@@ -1,4 +1,5 @@
 import { Box, Button, Chip, Divider, Paper, Stack, Typography } from "@mui/material";
+import PageHeader from "./PageHeader";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import Gavel from "@mui/icons-material/Gavel";
 import NotificationsActive from "@mui/icons-material/NotificationsActive";
@@ -57,14 +58,14 @@ export default function CaseDetail() {
         </Button>
       </Stack>
 
-      <Paper elevation={1} sx={{ p: { xs: 2.25, md: 3 }, borderRadius: 3, display: "flex", flexDirection: "column", gap: 2 }}>
-        <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 1 }}>
-          <Typography variant="caption" sx={{ fontFamily: '"JetBrains Mono", monospace', fontWeight: 700, color: "text.secondary" }}>
-            {g.regId}
-          </Typography>
-          <StatusChip g={g} sla={sla} />
-        </Stack>
-        <Typography variant="h6" sx={{ lineHeight: 1.35 }}>{g.subject}</Typography>
+      <Paper elevation={1} sx={{ p: 0, overflow: "hidden", borderRadius: 2 }}>
+        <PageHeader
+          title={`Grievance ${g.regId} · शिकायत विवरण`}
+          sub={`${ministryOf(g.ministryId)?.nameEn ?? ""} — status, SLA, movement history and next actions`}
+          right={<StatusChip g={g} sla={sla} />}
+        />
+        <Stack spacing={2.25} sx={{ p: { xs: 2, md: 3 } }}>
+          <Typography variant="h6" sx={{ lineHeight: 1.35 }}>{g.subject}</Typography>
         <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: "wrap", rowGap: 0.75 }}>
           <Chip size="small" label={`🏛 ${ministryOf(g.ministryId)?.nameEn}`} variant="outlined" sx={{ height: 26, fontSize: 11.5 }} />
           <Chip size="small" label={categoryOf(g.categoryId)?.titleEn} variant="outlined" sx={{ height: 26, fontSize: 11.5 }} />
@@ -117,6 +118,7 @@ export default function CaseDetail() {
             <Typography variant="body2" sx={{ mt: 0.5, lineHeight: 1.6 }}>{g.appeal.grounds} — {g.appeal.argument.slice(0, 220)}{g.appeal.argument.length > 220 ? "…" : ""}</Typography>
           </Paper>
         )}
+        </Stack>
       </Paper>
 
       {/* Next actions — same eligibility the WebMCP tools enforce */}
@@ -151,13 +153,15 @@ export default function CaseDetail() {
       )}
 
       {/* Timeline */}
-      <Paper elevation={1} sx={{ p: { xs: 2.25, md: 3 }, borderRadius: 3 }}>
-        <Typography variant="subtitle1" gutterBottom>Movement timeline</Typography>
-        <Stack spacing={0}>
-          {g.timeline.map((e, i) => (
-            <TimelineRow key={e.id} e={e} last={i === g.timeline.length - 1} />
-          ))}
-        </Stack>
+      <Paper elevation={1} sx={{ p: 0, overflow: "hidden", borderRadius: 2 }}>
+        <PageHeader title="Movement timeline · गतिविधि" sub="Every action on this case, attributed to you, your agent, the ministry or the system" />
+        <Box sx={{ p: { xs: 2, md: 3 } }}>
+          <Stack spacing={0}>
+            {g.timeline.map((e, i) => (
+              <TimelineRow key={e.id} e={e} last={i === g.timeline.length - 1} />
+            ))}
+          </Stack>
+        </Box>
       </Paper>
     </Box>
   );

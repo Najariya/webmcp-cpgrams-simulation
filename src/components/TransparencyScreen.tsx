@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Box, Button, Chip, Divider, Paper, Stack, Typography } from "@mui/material";
 import PlayArrow from "@mui/icons-material/PlayArrow";
 import VolumeUp from "@mui/icons-material/VolumeUp";
+import PageHeader from "./PageHeader";
 import { registrar } from "../webmcp/registrar";
 import { getModelContext, type RegisteredToolInfo } from "../webmcp/types";
 import { getSlaStatusTool, speakAloudTool } from "../webmcp/tools";
@@ -49,26 +50,26 @@ export default function TransparencyScreen() {
   };
 
   return (
-    <Box sx={{ maxWidth: 860, mx: "auto", width: 1, p: { xs: 2, md: 3 }, display: "flex", flexDirection: "column", gap: 2.5 }}>
-      <Box>
-        <Typography variant="h6">How your agent works</Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, maxWidth: 640, lineHeight: 1.6 }}>
-          This page shows exactly which capabilities the site exposes to your browser agent right now —
-          the same registry your agent sees through WebMCP. Capabilities change with your situation.
-        </Typography>
-      </Box>
-
-      <Chip
-        color={available ? "success" : "warning"}
-        variant={available ? "filled" : "outlined"}
-        label={available ? "✓ WebMCP active in this browser — this is the live registry" : "WebMCP not active — simulation view of the intended registry"}
-        sx={{ alignSelf: "flex-start", fontWeight: 600 }}
-      />
-      {!available && (
-        <Typography variant="caption" color="text.secondary" sx={{ mt: -1.5 }}>
-          Open in ChatGPT's in-app browser, or enable <strong>chrome://flags/#enable-webmcp-testing</strong> in Chrome 149+ and relaunch.
-        </Typography>
-      )}
+    <Box sx={{ maxWidth: 980, mx: "auto", width: 1, px: { xs: 1.5, md: 2 }, py: 2.5, display: "flex", flexDirection: "column", gap: 2.5 }}>
+      <Paper elevation={1} sx={{ p: 0, overflow: "hidden", borderRadius: 2 }}>
+        <PageHeader
+          title="Agent Tools · आपके एजेंट के टूल्स"
+          sub="Exactly which capabilities this site exposes to your browser agent right now — the same registry your agent sees through WebMCP"
+        />
+        <Box sx={{ p: { xs: 2, md: 2.5 } }}>
+          <Chip
+            color={available ? "success" : "warning"}
+            variant={available ? "filled" : "outlined"}
+            label={available ? "✓ WebMCP active in this browser — this is the live registry" : "WebMCP not active — simulation view of the intended registry"}
+            sx={{ fontWeight: 600 }}
+          />
+          {!available && (
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
+              Open in ChatGPT's in-app browser, or enable <strong>chrome://flags/#enable-webmcp-testing</strong> in Chrome 149+ and relaunch.
+            </Typography>
+          )}
+        </Box>
+      </Paper>
 
       <Stack spacing={1.25}>
         {tools.map((t) => (
