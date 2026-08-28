@@ -8,6 +8,7 @@ import SmartToy from "@mui/icons-material/SmartToy";
 import Campaign from "@mui/icons-material/Campaign";
 import HelpOutline from "@mui/icons-material/HelpOutlineOutlined";
 import Close from "@mui/icons-material/Close";
+import Check from "@mui/icons-material/Check";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
 import { registrar } from "../webmcp/registrar";
@@ -16,7 +17,11 @@ import { goi } from "../theme";
 import { slaStatus } from "../domain/sla";
 import { dict } from "../i18n";
 
-const HERO_PROMPT = "Which of my grievances needs attention today?";
+const AGENT_PROMPTS = [
+  "Which of my grievances needs attention today?",
+  "Help me file a grievance about my problem.",
+  "Explain the status of my case in simple words.",
+];
 
 const NOTICE_KEY = "advocate-notice-v1";
 
@@ -39,7 +44,6 @@ export default function GovHome() {
     setNoticeOpen(false);
   };
   const attention = grievances.filter((g) => slaStatus(g, simNow).needsAttention).length;
-  const copy = (t: string) => navigator.clipboard?.writeText(t);
   const news = [
     ["28 Aug 2026", d.home.news1],
     ["30 May 2026", d.home.news2],
@@ -143,18 +147,11 @@ export default function GovHome() {
                 {d.home.askAgent}
               </Typography>
             </Stack>
-            <Paper
-              elevation={0}
-              onClick={() => copy(HERO_PROMPT)}
-              sx={{ p: 1.25, bgcolor: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.32)", borderRadius: 1.5, cursor: "pointer", transition: "background-color .15s", "&:hover": { bgcolor: "rgba(255,255,255,0.2)" } }}
-            >
-              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                <Typography sx={{ fontSize: "0.8125rem", fontWeight: 600, lineHeight: 1.45, flex: 1 }}>
-                  “{HERO_PROMPT}”
-                </Typography>
-                <ContentCopy sx={{ fontSize: 14, opacity: 0.85 }} />
-              </Stack>
-            </Paper>
+            <Stack spacing={0.75}>
+              {AGENT_PROMPTS.map((p) => (
+                <PromptChip key={p} text={p} copiedLabel={d.common.copied} copyLabel={d.common.copy} />
+              ))}
+            </Stack>
             <Typography className="longform" variant="caption" sx={{ display: "block", opacity: 0.85, mt: 1.25, lineHeight: 1.55 }}>
               {d.home.askAgentCaption}{" "}
               <Box component="span" sx={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => setView("transparency")}>{d.home.askAgentLink}</Box>.
@@ -211,5 +208,35 @@ function ActionCard({
         <Typography className="longform" variant="body2" sx={{ color: "text.secondary", lineHeight: 1.6, fontSize: "0.7812rem" }}>{desc}</Typography>
       </CardActionArea>
     </Card>
+  );
+}
+
+function PromptChip({ text, copyLabel, copiedLabel }: { text: string; copyLabel: string; copiedLabel: string }) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    navigator.clipboard?.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <Paper
+      elevation={0}
+      component="button"
+      onClick={copy}
+      aria-label={`${copyLabel}: ${text}`}
+      sx={{ p: 1.25, display: "flex", gap: 1, alignItems: "center", width: 1, textAlign: "left", bgcolor: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.32)", borderRadius: 1.5, cursor: "pointer", transition: "background-color .15s", "&:hover": { bgcolor: "rgba(255,255,255,0.2)" }, "&:focus-visible": { outline: "2px solid #FFB37E" } }}
+    >
+      <Typography sx={{ fontSize: "0.8125rem", fontWeight: 600, lineHeight: 1.45, flex: 1, color: "#fff" }}>
+        “{text}”
+      </Typography>
+      {copied ? (
+        <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", color: "#A8E6B0" }}>
+          <Check sx={{ fontSize: 14 }} />
+          <Typography sx={{ fontSize: "0.75rem", fontWeight: 700, color: "#A8E6B0" }}>{copiedLabel}</Typography>
+        </Stack>
+      ) : (
+        <ContentCopy sx={{ fontSize: 14, opacity: 0.85 }} />
+      )}
+    </Paper>
   );
 }
