@@ -1,73 +1,364 @@
-import { ok, guarded } from "./envelope";
+import { err, guarded, ok } from "./envelope";
 import type { ModelContextTool } from "./types";
 import { useAppStore } from "../store";
-import { CATEGORIES } from "../data/categories";
+import { CATEGORIES, categoryOf, ministryOf } from "../data/catalog";
+import { appealEligible, rateEligible, reminderEligible, slaStatus } from "../domain/sla";
+import { REG_ID_RE, type Grievance } from "../domain/types";
 
 /**
- * Day-0 base tools (read-only) — prove the pattern end-to-end.
- * Descriptions stay under Chrome's 500-char budget and state the output shape,
- * because WebMCP has no outputSchema: the description IS the contract.
+ * Tool catalog (v4 §21) — read tools 1–6 + optional speak_aloud.
+ * Write tools (7–13) join in S2 with the confirmation infrastructure.
+ * Descriptions stay ≤ ~500 chars and state the output shape: no outputSchema in
+ * WebMCP, so the description IS the contract.
  */
+
+// ---------- shared validators (docs/03 §5) ----------
+
+type Input = Record<string, unknown>;
+
+function rejectUnknownKeys(tool: string, input: Input, allowed: string[]): string | null {
+  const unknown = Object.keys(input).filter((k) => !allowed.includes(k));
+  if (unknown.length) {
+    return err(tool, `Unexpected field: ${unknown[0]}.`, {
+      code: "INVALID_ARGUMENT",
+      message: `Unknown key "${unknown[0]}".`,
+      field: unknown[0],
+      hint: `Accepted fields: ${allowed.join(", ") || "(none)"}.`,
+    });
+  }
+  return null;
+}
+
+function requireString(tool: string, input: Input, field: string, min = 1, max = 500): string | null {
+  const v = input[field];
+  if (typeof v !== "string" || !v.trim()) {
+    return err(tool, `The field ${field} is required.`, {
+      code: "INVALID_ARGUMENT",
+      message: `Missing or empty "${field}".`,
+      field,
+      hint: `Provide "${field}" as a non-empty string.`,
+    });
+  }
+  if (v.length > max || v.trim().length < min) {
+    return err(tool, `The field ${field} has an invalid length.`, {
+      code: "INVALID_ARGUMENT",
+      message: `"${field}" must be ${min}–${max} characters.`,
+      field,
+      hint: `Trim to ${min}–${max} characters.`,
+    });
+  }
+  return null;
+}
+
+function findGrievance(tool: string, s: { grievances: Grievance[] }, idKey: string, input: Input): Grievance | string {
+  const rej = rejectUnknownKeys(tool, input, [idKey]) ?? requireString(tool, input, idKey, 6, 40);
+  if (rej) return rej;
+  const raw = String(input[idKey]).trim();
+  const g = s.grievances.find((x) => x.regId === raw || x.id === raw);
+  if (!g) {
+    return err(tool, `No grievance found for ${raw}.`, {
+      code: "NOT_FOUND",
+      message: `No grievance matches "${raw}".`,
+      hint: "Call get_app_state or list cases from get_sla_status to see valid registration IDs (format PG-26-XXXXX).",
+    });
+  }
+  return g;
+}
+
+// ---------- tools 1–6 ----------
 
 export const getAppStateTool: ModelContextTool = {
   name: "get_app_state",
   title: "Get app state",
   description:
-    "Read the portal's current state: active view, selected grievance id, open draft id, and the simulation clock. Returns JSON {ok, summary, data:{view, selectedGrievanceId, draftId, simNow}}. Read-only.",
+    "Snapshot of the citizen's case workspace: current screen, language, case counts by status, which cases need attention today (SLA overdue / unrated / appeal-eligible), and which write actions are currently available. Start here. Returns JSON {ok, speakable, data:{view, lang, counts, attention:[{regId,subject,why}], can:{...}}, nextActions}. Read-only.",
   inputSchema: { type: "object", properties: {}, additionalProperties: false },
   annotations: { readOnlyHint: true },
   execute: async () =>
-    guarded("get_app_state", "ऐप की स्थिति मिल गई। Got the app state.", async () => {
+    guarded("get_app_state", "Could not read the app state. Please retry.", async () => {
       const s = useAppStore.getState();
+      const attention = s.attentionCases().map((g) => ({
+        regId: g.regId,
+        subject: g.subject.slice(0, 80),
+        why: slaStatus(g, s.simNow).attentionReason ?? "Action available (rate or appeal).",
+      }));
+      const counts = s.grievances.reduce<Record<string, number>>((acc, g) => {
+        acc[g.status] = (acc[g.status] ?? 0) + 1;
+        return acc;
+      }, {});
+      const surf = s.surface();
       return ok(
         "get_app_state",
-        `मौजूदा स्क्रीन: ${s.view}. Current view: ${s.view}.`,
-        { view: s.view, selectedGrievanceId: s.selectedGrievanceId, draftId: s.draftId, simNow: new Date().toISOString() },
+        attention.length
+          ? `${attention.length} of your ${s.grievances.length} grievances need attention today.`
+          : `You have ${s.grievances.length} grievances; none need action right now.`,
+        {
+          view: s.view,
+          lang: s.lang,
+          counts,
+          attention,
+          can: {
+            create_grievance_draft: surf.noDraft,
+            update_grievance_draft: surf.draftActive || surf.draftValid,
+            submit_grievance: surf.draftValid,
+            send_reminder: surf.reminderEligibleIds.length > 0,
+            rate_disposal: surf.rateEligibleIds.length > 0,
+            create_appeal_draft: surf.appealEligibleIds.length > 0,
+            send_appeal: surf.appealDraftValid,
+          },
+        },
+        attention.length ? ["get_sla_status", "get_grievance_details"] : ["get_sla_status"],
       );
     }),
 };
 
-export const listIssueCategoriesTool: ModelContextTool = {
-  name: "list_issue_categories",
+export const listGrievanceCategoriesTool: ModelContextTool = {
+  name: "list_grievance_categories",
   title: "List grievance categories",
   description:
-    "List the grievance categories this panchayat portal accepts, with bilingual titles, the authority each routes to (GP = Gram Panchayat), the SLA in hours, and whether photo evidence is required. Use before filing so category ids are valid. Returns JSON {ok, summary, data:{categories:[{id,titleEn,titleHi,authority,slaHours,requiresPhoto}]}}. Read-only.",
+    "Categories this simulation accepts, routed to Central Ministries/Departments (Railways, EPFO, Health, Education, Power, Consumer Affairs) with a 21-day redressal target. Use before filing so category and ministry ids are valid. Returns JSON {ok, speakable, data:{categories:[{id,titleEn,titleHi,ministry,requiresEvidence}]}, nextActions}. Read-only.",
   inputSchema: { type: "object", properties: {}, additionalProperties: false },
   annotations: { readOnlyHint: true },
   execute: async () =>
-    guarded(
-      "list_issue_categories",
-      "श्रेणियाँ मिल गईं। Got the categories.",
-      async () =>
-        ok(
-          "list_issue_categories",
-          `${CATEGORIES.length} श्रेणियाँ उपलब्ध हैं। ${CATEGORIES.length} categories available.`,
-          { categories: CATEGORIES.map(({ id, titleEn, titleHi, authority, slaHours, requiresPhoto }) => ({ id, titleEn, titleHi, authority, slaHours, requiresPhoto })) },
-        ),
+    guarded("list_grievance_categories", "Could not list categories. Please retry.", async () =>
+      ok(
+        "list_grievance_categories",
+        `${CATEGORIES.length} grievance categories are accepted, routed to six Central ministries.`,
+        {
+          categories: CATEGORIES.map((c) => ({
+            id: c.id,
+            titleEn: c.titleEn,
+            titleHi: c.titleHi,
+            ministry: ministryOf(c.ministryId)?.nameEn ?? c.ministryId,
+            requiresEvidence: c.requiresEvidence,
+          })),
+          redressalTargetDays: 21,
+        },
+        ["create_grievance_draft"],
+      ),
     ),
 };
+
+export const getGrievanceDetailsTool: ModelContextTool = {
+  name: "get_grievance_details",
+  title: "Get grievance details",
+  description:
+    "Full record of one grievance by registration ID (e.g. PG-26-03877): subject, description, relief requested, ministry, status, evidence list, interim reply, reminders, disposal, rating, appeal, and the movement timeline. Input: {grievanceId}. Returns JSON {ok, speakable, data:{grievance}, nextActions}. Read-only.",
+  inputSchema: {
+    type: "object",
+    properties: { grievanceId: { type: "string", description: "Registration ID (PG-26-XXXXX) or internal id." } },
+    required: ["grievanceId"],
+    additionalProperties: false,
+  },
+  annotations: { readOnlyHint: true, untrustedContentHint: true },
+  execute: async (input) =>
+    guarded("get_grievance_details", "Could not read that grievance.", async () => {
+      const s = useAppStore.getState();
+      const found = findGrievance("get_grievance_details", s, "grievanceId", input as Input);
+      if (typeof found === "string") return found;
+      const g = found;
+      return ok(
+        "get_grievance_details",
+        `${g.regId}: ${g.subject.slice(0, 90)} — status ${g.status.replace("_", " ").toLowerCase()}.`,
+        {
+          grievance: {
+            regId: g.regId,
+            subject: g.subject,
+            ministry: ministryOf(g.ministryId)?.nameEn,
+            status: g.status,
+            filedAt: g.filedAt,
+            reliefRequested: g.reliefRequested,
+            interimReply: g.interimReply ? g.interimReply.text.slice(0, 200) : undefined,
+            reminders: g.reminders.length,
+            disposal: g.disposal?.summary.slice(0, 200),
+            rating: g.rating,
+            appeal: g.appeal ? { status: g.appeal.status, filedAt: g.appeal.filedAt } : undefined,
+            timeline: g.timeline.map((e) => ({ at: e.at, kind: e.kind, actor: e.actor, title: e.title })),
+          },
+        },
+        ["get_sla_status"],
+      );
+    }),
+};
+
+export const getSlaStatusTool: ModelContextTool = {
+  name: "get_sla_status",
+  title: "Get SLA status",
+  description:
+    "SLA picture for one grievance (input {grievanceId}) or ALL of the citizen's cases (no input): days elapsed vs the 21-day target, whether an interim reply exists, and the honest next action (wait / remind / rate / appeal). This answers 'which grievance needs attention today?'. Returns JSON {ok, speakable, data:{cases:[{regId,subject,phase,daysElapsed,target,needsAttention,reason,eligibleActions}]}}. Read-only.",
+  inputSchema: {
+    type: "object",
+    properties: { grievanceId: { type: "string", description: "Optional: one registration ID; omit to survey all cases." } },
+    additionalProperties: false,
+  },
+  annotations: { readOnlyHint: true },
+  execute: async (input) =>
+    guarded("get_sla_status", "Could not read SLA status.", async () => {
+      const s = useAppStore.getState();
+      const i = input as Input;
+      const rej = rejectUnknownKeys("get_sla_status", i, ["grievanceId"]);
+      if (rej) return rej;
+      const list = i.grievanceId ? s.grievances.filter((g) => g.regId === i.grievanceId || g.id === i.grievanceId) : s.grievances;
+      if (i.grievanceId && list.length === 0) {
+        return err("get_sla_status", `No grievance found for ${String(i.grievanceId)}.`, {
+          code: "NOT_FOUND",
+          message: `No grievance matches "${String(i.grievanceId)}".`,
+          hint: `Check the ID format (${REG_ID_RE.source}) or list all cases by omitting grievanceId.`,
+        });
+      }
+      const single = Boolean(i.grievanceId);
+      const cases = list.map((g) => {
+        const sla = slaStatus(g, s.simNow);
+        const eligible: string[] = [];
+        if (reminderEligible(g, s.simNow)) eligible.push("send_reminder");
+        if (rateEligible(g)) eligible.push("rate_disposal");
+        if (appealEligible(g, s.simNow)) eligible.push("create_appeal_draft");
+        // Survey mode stays compact (v4 §26 budget): the long `reason` text only
+        // rides along when a single case is requested or attention is needed.
+        const row: Record<string, unknown> = {
+          regId: g.regId,
+          subject: g.subject.slice(0, single ? 70 : 45),
+          phase: sla.phase,
+          daysElapsed: sla.daysElapsed,
+          target: sla.targetDays,
+          hasInterimReply: sla.hasInterimReply,
+          needsAttention: sla.needsAttention,
+          eligibleActions: eligible,
+        };
+        if (single || sla.needsAttention) row.reason = sla.attentionReason?.slice(0, 130);
+        return row;
+      });
+      const needy = cases.filter((c) => c.needsAttention);
+      const speak = needy.length
+        ? `${needy.length} case${needy.length > 1 ? "s" : ""} need${needy.length > 1 ? "" : "s"} attention: ${needy.map((c) => `${c.regId} (day ${c.daysElapsed} of ${c.target}${c.hasInterimReply ? ", interim reply on file" : ", no interim response"}${c.phase === "disposed" ? ", awaiting your feedback" : ""}${c.phase === "rated" ? ", appeal window open" : ""})`).join("; ")}.`
+        : `All ${cases.length} cases are on track; nothing needs action today.`;
+      return ok("get_sla_status", speak, { cases }, needy.length ? ["send_reminder", "rate_disposal", "create_appeal_draft"] : ["get_grievance_details"]);
+    }),
+};
+
+const KB: { q: string[]; a: string }[] = [
+  {
+    q: ["excluded", "not accepted", "rti", "court", "religious", "service matter", "what can i file"],
+    a: "This simulation follows CPGRAMS exclusions: RTI matters, sub-judice (court) matters, religious matters, and government-employee service matters are not taken up. Service-delivery grievances about Central ministries are accepted.",
+  },
+  {
+    q: ["21", "how long", "timeline", "days", "target", "sla"],
+    a: "The redressal target is 21 days from filing. If redressal is delayed, the ministry must record an interim reply explaining the delay.",
+  },
+  {
+    q: ["reminder", "follow up", "pending"],
+    a: "On grievances past the 21-day target you may send a Reminder, at most once every 7 days in this simulation.",
+  },
+  {
+    q: ["appeal", "poor", "dissatisfied", "unhappy"],
+    a: "After disposal you rate the grievance. A Poor rating opens the appeal option for 30 days from disposal; appeals go to the ministry's Nodal Appellate Authority and are targeted for disposal in about 30 days.",
+  },
+  {
+    q: ["real", "government", "official", "cpgrams", "connected"],
+    a: "This is a labelled simulation: fictional cases, ministries and officials; not affiliated with or connected to the Government of India or the real CPGRAMS.",
+  },
+  {
+    q: ["interim", "delayed", "explain"],
+    a: "When resolution is delayed, an interim reply explaining the reason is mandatory. A pending case past 21 days with no interim response is exactly when a reminder is most justified.",
+  },
+];
+
+export const getKbAnswerTool: ModelContextTool = {
+  name: "get_kb_answer",
+  title: "Get process answer",
+  description:
+    "Plain-language answers about grievance process rules in this simulation: the 21-day target, interim replies, reminders, rating & appeals, exclusions, and the simulation's honesty policy. Input {question}. Returns JSON {ok, speakable, data:{answer, topic}, nextActions}. Read-only.",
+  inputSchema: {
+    type: "object",
+    properties: { question: { type: "string", description: "The citizen's process question, 6–300 chars." } },
+    required: ["question"],
+    additionalProperties: false,
+  },
+  annotations: { readOnlyHint: true },
+  execute: async (input) =>
+    guarded("get_kb_answer", "Could not answer that question.", async () => {
+      const rej =
+        rejectUnknownKeys("get_kb_answer", input as Input, ["question"]) ??
+        requireString("get_kb_answer", input as Input, "question", 6, 300);
+      if (rej) return rej;
+      const q = String((input as Input).question).toLowerCase();
+      const hit = KB.find((entry) => entry.q.some((k) => q.includes(k)));
+      return ok(
+        "get_kb_answer",
+        hit?.a ?? "I don't have a process answer for that; ask about timelines, reminders, appeals, or exclusions.",
+        { answer: hit?.a ?? "No matching topic.", topic: hit ? hit.q[0] : "unknown" },
+      );
+    }),
+};
+
+export const checkDuplicateTool: ModelContextTool = {
+  name: "check_duplicate_grievances",
+  title: "Check duplicates",
+  description:
+    "Before filing, check whether the citizen already has a similar open grievance (input {keywords, optional categoryId}). Avoids duplicate filings. Returns JSON {ok, speakable, data:{matches:[{regId,subject,status}]}}. Read-only.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      keywords: { type: "string", description: "Key terms of the new issue, e.g. 'EPF withdrawal stuck'." },
+      categoryId: { type: "string", description: "Optional category id from list_grievance_categories." },
+    },
+    required: ["keywords"],
+    additionalProperties: false,
+  },
+  annotations: { readOnlyHint: true },
+  execute: async (input) =>
+    guarded("check_duplicate_grievances", "Could not check duplicates.", async () => {
+      const rej =
+        rejectUnknownKeys("check_duplicate_grievances", input as Input, ["keywords", "categoryId"]) ??
+        requireString("check_duplicate_grievances", input as Input, "keywords", 3, 200);
+      if (rej) return rej;
+      const words = String((input as Input).keywords).toLowerCase().split(/\W+/).filter((w) => w.length > 3);
+      const s = useAppStore.getState();
+      const matches = s.grievances
+        .filter((g) => g.status !== "CLOSED")
+        .map((g) => {
+          const hay = `${g.subject} ${g.description}`.toLowerCase();
+          const score = words.reduce((n, w) => n + (hay.includes(w) ? 1 : 0), 0);
+          return { g, score };
+        })
+        .filter((m) => m.score >= Math.max(1, Math.ceil(words.length / 2)))
+        .slice(0, 3)
+        .map((m) => ({ regId: m.g.regId, subject: m.g.subject.slice(0, 80), status: m.g.status }));
+      return ok(
+        "check_duplicate_grievances",
+        matches.length
+          ? `${matches.length} similar open grievance${matches.length > 1 ? "s" : ""} found (${matches.map((m) => m.regId).join(", ")}).`
+          : "No similar open grievance found; this looks new.",
+        { matches },
+        matches.length ? ["get_grievance_details"] : ["create_grievance_draft"],
+      );
+    }),
+};
+
+// ---------- optional (post-core) ----------
 
 export const speakAloudTool: ModelContextTool = {
   name: "speak_aloud",
   title: "Speak aloud",
   description:
-    "Speak a short message to the citizen through the page (text-to-speech, Hindi voice preferred, English fallback). Use when the user prefers listening — e.g., read a status, a draft, or a summary aloud. Keep text under 300 chars. Returns JSON {ok, summary, data:{spoken,lang}}. Does not change any data.",
+    "Speak a short message to the citizen through the page (text-to-speech; Hindi or English voice). Use when the user prefers listening. Keep text under 300 chars. Returns JSON {ok, speakable, data:{spoken,lang}}. Does not change any data.",
   inputSchema: {
     type: "object",
     properties: {
       text: { type: "string", description: "The message to speak, under 300 characters." },
-      lang: { type: "string", enum: ["hi-IN", "en-IN"], description: "Voice language; default hi-IN." },
+      lang: { type: "string", enum: ["hi-IN", "en-IN"], description: "Voice language; default en-IN." },
     },
     required: ["text"],
     additionalProperties: false,
   },
   annotations: { readOnlyHint: true },
   execute: async (input) =>
-    guarded("speak_aloud", "आवाज़ से नहीं बोल पाए। Could not speak aloud.", async () => {
-      const text = typeof input.text === "string" ? input.text.slice(0, 300) : "";
-      const lang = input.lang === "en-IN" ? "en-IN" : "hi-IN";
+    guarded("speak_aloud", "Could not speak aloud.", async () => {
+      const i = input as Input;
+      const text = typeof i.text === "string" ? i.text.slice(0, 300) : "";
+      const lang = i.lang === "hi-IN" ? "hi-IN" : "en-IN";
       if (!("speechSynthesis" in window)) {
-        return ok("speak_aloud", "इस ब्राउज़र में आवाज़ उपलब्ध नहीं। Speech not supported here.", { spoken: false, lang });
+        return ok("speak_aloud", "Speech is not supported in this browser.", { spoken: false, lang });
       }
       const utter = new SpeechSynthesisUtterance(text);
       utter.lang = lang;
@@ -76,8 +367,24 @@ export const speakAloudTool: ModelContextTool = {
       if (match) utter.voice = match;
       window.speechSynthesis.cancel();
       window.speechSynthesis.speak(utter);
-      return ok("speak_aloud", `बोल रहे हैं: "${text.slice(0, 60)}…" · Speaking now.`, { spoken: true, lang });
+      return ok("speak_aloud", `Speaking: "${text.slice(0, 60)}…"`, { spoken: true, lang });
     }),
 };
 
-export const BASE_TOOLS: ModelContextTool[] = [getAppStateTool, listIssueCategoriesTool, speakAloudTool];
+// ---------- dynamic surface (v4 §22) ----------
+
+export const READ_TOOLS: ModelContextTool[] = [
+  getAppStateTool,
+  listGrievanceCategoriesTool,
+  getGrievanceDetailsTool,
+  getSlaStatusTool,
+  getKbAnswerTool,
+  checkDuplicateTool,
+];
+
+/** Desired tool set from current state. Write tools join in S2. */
+export function desiredTools(state: ReturnType<typeof useAppStore.getState>): ModelContextTool[] {
+  void state;
+  void categoryOf;
+  return [...READ_TOOLS];
+}

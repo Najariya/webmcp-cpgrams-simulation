@@ -1,34 +1,192 @@
 import { create } from "zustand";
-import { CATEGORIES } from "./data/categories";
+import {
+  closeIfWindowExpired,
+  fileAppeal,
+  rateDisposal,
+  sendReminder,
+  submitDraft,
+} from "./domain/engine";
+import { appealEligible, needsAttentionToday, rateEligible, reminderEligible, slaStatus } from "./domain/sla";
+import { draftIsValid, type Grievance, type GrievanceDraft, type Satisfaction } from "./domain/types";
+import { seedGoldenCases } from "./data/catalog";
 
 /**
- * App store (zustand). Day-0: view state + category reference data.
- * Day-1 adds persisted grievances, drafts, and the simulation engine.
+ * App store (zustand). Single source of truth for the simulation.
+ * Persisted to localStorage under "advocate-demo-v1" — fictional demo data only.
+ * The desired-tool surface (v4 §22) is derived here so UI and WebMCP agree.
  */
-export type View = "map" | "my_grievances" | "drafts" | "agent_guide";
+export type View = "home" | "case" | "draft_review" | "appeal_review" | "transparency";
 
-interface AppState {
+export interface Locale {
+  lang: "en" | "hi";
+}
+
+interface PersistedShape {
+  grievances: Grievance[];
+  draft: GrievanceDraft | null;
+  appealDraft: { grievanceId: string; grounds: string; argument: string } | null;
+}
+
+const PERSIST_KEY = "advocate-demo-v1";
+
+function loadPersisted(): PersistedShape {
+  try {
+    const raw = localStorage.getItem(PERSIST_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as PersistedShape;
+      if (Array.isArray(parsed.grievances)) return parsed;
+    }
+  } catch {
+    /* corrupt storage → reseed */
+  }
+  return { grievances: seedGoldenCases(), draft: null, appealDraft: null };
+}
+
+function persist(s: PersistedShape): void {
+  try {
+    localStorage.setItem(PERSIST_KEY, JSON.stringify(s));
+  } catch {
+    /* storage full/unavailable — simulation continues in memory */
+  }
+}
+
+export interface DesiredSurface {
+  noDraft: boolean;
+  draftActive: boolean;
+  draftValid: boolean;
+  reminderEligibleIds: string[];
+  rateEligibleIds: string[];
+  appealEligibleIds: string[];
+  appealDraftValid: boolean;
+}
+
+export function computeSurface(s: { grievances: Grievance[]; draft: GrievanceDraft | null; appealDraft: PersistedShape["appealDraft"] }, nowIso: string): DesiredSurface {
+  const d = s.draft;
+  return {
+    noDraft: d === null,
+    draftActive: d !== null && !draftIsValid(d),
+    draftValid: d !== null && draftIsValid(d),
+    reminderEligibleIds: s.grievances.filter((g) => reminderEligible(g, nowIso)).map((g) => g.id),
+    rateEligibleIds: s.grievances.filter((g) => rateEligible(g)).map((g) => g.id),
+    appealEligibleIds: s.grievances.filter((g) => appealEligible(g, nowIso)).map((g) => g.id),
+    appealDraftValid:
+      s.appealDraft !== null && s.appealDraft.grounds.trim().length >= 4 && s.appealDraft.argument.trim().length >= 30,
+  };
+}
+
+interface AppState extends PersistedShape {
   view: View;
   selectedGrievanceId: string | null;
-  draftId: string | null;
   largeType: boolean;
   panelOpen: boolean;
-  categories: typeof CATEGORIES;
+  lang: "en" | "hi";
+  /** Simulation clock — frozen at load so relative-day facts stay stable within a session. */
+  simNow: string;
   setView: (view: View) => void;
   select: (id: string | null) => void;
   toggleLargeType: () => void;
   togglePanel: () => void;
+  setLang: (lang: "en" | "hi") => void;
+  // engine-backed actions (guards throw PreconditionError → mapped by tool layer)
+  submitActiveDraft: () => Grievance;
+  remind: (grievanceId: string, byAgent: boolean) => void;
+  rate: (grievanceId: string, rating: Satisfaction) => void;
+  startAppealDraft: (grievanceId: string, grounds: string, argument: string) => void;
+  sendAppeal: () => Grievance;
+  resetDemo: () => void;
+  surface: (nowIso?: string) => DesiredSurface;
+  attentionCases: () => Grievance[];
 }
 
-export const useAppStore = create<AppState>((set) => ({
-  view: "map",
+const initial = loadPersisted();
+
+export const useAppStore = create<AppState>((set, get) => ({
+  ...initial,
+  view: "home",
   selectedGrievanceId: null,
-  draftId: null,
   largeType: false,
-  panelOpen: true,
-  categories: CATEGORIES,
+  panelOpen: false,
+  lang: "en",
+  simNow: new Date().toISOString(),
+
   setView: (view) => set({ view }),
   select: (selectedGrievanceId) => set({ selectedGrievanceId }),
   toggleLargeType: () => set((s) => ({ largeType: !s.largeType })),
   togglePanel: () => set((s) => ({ panelOpen: !s.panelOpen })),
+  setLang: (lang) => set({ lang }),
+
+  submitActiveDraft: () => {
+    const s = get();
+    if (!s.draft || !draftIsValid(s.draft)) {
+      throw Object.assign(new Error("Draft is not submittable"), { code: "PRECONDITION_FAILED" });
+    }
+    const seq = s.grievances.length + 4_800;
+    const regId = `PG-26-${String(10_000 + Math.floor(Math.random() * 89_999)).slice(0, 5)}`;
+    void seq;
+    const g = submitDraft(s.draft, s.simNow, regId);
+    set({ grievances: [g, ...s.grievances], draft: null, view: "case", selectedGrievanceId: g.id });
+    persist({ grievances: [g, ...s.grievances], draft: null, appealDraft: s.appealDraft });
+    return g;
+  },
+
+  remind: (grievanceId, byAgent) => {
+    const s = get();
+    const idx = s.grievances.findIndex((g) => g.id === grievanceId);
+    if (idx < 0) throw Object.assign(new Error(`No grievance with id ${grievanceId}`), { code: "NOT_FOUND" });
+    const updated = sendReminder(s.grievances[idx], s.simNow, byAgent);
+    const grievances = s.grievances.map((g, i) => (i === idx ? updated : g));
+    set({ grievances });
+    persist({ grievances, draft: s.draft, appealDraft: s.appealDraft });
+  },
+
+  rate: (grievanceId, rating) => {
+    const s = get();
+    const idx = s.grievances.findIndex((g) => g.id === grievanceId);
+    if (idx < 0) throw Object.assign(new Error(`No grievance with id ${grievanceId}`), { code: "NOT_FOUND" });
+    const updated = closeIfWindowExpired(rateDisposal(s.grievances[idx], rating, s.simNow), s.simNow);
+    const grievances = s.grievances.map((g, i) => (i === idx ? updated : g));
+    set({ grievances });
+    persist({ grievances, draft: s.draft, appealDraft: s.appealDraft });
+  },
+
+  startAppealDraft: (grievanceId, grounds, argument) => {
+    const s = get();
+    const g = s.grievances.find((x) => x.id === grievanceId);
+    if (!g) throw Object.assign(new Error(`No grievance with id ${grievanceId}`), { code: "NOT_FOUND" });
+    set({ appealDraft: { grievanceId, grounds, argument } });
+    persist({ grievances: s.grievances, draft: s.draft, appealDraft: { grievanceId, grounds, argument } });
+  },
+
+  sendAppeal: () => {
+    const s = get();
+    if (!s.appealDraft) throw Object.assign(new Error("No appeal draft"), { code: "PRECONDITION_FAILED" });
+    const idx = s.grievances.findIndex((g) => g.id === s.appealDraft!.grievanceId);
+    if (idx < 0) throw Object.assign(new Error("Appeal grievance not found"), { code: "NOT_FOUND" });
+    const updated = fileAppeal(s.grievances[idx], s.appealDraft, s.simNow);
+    const grievances = s.grievances.map((g, i) => (i === idx ? updated : g));
+    set({ grievances, appealDraft: null });
+    persist({ grievances, draft: s.draft, appealDraft: null });
+    return updated;
+  },
+
+  resetDemo: () => {
+    const fresh = { grievances: seedGoldenCases(), draft: null, appealDraft: null };
+    set({ ...fresh, view: "home", selectedGrievanceId: null });
+    persist(fresh);
+  },
+
+  surface: (nowIso) => {
+    const s = get();
+    return computeSurface(s, nowIso ?? s.simNow);
+  },
+
+  attentionCases: () => {
+    const s = get();
+    return s.grievances.filter((g) => needsAttentionToday(g, s.simNow));
+  },
 }));
+
+/** Convenience for tools/UI: SLA snapshot of every case (drives the case board). */
+export function boardSnapshot(s: { grievances: Grievance[]; simNow: string }) {
+  return s.grievances.map((g) => ({ g, sla: slaStatus(g, s.simNow) }));
+}
