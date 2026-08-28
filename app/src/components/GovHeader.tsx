@@ -22,7 +22,7 @@ const NAV: { view: View | null; href?: string; label: string; short: string; hi:
 ];
 
 export default function GovHeader() {
-  const { view, setView, citizen, signOut, typeStep, cycleTypeStep, lang, setLang } = useAppStore();
+  const { view, setView, citizen, signOut, typeStep, cycleTypeStep, lang, setLang, goOrSignIn } = useAppStore();
   const { voiceMode, toggleVoiceMode } = useVoiceStore();
   const theme = useTheme();
   const compact = useMediaQuery(theme.breakpoints.down("md"));
@@ -131,7 +131,7 @@ export default function GovHeader() {
             return (
               <Button
                 key={n.label}
-                onClick={() => n.view && setView(n.view)}
+                onClick={() => n.view && (n.view === "lodge" || n.view === "status" ? goOrSignIn(n.view) : setView(n.view))}
                 sx={{
                   color: active ? "#fff" : "rgba(255,255,255,0.78)",
                   bgcolor: active ? "rgba(255,255,255,0.14)" : "transparent",

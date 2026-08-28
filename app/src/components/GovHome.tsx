@@ -13,7 +13,7 @@ import { dict } from "../i18n";
 const HERO_PROMPT = "Which of my grievances needs attention today?";
 
 export default function GovHome() {
-  const { grievances, simNow, citizen, lang, setView } = useAppStore();
+  const { grievances, simNow, citizen, lang, setView, goOrSignIn } = useAppStore();
   const d = dict(lang);
   const attention = grievances.filter((g) => slaStatus(g, simNow).needsAttention).length;
   const copy = (t: string) => navigator.clipboard?.writeText(t);
@@ -44,7 +44,7 @@ export default function GovHome() {
             icon={<FactCheck />} title="View Status" hi="स्थिति देखें"
             desc={d.home.cardStatusDesc}
             badge={attention ? d.home.cardStatusBadge(attention) : d.home.cases(grievances.length)}
-            onClick={() => setView("status")}
+            onClick={() => goOrSignIn("status")}
           />
         ) : (
           <ActionCard
@@ -56,7 +56,7 @@ export default function GovHome() {
         <ActionCard
           icon={<EditNote />} title="Lodge Grievance" hi="शिकायत दर्ज करें"
           desc={d.home.cardLodgeDesc}
-          onClick={() => setView(citizen ? "lodge" : "login")}
+          onClick={() => goOrSignIn("lodge")}
         />
         <ActionCard
           icon={<SmartToy />} title="Your Browser Agent" hi="आपका एजेंट"

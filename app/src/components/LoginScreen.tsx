@@ -11,8 +11,15 @@ import { dict } from "../i18n";
  * real portal's primary path; here any credentials work and the demo citizen
  * profile is one click. No real authentication exists by design.
  */
+const DEST_LABELS: Record<string, { en: string; hi: string }> = {
+  lodge: { en: "Lodge Grievance", hi: "शिकायत दर्ज करना" },
+  status: { en: "your case register", hi: "मामला रजिस्टर देखना" },
+  case: { en: "the case you opened", hi: "खोला गया मामला" },
+  draft_review: { en: "your grievance review", hi: "शिकायत समीक्षा" },
+  appeal_review: { en: "your appeal review", hi: "अपील समीक्षा" },
+};
 export default function LoginScreen() {
-  const { signIn, lang } = useAppStore();
+  const { signIn, lang, postSignInView } = useAppStore();
   const d = dict(lang);
   const [name, setName] = useState(DEMO_CITIZEN.name);
   const [mobile, setMobile] = useState(DEMO_CITIZEN.mobile);
@@ -43,6 +50,13 @@ export default function LoginScreen() {
         </Box>
 
         <Stack spacing={2.25} sx={{ p: 3 }}>
+          {postSignInView && (
+            <Alert severity="info" icon={false} sx={{ "& .MuiAlert-message": { fontSize: "0.7812rem", fontWeight: 600 } }}>
+              {lang === "hi"
+                ? `${DEST_LABELS[postSignInView]?.hi ?? ""} जारी रखने के लिए साइन इन करें।`
+                : `Sign in to continue to ${DEST_LABELS[postSignInView]?.en ?? "the portal"}.`}
+            </Alert>
+          )}
           {mode === "register" && (
             <TextField label="Full name · पूरा नाम" value={name} onChange={(e) => setName(e.target.value)} fullWidth required />
           )}

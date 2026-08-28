@@ -103,6 +103,9 @@ export function computeSurface(s: { grievances: Grievance[]; draft: GrievanceDra
 
 interface AppState extends PersistedShape {
   clearFiledNotice: () => void;
+  /** Where an auth-gated navigation should land after sign-in (intent preservation). */
+  postSignInView: View | null;
+  goOrSignIn: (view: View) => void;
   view: View;
   selectedGrievanceId: string | null;
   /** Session-only: the most recent filing, for the case-detail success banner. */
@@ -138,6 +141,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   view: "home",
   selectedGrievanceId: null,
   lastFiled: null,
+  postSignInView: null,
   typeStep: loadTypeStep(),
   lang: loadLang(),
   simNow: new Date().toISOString(),
@@ -145,6 +149,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   setView: (view) => set({ view }),
   select: (selectedGrievanceId) => set({ selectedGrievanceId }),
   clearFiledNotice: () => set({ lastFiled: null }),
+  goOrSignIn: (view) => {
+    const s = get();
+    if (s.citizen) set({ view });
+    else set({ view: "login", postSignInView: view });
+  },
   setTypeStep: (step) => {
     applyTypeStep(step);
     saveTypeStep(step);
@@ -162,7 +171,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   signIn: (c) => {
     const s = get();
-    set({ citizen: c, view: s.view === "login" ? "status" : s.view });
+    set({ citizen: c, view: s.postSignInView ?? (s.view === "login" ? "status" : s.view), postSignInView: null });
     persist({ grievances: s.grievances, draft: s.draft, appealDraft: s.appealDraft, citizen: c });
     announce(`Signed in as ${c.name}.`, s.lang);
   },
