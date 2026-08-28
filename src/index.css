@@ -1,0 +1,3 @@
+html, body, #root { height: 100%; margin: 0; }
+body { font-family: "Inter", "Noto Sans Devanagari", "SF Pro Text", system-ui, -apple-system, sans-serif; }
+.leaflet-container { font: inherit; }
