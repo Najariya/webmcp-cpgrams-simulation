@@ -15,7 +15,21 @@ import { seedGoldenCases } from "./data/catalog";
  * Persisted to localStorage under "advocate-demo-v1" — fictional demo data only.
  * The desired-tool surface (v4 §22) is derived here so UI and WebMCP agree.
  */
-export type View = "home" | "case" | "draft_review" | "appeal_review" | "transparency";
+export type View = "home" | "lodge" | "status" | "case" | "draft_review" | "appeal_review" | "transparency" | "faq" | "login";
+
+export interface Citizen {
+  name: string;
+  mobile: string;
+  email: string;
+  state: string;
+}
+
+export const DEMO_CITIZEN: Citizen = {
+  name: "Sita Sharma",
+  mobile: "98XXXXXX21",
+  email: "sita.demo@example.org",
+  state: "Delhi",
+};
 
 export interface Locale {
   lang: "en" | "hi";
@@ -25,6 +39,7 @@ interface PersistedShape {
   grievances: Grievance[];
   draft: GrievanceDraft | null;
   appealDraft: { grievanceId: string; grounds: string; argument: string } | null;
+  citizen: Citizen | null;
 }
 
 const PERSIST_KEY = "advocate-demo-v1";
@@ -34,17 +49,26 @@ function loadPersisted(): PersistedShape {
     const raw = localStorage.getItem(PERSIST_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as PersistedShape;
-      if (Array.isArray(parsed.grievances)) return parsed;
+      if (Array.isArray(parsed.grievances)) {
+        return {
+          grievances: parsed.grievances,
+          draft: parsed.draft ?? null,
+          appealDraft: parsed.appealDraft ?? null,
+          citizen: parsed.citizen ?? null,
+        };
+      }
     }
   } catch {
     /* corrupt storage → reseed */
   }
-  return { grievances: seedGoldenCases(), draft: null, appealDraft: null };
+  return { grievances: seedGoldenCases(), draft: null, appealDraft: null, citizen: null };
 }
 
-function persist(s: PersistedShape): void {
+function persist(s: Omit<PersistedShape, "citizen"> & { citizen?: Citizen | null }): void {
+  // citizen defaults to the current session (engine actions don't touch auth)
+  const citizen = s.citizen !== undefined ? s.citizen : (useAppStore.getState()?.citizen ?? null);
   try {
-    localStorage.setItem(PERSIST_KEY, JSON.stringify(s));
+    localStorage.setItem(PERSIST_KEY, JSON.stringify({ ...s, citizen }));
   } catch {
     /* storage full/unavailable — simulation continues in memory */
   }
@@ -78,15 +102,17 @@ interface AppState extends PersistedShape {
   view: View;
   selectedGrievanceId: string | null;
   largeType: boolean;
-  panelOpen: boolean;
   lang: "en" | "hi";
   /** Simulation clock — frozen at load so relative-day facts stay stable within a session. */
   simNow: string;
   setView: (view: View) => void;
   select: (id: string | null) => void;
   toggleLargeType: () => void;
-  togglePanel: () => void;
   setLang: (lang: "en" | "hi") => void;
+  signIn: (c: Citizen) => void;
+  signOut: () => void;
+  saveDraft: (d: Omit<GrievanceDraft, "id" | "updatedAt">) => void;
+  clearDraft: () => void;
   // engine-backed actions (guards throw PreconditionError → mapped by tool layer)
   submitActiveDraft: () => Grievance;
   remind: (grievanceId: string, byAgent: boolean) => void;
@@ -105,15 +131,36 @@ export const useAppStore = create<AppState>((set, get) => ({
   view: "home",
   selectedGrievanceId: null,
   largeType: false,
-  panelOpen: false,
   lang: "en",
   simNow: new Date().toISOString(),
 
   setView: (view) => set({ view }),
   select: (selectedGrievanceId) => set({ selectedGrievanceId }),
   toggleLargeType: () => set((s) => ({ largeType: !s.largeType })),
-  togglePanel: () => set((s) => ({ panelOpen: !s.panelOpen })),
   setLang: (lang) => set({ lang }),
+
+  signIn: (c) => {
+    const s = get();
+    set({ citizen: c, view: s.view === "login" ? "status" : s.view });
+    persist({ grievances: s.grievances, draft: s.draft, appealDraft: s.appealDraft, citizen: c });
+  },
+  signOut: () => {
+    const s = get();
+    set({ citizen: null, view: "home", selectedGrievanceId: null });
+    persist({ grievances: s.grievances, draft: s.draft, appealDraft: s.appealDraft, citizen: null });
+  },
+
+  saveDraft: (d) => {
+    const s = get();
+    const draft: GrievanceDraft = { ...d, id: s.draft?.id ?? `d-${Date.now().toString(36)}`, updatedAt: s.simNow };
+    set({ draft });
+    persist({ grievances: s.grievances, draft, appealDraft: s.appealDraft, citizen: s.citizen });
+  },
+  clearDraft: () => {
+    const s = get();
+    set({ draft: null });
+    persist({ grievances: s.grievances, draft: null, appealDraft: s.appealDraft, citizen: s.citizen });
+  },
 
   submitActiveDraft: () => {
     const s = get();
