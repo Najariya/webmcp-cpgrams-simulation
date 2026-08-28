@@ -77,7 +77,7 @@ export default function GovHeader() {
                 size="small"
                 onClick={toggleVoiceMode}
                 sx={{ color: voiceMode ? "#FFB37E" : "#fff", border: "1px solid rgba(255,255,255,0.4)", width: 28, height: 28, borderRadius: 1 }}
-                aria-label={voiceMode ? "Voice mode on — click to turn narration off" : "Voice mode off — click to speak key updates"}
+                aria-label={voiceMode ? "Voice mode on. Click to turn narration off" : "Voice mode off. Click to speak key updates"}
                 aria-pressed={voiceMode}
               >
                 <RecordVoiceOver sx={{ fontSize: "0.9375rem" }} />
@@ -86,7 +86,7 @@ export default function GovHeader() {
                 size="small"
                 onClick={cycleTypeStep}
                 sx={{ color: typeStep > 0 ? "#FFB37E" : "#fff", border: "1px solid rgba(255,255,255,0.4)", bgcolor: typeStep > 0 ? "rgba(255,179,126,0.15)" : "transparent", width: 28, height: 28, borderRadius: 1 }}
-                aria-label={`Text size ${TYPE_STEP_LABELS[typeStep]} — click to change`}
+                aria-label={`Text size ${TYPE_STEP_LABELS[typeStep]}. Click to change`}
                 aria-pressed={typeStep > 0}
               >
                 <TextIncrease sx={{ fontSize: "0.9375rem" }} />

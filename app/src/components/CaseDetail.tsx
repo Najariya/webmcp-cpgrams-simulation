@@ -157,7 +157,7 @@ export default function CaseDetail() {
           {g.appeal && (
             <NoticeCard
               icon={<Gavel />} tone="violet" title={`Appeal · ${g.appeal.status === "PENDING" ? "pending with Nodal Appellate Authority" : "disposed"}`}
-              body={`${g.appeal.grounds} — ${g.appeal.argument.slice(0, 240)}${g.appeal.argument.length > 240 ? "…" : ""}`}
+              body={`${g.appeal.grounds}: ${g.appeal.argument.slice(0, 240)}${g.appeal.argument.length > 240 ? "…" : ""}`}
             />
           )}
         </Stack>

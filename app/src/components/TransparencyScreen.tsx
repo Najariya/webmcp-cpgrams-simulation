@@ -96,7 +96,7 @@ export default function TransparencyScreen() {
       <Paper elevation={1} sx={{ p: 0, overflow: "hidden", borderRadius: 2 }}>
         <PageHeader
           title="Agent Tools · आपके एजेंट के टूल्स"
-          sub="Exactly which capabilities this site exposes to your browser agent right now — the same registry your agent sees through WebMCP"
+          sub="Exactly which capabilities this site exposes to your browser agent right now, the same registry your agent sees through WebMCP"
         />
         <Stack
           direction="row"
@@ -106,7 +106,7 @@ export default function TransparencyScreen() {
           <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: available ? goi.green : "#B45309", mt: "7px", flexShrink: 0 }} />
           <Box sx={{ minWidth: 0 }}>
             <Typography sx={{ fontSize: "0.8125rem", fontWeight: 700, color: available ? "#1A5C33" : "#7A4608", lineHeight: 1.4 }}>
-              {available ? "WebMCP active in this browser — this is the live registry" : "WebMCP not active — simulation view of the intended registry"}
+              {available ? "WebMCP active in this browser. This is the live registry" : "WebMCP not active. This is a simulation view of the intended registry"}
             </Typography>
             <Typography className="longform" sx={{ fontSize: "0.75rem", lineHeight: 1.65, color: "text.secondary", mt: 0.25 }}>
               {available ? (
@@ -131,7 +131,7 @@ export default function TransparencyScreen() {
           icon={<VisibilityOutlined sx={{ fontSize: "1rem" }} />}
           title={`Read tools · पढ़ने के टूल`}
           count={reads.length}
-          blurb="Free for your agent to call at any time — they only read your record, so no confirmation is needed."
+          blurb="Free for your agent to call at any time. They only read your record, so no confirmation is needed."
         >
           {reads.map((t, i) => (
             <ToolCard key={t.name} t={t} index={i} expanded={expanded.has(t.name)} onToggle={() => toggle(t.name)} />
@@ -144,7 +144,7 @@ export default function TransparencyScreen() {
           icon={<PanToolOutlined sx={{ fontSize: "1rem" }} />}
           title={`Action tools · कार्रवाई के टूल`}
           count={writes.length}
-          blurb="These change something — your record or your preferences. Record-changing actions pause for your explicit in-page confirmation, bound to the exact payload, before anything is committed; preference changes are reversible and need none."
+          blurb="These change something: your record or your preferences. Record-changing actions pause for your explicit in-page confirmation, bound to the exact payload, before anything is committed. Preference changes are reversible and need none."
         >
           {writes.map((t, i) => (
             <ToolCard key={t.name} t={t} index={reads.length + i} expanded={expanded.has(t.name)} onToggle={() => toggle(t.name)} />
@@ -167,7 +167,7 @@ export default function TransparencyScreen() {
           </Typography>
         </Stack>
         <Typography className="longform" sx={{ fontSize: "0.7812rem", lineHeight: 1.65, color: "text.secondary", mt: 1 }}>
-          Run the exact tool your agent would call — same validation, same envelope, no agent required. The response below is precisely what your agent receives.
+          Run the exact tool your agent would call with the same validation and envelope, no agent required. The response below is precisely what your agent receives.
         </Typography>
         <Stack direction="row" spacing={1.5} useFlexGap sx={{ flexWrap: "wrap", rowGap: 1, mt: 1.75 }}>
           <Button variant="outlined" size="small" startIcon={<PlayArrow />} onClick={runSelfTest}>
@@ -238,9 +238,9 @@ export default function TransparencyScreen() {
         </Stack>
         <Stack spacing={1} sx={{ mt: 1.5 }}>
           {[
-            ["Speakable envelopes", "Every tool returns a one-locale speakable line sized for speech — compact, plain-language, never bilingual concatenation. Voice agents read it directly."],
-            ["Live announcements", "Page state changes — filings, reminders, ratings, appeals, approval prompts — are announced through an aria-live region, so voice agents and screen readers hear what changed."],
-            ["Voice Mode", "A narration preference (toggle in the header, or the set_voice_mode tool) makes the page speak key citizen moments aloud in English or Hindi."],
+            ["Speakable envelopes", "Every tool returns a one-locale speakable line sized for speech: compact, plain-language and never bilingual concatenation. Voice agents read it directly."],
+            ["Live announcements", "Page state changes (filings, reminders, ratings, appeals and approval prompts) are announced through an aria-live region, so voice agents and screen readers hear what changed."],
+            ["Voice Mode", "A narration preference (toggle in the header or the set_voice_mode tool) makes the page speak key citizen moments aloud in English or Hindi."],
           ].map(([t, d]) => (
             <Box key={t} sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "180px 1fr" }, gap: { xs: 0.25, sm: 2 } }}>
               <Typography sx={{ fontSize: "0.7812rem", fontWeight: 700, color: goi.navyDark }}>{t}</Typography>
@@ -254,7 +254,7 @@ export default function TransparencyScreen() {
             color={voiceMode ? "success" : "inherit"}
             onClick={() => setVoiceMode(!voiceMode)}
           >
-            {voiceMode ? "Voice mode is on — turn off" : "Turn Voice Mode on"}
+            {voiceMode ? "Voice mode is on · turn off" : "Turn Voice Mode on"}
           </Button>
           <Button variant="outlined" size="small" startIcon={<VolumeUp />} onClick={() => speak("Your agent sees the same case list you do. Every consequential action asks you first.", "en-IN")}>
             Test voice · English
@@ -270,12 +270,12 @@ export default function TransparencyScreen() {
         <GuaranteeCard
           icon={<VerifiedUserOutlined sx={{ fontSize: "1.1875rem" }} />}
           title="Human control"
-          body="Reads are free. Drafting is reversible. Consequential actions — submitting a grievance or sending an appeal — require your explicit confirmation in the page, bound to the exact payload. The agent can never silently commit them."
+          body="Reads are free. Drafting is reversible. Consequential actions (submitting a grievance or sending an appeal) require your explicit confirmation in the page, bound to the exact payload. The agent can never silently commit them."
         />
         <GuaranteeCard
           icon={<PrivacyTipOutlined sx={{ fontSize: "1.1875rem" }} />}
           title="Privacy"
-          body="The prototype has no application backend and performs no server-side persistence. Demo grievance state is stored locally in your browser — you can export it as a file or erase it at any time from the case register. Information required for an agent action is shared with your browser agent through explicit WebMCP tool contracts. All cases are fictional; no government connectivity."
+          body="The prototype has no application backend and performs no server-side persistence. Demo grievance state is stored locally in your browser. You can export it as a file or erase it at any time from the case register. Information required for an agent action is shared with your browser agent through explicit WebMCP tool contracts. All cases are fictional; no government connectivity."
         />
       </Box>
     </Box>
@@ -364,7 +364,7 @@ function ToolCard({ t, index, expanded, onToggle }: {
                     </Stack>
                     <Typography sx={{ fontSize: "0.75rem", lineHeight: 1.55, color: "text.secondary" }}>
                       <Box component="span" sx={{ color: "#5B6774", fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.75rem" }}>{spec.type}{spec.enum ? ` · ${spec.enum.join(" | ")}` : ""}</Box>
-                      {spec.description && <Box component="span"> — {spec.description}</Box>}
+                      {spec.description && <Box component="span">: {spec.description}</Box>}
                     </Typography>
                   </Box>
                 );
