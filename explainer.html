@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>What is WebMCP? — an animated explainer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root {
+    --bg: #0b1020;
+    --bg2: #0e1530;
+    --card: #141c3a;
+    --card2: #182148;
+    --ink: #e8ecff;
+    --muted: #93a0c8;
+    --cyan: #6ee7ff;
+    --violet: #a78bfa;
+    --pink: #f472b6;
+    --green: #34d399;
+    --amber: #fbbf24;
+    --red: #f87171;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(1200px 800px at 70% -10%, #1a2350 0%, var(--bg) 55%);
+    color: var(--ink);
+    overflow: hidden;
+  }
+  #app { position: fixed; inset: 0; display: flex; flex-direction: column; }
+
+  /* ---------- top bar ---------- */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 22px; z-index: 40;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: .3px; }
+  .brand .logo {
+    width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center;
+    background: linear-gradient(135deg, var(--cyan), var(--violet)); color: #0b1020; font-size: 16px;
+  }
+  .badge {
+    font-family: var(--mono); font-size: 11.5px; padding: 6px 12px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.14); color: var(--muted); background: rgba(255,255,255,.04);
+    display: flex; align-items: center; gap: 8px; max-width: 60vw;
+  }
+  .badge .dot { width: 8px; height: 8px; border-radius: 50%; background: #64748b; flex: none; }
+  .badge.ok .dot { background: var(--green); box-shadow: 0 0 10px var(--green); }
+  .badge.ok { color: var(--green); border-color: rgba(52,211,153,.4); }
+  .badge.warn .dot { background: var(--amber); }
+
+  /* ---------- stage & scenes ---------- */
+  #stage { position: relative; flex: 1; }
+  .scene {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    opacity: 0; visibility: hidden; padding: 12px 28px 90px;
+  }
+  .scene.active { opacity: 1; visibility: visible; }
+  .wrap { width: min(1060px, 100%); }
+
+  .kicker {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--cyan); margin-bottom: 14px;
+  }
+  h1 { font-size: clamp(38px, 6vw, 68px); line-height: 1.05; font-weight: 800; }
+  h1 .grad {
+    background: linear-gradient(90deg, var(--cyan), var(--violet), var(--pink));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  h2 { font-size: clamp(26px, 4vw, 42px); line-height: 1.12; font-weight: 800; margin-bottom: 10px; }
+  .sub { color: var(--muted); font-size: clamp(15px, 1.9vw, 19px); line-height: 1.55; max-width: 720px; }
+  .sub b { color: var(--ink); }
+  .codechip {
+    font-family: var(--mono); font-size: 13px; color: #c9d6ff;
+    background: #0a0f24; border: 1px solid rgba(110,231,255,.25); border-radius: 12px;
+    padding: 12px 16px; display: inline-block; margin-top: 18px;
+  }
+  .codechip .kw { color: var(--violet); } .codechip .str { color: var(--green); } .codechip .fn { color: var(--cyan); }
+
+  /* ---------- generic cards / rows ---------- */
+  .row { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 26px; }
+  .point {
+    flex: 1 1 240px; background: var(--card); border: 1px solid rgba(255,255,255,.08);
+    border-radius: 16px; padding: 18px 20px;
+  }
+  .point .ic { font-size: 26px; margin-bottom: 10px; }
+  .point h3 { font-size: 16px; margin-bottom: 6px; }
+  .point p { font-size: 13.5px; color: var(--muted); line-height: 1.5; }
+
+  /* ---------- browser mockup ---------- */
+  .browser {
+    background: var(--card); border: 1px solid rgba(255,255,255,.1); border-radius: 18px;
+    overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,.45); width: min(560px, 100%);
+  }
+  .browser .bar { display: flex; gap: 6px; padding: 10px 14px; background: #0d1330; align-items: center; }
+  .browser .bar i { width: 10px; height: 10px; border-radius: 50%; background: #3a4470; }
+  .browser .bar .url {
+    flex: 1; margin-left: 10px; font-family: var(--mono); font-size: 11px; color: var(--muted);
+    background: #0a0f24; border-radius: 8px; padding: 5px 12px;
+  }
+  .browser .page { padding: 22px; background: linear-gradient(180deg, #10173a, #0d1330); position: relative; }
+  .form-title { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+  .form-sub { font-size: 11.5px; color: var(--muted); margin-bottom: 16px; }
+  .field {
+    background: #0a0f24; border: 1px solid #26305c; border-radius: 10px; height: 34px;
+    margin-bottom: 10px; position: relative;
+  }
+  .field span { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #5b6799; }
+  .field.filled span { color: #c9d6ff; }
+  .field.error { border-color: var(--red); box-shadow: 0 0 0 3px rgba(248,113,113,.15); }
+  .field .typing { color: var(--cyan); }
+  .btn {
+    display: inline-block; background: linear-gradient(90deg, var(--cyan), var(--violet)); color: #0b1020;
+    font-weight: 700; font-size: 12.5px; padding: 9px 18px; border-radius: 10px; margin-top: 6px;
+  }
+  .toast {
+    position: absolute; right: 14px; bottom: 14px; font-size: 11.5px; padding: 8px 12px; border-radius: 10px;
+    background: rgba(248,113,113,.12); border: 1px solid rgba(248,113,113,.4); color: var(--red);
+    opacity: 0;
+  }
+
+  /* robot cursor */
+  .robo {
+    position: absolute; z-index: 5; width: 40px; height: 40px; border-radius: 12px;
+    background: linear-gradient(135deg, #34d399, #6ee7ff); display: grid; place-items: center;
+    font-size: 20px; box-shadow: 0 8px 24px rgba(52,211,153,.4); opacity: 0;
+  }
+
+  /* flash (screenshot) */
+  .flash { position: absolute; inset: 0; background: white; opacity: 0; z-index: 6; border-radius: 0 0 18px 18px; }
+
+  /* tool cards rising from the page */
+  .toolcard {
+    background: #0e1c3f; border: 1px solid rgba(110,231,255,.45); border-radius: 14px;
+    padding: 12px 16px; font-family: var(--mono); width: 250px; box-shadow: 0 0 30px rgba(110,231,255,.12);
+  }
+  .toolcard .tname { color: var(--cyan); font-size: 13px; font-weight: 700; }
+  .toolcard .tdesc { color: var(--muted); font-size: 11px; margin-top: 5px; font-family: system-ui; line-height: 1.45; }
+  .toolcard .targs { color: var(--violet); font-size: 10.5px; margin-top: 6px; }
+
+  /* scene 4 pipeline */
+  .pipe { display: flex; gap: 12px; margin-top: 22px; flex-wrap: wrap; }
+  .step {
+    flex: 1 1 160px; background: var(--card); border: 1px solid rgba(255,255,255,.09);
+    border-radius: 14px; padding: 14px 16px; position: relative;
+  }
+  .step .n {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 2px; color: var(--cyan); text-transform: uppercase;
+  }
+  .step h3 { font-size: 15px; margin: 6px 0 4px; }
+  .step p { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .step .json {
+    font-family: var(--mono); font-size: 10.5px; color: #b7c6ff; background: #0a0f24; border-radius: 8px;
+    padding: 8px 10px; margin-top: 8px; line-height: 1.6; white-space: pre; overflow-x: auto;
+  }
+  .step.lit { border-color: rgba(110,231,255,.7); box-shadow: 0 0 24px rgba(110,231,255,.15); }
+
+  /* chat bubbles */
+  .chat { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; max-width: 560px; }
+  .bubble {
+    padding: 12px 16px; border-radius: 16px; font-size: 14px; line-height: 1.5; max-width: 85%;
+  }
+  .bubble.user { align-self: flex-end; background: linear-gradient(135deg, #2563eb, #4f46e5); border-bottom-right-radius: 4px; }
+  .bubble.agent { align-self: flex-start; background: var(--card2); border: 1px solid rgba(255,255,255,.1); border-bottom-left-radius: 4px; }
+  .bubble .toolline { font-family: var(--mono); font-size: 11px; color: var(--cyan); display: block; margin-top: 6px; }
+
+  /* approval card scene 5 */
+  .approve-card {
+    background: var(--card2); border: 1px solid rgba(52,211,153,.5); border-radius: 16px;
+    padding: 18px 20px; width: min(480px, 100%); box-shadow: 0 0 40px rgba(52,211,153,.12);
+  }
+  .approve-card .tag { font-family: var(--mono); font-size: 10.5px; color: var(--amber); letter-spacing: 2px; }
+  .approve-card h3 { margin: 8px 0 6px; font-size: 17px; }
+  .approve-card p { font-size: 13px; color: var(--muted); line-height: 1.55; }
+  .approve-actions { display: flex; gap: 10px; margin-top: 16px; }
+  .abtn { font-weight: 700; font-size: 13px; padding: 10px 18px; border-radius: 10px; cursor: default; }
+  .abtn.yes { background: linear-gradient(90deg, #34d399, #6ee7ff); color: #06251b; }
+  .abtn.edit { background: #1c2752; color: var(--ink); border: 1px solid rgba(255,255,255,.15); }
+  .ticket {
+    margin-top: 18px; background: rgba(52,211,153,.08); border: 1px dashed rgba(52,211,153,.6);
+    border-radius: 12px; padding: 12px 16px; font-family: var(--mono); font-size: 12px; color: var(--green);
+    opacity: 0;
+  }
+
+  /* scene 6 compare */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 26px; }
+  @media (max-width: 760px) { .compare { grid-template-columns: 1fr; } }
+  .panel { border-radius: 18px; padding: 22px; border: 1px solid rgba(255,255,255,.1); background: var(--card); }
+  .panel.win { border-color: rgba(110,231,255,.5); box-shadow: 0 0 40px rgba(110,231,255,.08); }
+  .panel h3 { font-size: 17px; margin-bottom: 4px; }
+  .panel .who { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 14px; }
+  .panel ul { list-style: none; }
+  .panel li { font-size: 13.5px; color: var(--muted); padding: 7px 0 7px 28px; position: relative; line-height: 1.45; }
+  .panel li b { color: var(--ink); }
+  .panel li::before { position: absolute; left: 0; }
+  .panel.win li::before { content: "✓"; color: var(--green); font-weight: 800; }
+  .panel.lose li::before { content: "–"; color: var(--muted); }
+
+  .bigline { margin-top: 26px; font-size: clamp(16px, 2.4vw, 22px); font-weight: 700; text-align: center; }
+  .bigline .grad {
+    background: linear-gradient(90deg, var(--cyan), var(--violet)); -webkit-background-clip: text;
+    background-clip: text; color: transparent;
+  }
+
+  /* scene 7 flow */
+  .flow { display: flex; align-items: stretch; gap: 0; margin-top: 26px; flex-wrap: wrap; }
+  .fnode {
+    flex: 1 1 130px; background: var(--card); border: 1px solid rgba(255,255,255,.09); border-radius: 14px;
+    padding: 14px 12px; text-align: center; position: relative;
+  }
+  .fnode .ic { font-size: 22px; margin-bottom: 8px; }
+  .fnode h4 { font-size: 13px; margin-bottom: 4px; }
+  .fnode p { font-size: 11px; color: var(--muted); line-height: 1.4; }
+  .farrow { align-self: center; color: var(--cyan); font-size: 18px; padding: 0 8px; }
+
+  /* scene: architecture — who lives where */
+  .arch { display: flex; align-items: stretch; justify-content: center; margin-top: 28px; flex-wrap: wrap; gap: 4px 0; }
+  .actor {
+    flex: 0 1 250px; background: var(--card); border-radius: 18px; padding: 18px 18px 14px;
+    border: 1px solid rgba(255,255,255,.1); text-align: left;
+  }
+  .actor .aic { font-size: 28px; }
+  .actor h3 { font-size: 16px; margin: 8px 0 2px; }
+  .actor .arole { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-bottom: 8px; letter-spacing: .5px; }
+  .actor ul { list-style: none; }
+  .actor li { font-size: 12px; color: var(--muted); padding: 3px 0 3px 18px; position: relative; line-height: 1.45; }
+  .actor li b { color: var(--ink); }
+  .actor li::before { content: "▸"; position: absolute; left: 0; }
+  .actor.brain { border-color: rgba(167,139,250,.5); box-shadow: 0 0 34px rgba(167,139,250,.12); }
+  .actor.brain li::before { color: var(--violet); }
+  .actor.messenger { border-color: rgba(110,231,255,.5); box-shadow: 0 0 34px rgba(110,231,255,.12); }
+  .actor.messenger li::before { color: var(--cyan); }
+  .actor.kitchen { border-color: rgba(52,211,153,.5); box-shadow: 0 0 34px rgba(52,211,153,.12); }
+  .actor.kitchen li::before { color: var(--green); }
+  .alink { flex: 0 0 160px; display: flex; flex-direction: column; justify-content: center; gap: 9px; padding: 0 8px; min-width: 130px; }
+  .alabel { font-family: var(--mono); font-size: 9.5px; color: #5b6799; text-align: center; letter-spacing: 1.5px; text-transform: uppercase; }
+  .apacket {
+    font-family: var(--mono); font-size: 10px; text-align: center; padding: 7px 6px; border-radius: 999px;
+    background: #0e1c3f; border: 1px solid rgba(110,231,255,.4); color: #b7c6ff; white-space: nowrap;
+  }
+  .loopstrip { display: flex; gap: 8px; justify-content: center; margin-top: 22px; flex-wrap: wrap; }
+  .lchip {
+    font-family: var(--mono); font-size: 11px; color: var(--muted); background: var(--card);
+    border: 1px solid rgba(255,255,255,.09); border-radius: 999px; padding: 8px 14px;
+    transition: none;
+  }
+  .lchip.lit { border-color: rgba(110,231,255,.7); color: var(--cyan); box-shadow: 0 0 18px rgba(110,231,255,.18); }
+
+  /* ---------- bottom nav ---------- */
+  nav {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: center; gap: 18px; padding: 16px;
+    background: linear-gradient(180deg, transparent, rgba(11,16,32,.9) 40%);
+  }
+  .nbtn {
+    font: inherit; font-weight: 700; color: var(--ink); background: var(--card2);
+    border: 1px solid rgba(255,255,255,.14); border-radius: 12px; padding: 10px 20px; cursor: pointer;
+    transition: transform .15s ease, border-color .15s ease;
+  }
+  .nbtn:hover { transform: translateY(-1px); border-color: var(--cyan); }
+  .nbtn:disabled { opacity: .35; cursor: default; transform: none; }
+  .dots { display: flex; gap: 8px; }
+  .dot2 { width: 9px; height: 9px; border-radius: 50%; background: #2c3663; cursor: pointer; transition: all .2s; }
+  .dot2.on { background: var(--cyan); transform: scale(1.35); box-shadow: 0 0 12px var(--cyan); }
+  .auto {
+    font-family: var(--mono); font-size: 11px; color: var(--muted); background: none; border: none;
+    cursor: pointer; letter-spacing: 1px; text-transform: uppercase; padding: 8px;
+  }
+  .auto.on { color: var(--green); }
+  .hint { position: absolute; bottom: 74px; width: 100%; text-align: center; font-size: 11.5px; color: #5b6799; z-index: 45; }
+  .progress { position: absolute; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--cyan), var(--violet)); width: 0%; z-index: 60; }
+
+  /* confetti bits */
+  .confetti { position: fixed; top: -20px; width: 10px; height: 14px; z-index: 100; border-radius: 2px; pointer-events: none; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="progress" id="progress"></div>
+  <header>
+    <div class="brand"><div class="logo">🛠️</div> WebMCP, visually</div>
+    <div class="badge" id="mcBadge"><span class="dot"></span><span id="mcBadgeText">checking this browser for WebMCP…</span></div>
+  </header>
+
+  <div id="stage">
+
+    <!-- ═══════════ SCENE 1 · title ═══════════ -->
+    <section class="scene active" id="s1">
+      <div class="wrap">
+        <div class="kicker">a 2-minute visual explainer</div>
+        <h1>What is <span class="grad">WebMCP</span>?</h1>
+        <p class="sub" style="margin-top:18px">
+          A new web standard that lets a website hand AI agents a <b>menu of things it can do</b> —
+          instead of forcing the agent to guess its way through buttons and forms.
+        </p>
+        <p class="sub" style="margin-top:14px">
+          Same big idea as MCP… but <b>the website itself is the server</b>, the tools live in the page,
+          and you — the human — stay in the loop.
+        </p>
+        <div class="codechip" id="s1chip"><span class="kw">await</span> document.<span class="fn">modelContext</span>.<span class="fn">registerTool</span>({ name: <span class="str">"search_issues"</span>, … })</div>
+      </div>
+    </section>
+
+    <!-- ═══════════ SCENE 2 · the problem ═══════════ -->
+    <section class="scene" id="s2">
+      <div class="wrap" style="display:flex; gap:40px; align-items:center; flex-wrap:wrap;">
+        <div style="flex:1 1 380px;">
+          <div class="kicker">today's problem</div>
+          <h2>AI agents browse the web <span style="color:var(--red)">blind</span>.</h2>
+          <p class="sub">Without WebMCP, an agent visiting a page sees pixels, not structure.
+          So it does what you would do blindfolded:</p>
+          <div class="row" style="flex-direction:column; gap:12px;">
+            <div class="point" style="flex:none;"><h3>📸 It takes screenshots and guesses</h3><p>Every layout change, every dropdown, every spinner is a fresh chance to fail.</p></div>
+            <div class="point" style="flex:none;"><h3>🖱️ It simulates clicks and prays</h3><p>Slow, fragile choreography — misclicks go to the wrong department, wrong field, wrong button.</p></div>
+          </div>
+        </div>
+        <div style="flex:1 1 380px; display:flex; justify-content:center;">
+          <div class="browser" id="s2browser">
+            <div class="bar"><i></i><i></i><i></i><div class="url">cityportal.gov/file-complaint</div></div>
+            <div class="page" style="height:270px">
+              <div class="form-title">📄 File a Complaint</div>
+              <div class="form-sub">Select the correct department (14 options)</div>
+              <div class="field" id="f1"><span>Your name</span></div>
+              <div class="field" id="f2"><span>Department ▾</span></div>
+              <div class="field" id="f3"><span>Describe the issue</span></div>
+              <span class="btn">Submit</span>
+              <div class="toast" id="s2toast">❌ Submitted to the wrong department</div>
+              <div class="flash" id="s2flash"></div>
+              <div class="robo" id="s2robo">🤖</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ SCENE 3 · the idea ═══════════ -->
+    <section class="scene" id="s3">
+      <div class="wrap">
+        <div class="kicker">the webmcp idea</div>
+        <h2>Let the page <span style="color:var(--cyan)">speak</span> — give it a tool menu.</h2>
+        <p class="sub">With WebMCP, the page itself declares its capabilities as structured tools:
+        exact names, exact inputs, exact outputs. The agent stops guessing and starts <b>calling</b>.</p>
+        <div style="display:flex; gap:26px; margin-top:34px; flex-wrap:wrap; align-items:flex-start;">
+          <div style="flex:0 1 300px;">
+            <div class="codechip" style="margin-top:0" id="s3code"><span class="kw">await</span> document.<span class="fn">modelContext</span>.<span class="fn">registerTool</span>({<br>
+  &nbsp;name: <span class="str">"create_report_draft"</span>,<br>
+  &nbsp;description: <span class="str">"Draft a civic complaint…"</span>,<br>
+  &nbsp;inputSchema: { … },<br>
+  &nbsp;execute: <span class="kw">async</span> (input) => { … }<br>})</div>
+            <p class="sub" style="font-size:13px; margin-top:14px">One JavaScript call. The browser makes these tools discoverable to any agent — ChatGPT's browser, Chrome's agent, any WebMCP-capable client.</p>
+          </div>
+          <div style="flex:1 1 300px; display:flex; flex-direction:column; gap:14px;" id="s3cards">
+            <div class="toolcard"><div class="tname">🔧 search_issues</div><div class="tdesc">Find complaints by location, category or status.</div><div class="targs">{ category: "pothole", near: [lat, lng] }</div></div>
+            <div class="toolcard"><div class="tname">📝 create_report_draft</div><div class="tdesc">Prepare a structured complaint for human review.</div><div class="targs">{ title, description, location, severity }</div></div>
+            <div class="toolcard"><div class="tname">✅ submit_report</div><div class="tdesc">File the approved draft. Requires human confirmation.</div><div class="targs">{ draftId }</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ SCENE 4 · anatomy of a tool call ═══════════ -->
+    <section class="scene" id="s4">
+      <div class="wrap">
+        <div class="kicker">under the hood</div>
+        <h2>One sentence from you → <span style="color:var(--violet)">one tool call</span>.</h2>
+        <div class="chat">
+          <div class="bubble user" id="s4user">There's a huge pothole near my house. Report it. 🕳️</div>
+          <div class="bubble agent" id="s4agent">On it — filing a draft with the Roads department.<span class="toolline" id="s4toolline">→ create_report_draft({ category: "pothole", location: [12.97, 77.59], severity: "high" })</span></div>
+        </div>
+        <div class="pipe" id="s4pipe">
+          <div class="step" id="st1"><div class="n">step 1</div><h3>🔍 Discover</h3><p>The agent reads the page's live tool menu.</p></div>
+          <div class="step" id="st2"><div class="n">step 2</div><h3>📦 Call</h3><p>It picks a tool and fills a typed JSON payload.</p><div class="json">{ "category": "pothole",
+  "severity": "high" }</div></div>
+          <div class="step" id="st3"><div class="n">step 3</div><h3>⚡ Execute</h3><p>Your page's own JavaScript runs — same code a button click would run.</p></div>
+          <div class="step" id="st4"><div class="n">step 4</div><h3>📊 Result</h3><p>Structured data returns to the agent — not a screenshot.</p><div class="json">{ "draftId": "d-91",
+  "department": "Roads",
+  "slaDays": 7 }</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ SCENE 4.5 · architecture — who lives where ═══════════ -->
+    <section class="scene" id="sarch">
+      <div class="wrap">
+        <div class="kicker">the architecture</div>
+        <h2>Who lives <span style="color:var(--violet)">where</span>?</h2>
+        <p class="sub">The AI never moves into your browser. Three actors, one loop —
+        the <b>brain</b> decides in the cloud, the <b>messenger</b> carries the decisions,
+        and the <b>kitchen</b> — a page exactly like this one — does the work in your tab.</p>
+        <div class="arch">
+          <div class="actor brain">
+            <div class="aic">🧠</div>
+            <h3>The Brain</h3>
+            <div class="arole">the AI model · GPT / Gemini</div>
+            <ul>
+              <li>Lives in the <b>cloud</b></li>
+              <li>Reads context, makes the decision</li>
+              <li>Never touches your computer</li>
+            </ul>
+          </div>
+          <div class="alink">
+            <div class="alabel">cloud ⇄ agent</div>
+            <div class="apacket pk1">👁 snapshot ◀</div>
+            <div class="apacket pk2">⚡ decision ▶</div>
+          </div>
+          <div class="actor messenger">
+            <div class="aic">🛰️</div>
+            <h3>The Messenger</h3>
+            <div class="arole">the browser agent</div>
+            <ul>
+              <li>ChatGPT's in-app browser / Chrome's agent</li>
+              <li>Observes the page, talks to the model</li>
+              <li>Delivers tool calls, returns results</li>
+            </ul>
+          </div>
+          <div class="alink">
+            <div class="alabel">agent ⇄ page</div>
+            <div class="apacket pk3">⚡ tool call ▶</div>
+            <div class="apacket pk4">📦 result ◀</div>
+          </div>
+          <div class="actor kitchen">
+            <div class="aic">🍳</div>
+            <h3>The Kitchen</h3>
+            <div class="arole">your webpage — this very tab</div>
+            <ul>
+              <li>Registers the tool menu</li>
+              <li><b>execute() runs inside the page</b></li>
+              <li>Your code &amp; data stay local</li>
+            </ul>
+          </div>
+        </div>
+        <div class="loopstrip">
+          <span class="lchip">1 · you ask in chat</span>
+          <span class="lchip">2 · agent observes page</span>
+          <span class="lchip">3 · model decides</span>
+          <span class="lchip">4 · tool runs in page</span>
+          <span class="lchip">5 · result + reply</span>
+        </div>
+        <div class="bigline">The deciding happens in the cloud. The doing happens in your tab.<br><span class="grad">The browser translates.</span></div>
+      </div>
+    </section>
+
+    <!-- ═══════════ SCENE 5 · human in the loop ═══════════ -->
+    <section class="scene" id="s5">
+      <div class="wrap" style="display:flex; gap:44px; align-items:center; flex-wrap:wrap;">
+        <div style="flex:1 1 360px;">
+          <div class="kicker">the safety net</div>
+          <h2>The agent prepares.<br><span style="color:var(--green)">You decide.</span></h2>
+          <p class="sub">WebMCP is designed for <b>human-in-the-loop</b> work: the agent drafts on the shared screen,
+          and sensitive actions wait for your click.</p>
+          <div class="row" style="flex-direction:column; gap:12px;">
+            <div class="point" style="flex:none;"><h3>🏠 Runs in your browser</h3><p>Tools share your session and your screen — no backend server, no passwords copied elsewhere. <span style="font-family:var(--mono); font-size:11px; color:var(--cyan)">readOnlyHint</span> marks safe tools; risky ones can demand confirmation.</p></div>
+            <div class="point" style="flex:none;"><h3>👁️ Everything is visible</h3><p>When a tool runs, you watch the page change — nothing happens in a dark terminal far away.</p></div>
+          </div>
+        </div>
+        <div style="flex:1 1 360px; display:flex; justify-content:center;">
+          <div>
+            <div class="approve-card" id="s5card">
+              <div class="tag">AGENT DRAFT · AWAITING YOUR APPROVAL</div>
+              <h3>🕳️ Pothole on 5th Cross Street</h3>
+              <p>Category <b style="color:var(--ink)">Pothole</b> · routed to <b style="color:var(--ink)">Roads Dept</b> · severity <b style="color:var(--ink)">high</b> · location pinned on map.</p>
+              <div class="approve-actions">
+                <span class="abtn yes" id="s5yes">Approve ✓</span>
+                <span class="abtn edit">Edit ✎</span>
+              </div>
+            </div>
+            <div class="ticket" id="s5ticket">🎟️ Ticket #4821 filed · Roads Dept · SLA: fix within 7 days</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ SCENE 6 · vs classic MCP ═══════════ -->
+    <section class="scene" id="s6">
+      <div class="wrap">
+        <div class="kicker">how it differs from "normal" mcp</div>
+        <h2>MCP over a wire vs. <span style="color:var(--cyan)">MCP in the page</span>.</h2>
+        <div class="compare">
+          <div class="panel lose">
+            <h3>🔌 Classic MCP server</h3>
+            <div class="who">a separate backend you build, host & secure</div>
+            <ul>
+              <li>Needs its <b>own server</b>, auth and API keys</li>
+              <li>Duplicates app logic outside the browser</li>
+              <li>Your data <b>leaves</b> to another machine</li>
+              <li>Invisible to the user while it works</li>
+            </ul>
+          </div>
+          <div class="panel win">
+            <h3>🌐 WebMCP</h3>
+            <div class="who">tools live inside the webpage itself</div>
+            <ul>
+              <li><b>Zero backend</b> — a static site can be agent-native</li>
+              <li>Reuses the page's <b>live state and UI</b></li>
+              <li>Runs in <b>your</b> browser session — private by default</li>
+              <li>Every action is <b>visible</b> on the shared screen</li>
+            </ul>
+          </div>
+        </div>
+        <div class="bigline">Same protocol idea — but <span class="grad">the website is the server.</span></div>
+      </div>
+    </section>
+
+    <!-- ═══════════ SCENE 7 · our build ═══════════ -->
+    <section class="scene" id="s7">
+      <div class="wrap">
+        <div class="kicker">what we'll build for the hackathon</div>
+        <h2>311 for the <span style="color:var(--pink)">agent era</span> 🏙️</h2>
+        <p class="sub">A civic complaint portal where the agent is your advocate — and every power it has is a tool
+        you can watch it use.</p>
+        <div class="flow" id="s7flow">
+          <div class="fnode"><div class="ic">💬</div><h4>You describe</h4><p>"Huge pothole near my gate"</p></div>
+          <div class="farrow">→</div>
+          <div class="fnode"><div class="ic">🤖</div><h4>Agent drafts</h4><p>right category, right dept, SLA clock</p></div>
+          <div class="farrow">→</div>
+          <div class="fnode"><div class="ic">🙋</div><h4>You approve</h4><p>one click on a visible card</p></div>
+          <div class="farrow">→</div>
+          <div class="fnode"><div class="ic">🎟️</div><h4>Ticket filed</h4><p>tracked publicly on the map</p></div>
+          <div class="farrow">→</div>
+          <div class="fnode"><div class="ic">⚖️</div><h4>Agent escalates</h4><p>if the SLA clock runs out</p></div>
+        </div>
+        <div class="bigline">The page becomes the agent's hands.<br><span class="grad">You stay the brain.</span> 🧠</div>
+      </div>
+    </section>
+  </div>
+
+  <div class="hint">use ← → keys · click the dots · or just watch</div>
+  <nav>
+    <button class="nbtn" id="prevBtn">← Back</button>
+    <div class="dots" id="dots"></div>
+    <button class="nbtn" id="nextBtn">Next →</button>
+    <button class="auto" id="autoBtn">▶ auto-play</button>
+  </nav>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  if (!window.gsap) { document.querySelector(".hint").textContent = "⚠ GSAP failed to load — check your internet connection"; return; }
+
+  const scenes = Array.from(document.querySelectorAll(".scene"));
+  const N = scenes.length;
+  let cur = 0, timers = { scene: null }, auto = false, autoTimer = null;
+
+  /* ---------- confetti ---------- */
+  const colors = ["#6ee7ff", "#a78bfa", "#f472b6", "#34d399", "#fbbf24"];
+  function confetti(n) {
+    n = n || 36;
+    for (let i = 0; i < n; i++) {
+      const b = document.createElement("div");
+      b.className = "confetti";
+      b.style.left = Math.random() * 100 + "vw";
+      b.style.background = colors[i % colors.length];
+      document.body.appendChild(b);
+      gsap.fromTo(b,
+        { y: -30, rotation: gsap.utils.random(-90, 90), opacity: 1 },
+        { y: window.innerHeight + 60, x: gsap.utils.random(-120, 120), rotation: gsap.utils.random(-360, 360),
+          duration: gsap.utils.random(1.6, 3), ease: "power1.in", opacity: 0,
+          onComplete: () => b.remove() });
+    }
+  }
+
+  /* ---------- per-scene intro timelines (paused) ---------- */
+  const T = {};
+
+  T[0] = gsap.timeline({ paused: true })
+    .from("#s1 .kicker", { y: 24, opacity: 0, duration: .5, ease: "power3.out" })
+    .from("#s1 h1", { y: 40, opacity: 0, duration: .7, ease: "power3.out" }, "-=.25")
+    .from("#s1 .sub", { y: 26, opacity: 0, duration: .6, stagger: .15, ease: "power3.out" }, "-=.3")
+    .from("#s1chip", { scale: .9, opacity: 0, duration: .5, ease: "back.out(2)" }, "-=.2")
+    .add(() => confetti(20), "-=.3");
+
+  /* scene 2: robot fumbles on the form */
+  const robo = "#s2robo";
+  T[1] = gsap.timeline({ paused: true, repeat: -1, repeatDelay: 1.2 })
+    .from("#s2 .kicker, #s2 h2, #s2 .sub", { y: 24, opacity: 0, duration: .5, stagger: .12, ease: "power3.out" })
+    .from("#s2 .point", { x: -30, opacity: 0, duration: .5, stagger: .15, ease: "power3.out" }, "-=.3")
+    .from("#s2browser", { y: 50, opacity: 0, scale: .96, duration: .6, ease: "power3.out" }, "-=.6")
+    // robot appears, screenshots, fumbles
+    .set(robo, { x: 300, y: -10, opacity: 0 })
+    .to(robo, { opacity: 1, duration: .3 })
+    .to("#s2flash", { opacity: .85, duration: .08, yoyo: true, repeat: 1 })   // screenshot flash
+    .to(robo, { x: 120, y: 40, duration: .55, ease: "power1.inOut" })
+    .to("#f1 span", { duration: .3, innerText: "nave…", color: "#6ee7ff" })  // types in wrong-ish way
+    .to(robo, { x: 300, y: 90, duration: .5, ease: "power1.inOut" })
+    .to("#f2", { duration: .25, className: "field error" })                    // wrong department
+    .to("#f2 span", { duration: .2, text: "Water Dept (should be Roads ▾)", color: "#f87171" }, "<")
+    .to(robo, { x: 200, y: 150, rotation: 20, duration: .5, ease: "power1.inOut" })
+    .to("#s2toast", { opacity: 1, duration: .4 }, "-=.1")
+    .to(robo, { rotation: -12, duration: .3, ease: "power2.inOut" })
+    .to({}, { duration: 1.4 });
+
+  /* scene 3: tool cards rise */
+  T[2] = gsap.timeline({ paused: true })
+    .from("#s3 .kicker, #s3 h2, #s3 .sub", { y: 24, opacity: 0, duration: .5, stagger: .12, ease: "power3.out" })
+    .from("#s3code", { x: -40, opacity: 0, duration: .6, ease: "power3.out" }, "-=.3")
+    .from("#s3cards .toolcard", { y: 60, opacity: 0, scale: .92, duration: .55, stagger: .22, ease: "back.out(1.6)" }, "-=.35")
+    .fromTo("#s3cards .toolcard", { boxShadow: "0 0 0px rgba(110,231,255,0)" },
+      { boxShadow: "0 0 34px rgba(110,231,255,.25)", duration: .8, stagger: .22, yoyo: true, repeat: 1 }, "-=.9");
+
+  /* scene 4: pipeline lights up in sequence, loops */
+  T[3] = gsap.timeline({ paused: true, repeat: -1, repeatDelay: 1.6 })
+    .from("#s4 .kicker, #s4 h2", { y: 24, opacity: 0, duration: .5, stagger: .12, ease: "power3.out" })
+    .from("#s4user", { x: 60, opacity: 0, duration: .45, ease: "power3.out" }, "-=.2")
+    .from("#s4agent", { x: -60, opacity: 0, duration: .45, ease: "power3.out" })
+    .from("#s4toolline", { opacity: 0, duration: .4 })
+    .from("#s4pipe .step", { y: 40, opacity: 0, duration: .5, stagger: .14, ease: "power3.out" }, "-=.3")
+    .add("lit")
+    .to("#st1", { className: "step lit", duration: .3 }, "lit")
+    .to("#st1", { className: "step", duration: .3 }, "lit+=1")
+    .to("#st2", { className: "step lit", duration: .3 }, "lit+=1")
+    .to("#st2", { className: "step", duration: .3 }, "lit+=2")
+    .to("#st3", { className: "step lit", duration: .3 }, "lit+=2")
+    .to("#st3", { className: "step", duration: .3 }, "lit+=3")
+    .to("#st4", { className: "step lit", duration: .3 }, "lit+=3")
+    .add(() => confetti(14), "lit+=3.1")
+    .to("#st4", { className: "step", duration: .5 }, "lit+=4.2")
+    .to({}, { duration: .8 });
+
+  /* scene: architecture — who lives where */
+  const archChips = gsap.utils.toArray("#sarch .lchip");
+  const chipLoop = gsap.timeline({ repeat: -1, repeatDelay: .6 });
+  archChips.forEach((c, i) => {
+    chipLoop.to(c, { duration: .2, className: "lchip lit" }, i * .75);
+    chipLoop.to(c, { duration: .2, className: "lchip" }, i * .75 + .65);
+  });
+  chipLoop.to({}, { duration: .8 });
+
+  const pk = (sel, x0, x1) => gsap.fromTo(sel,
+    { x: x0, opacity: 0 },
+    { keyframes: [
+        { opacity: 1, duration: .18 },
+        { x: x1, duration: .85, ease: "power1.inOut" },
+        { opacity: 0, duration: .18 }
+      ], repeat: -1, repeatDelay: .9 });
+
+  T[4] = gsap.timeline({ paused: true })
+    .from("#sarch .kicker, #sarch h2, #sarch .sub", { y: 24, opacity: 0, duration: .5, stagger: .12, ease: "power3.out" })
+    .from("#sarch .actor", { y: 54, opacity: 0, scale: .94, duration: .55, stagger: .16, ease: "back.out(1.5)" }, "-=.25")
+    .from("#sarch .alabel", { opacity: 0, duration: .3 }, "-=.2")
+    .from("#sarch .loopstrip .lchip", { y: 18, opacity: 0, duration: .4, stagger: .09, ease: "power3.out" }, "-=.1")
+    .from("#sarch .bigline", { opacity: 0, y: 16, duration: .5 })
+    .add(pk("#sarch .pk1", 22, -22))
+    .add(pk("#sarch .pk2", -22, 22), "<.45")
+    .add(pk("#sarch .pk3", -22, 22), "<.45")
+    .add(pk("#sarch .pk4", 22, -22), "<.45")
+    .add(chipLoop, "<");
+
+  /* scene 5: approval */
+  T[5] = gsap.timeline({ paused: true })
+    .from("#s5 .kicker, #s5 h2, #s5 .sub", { y: 24, opacity: 0, duration: .5, stagger: .12, ease: "power3.out" })
+    .from("#s5 .point", { x: -30, opacity: 0, duration: .5, stagger: .15, ease: "power3.out" }, "-=.3")
+    .from("#s5card", { y: 50, scale: .94, opacity: 0, duration: .6, ease: "back.out(1.4)" }, "-=.5")
+    .from("#s5yes", { scale: 1.35, duration: .18, ease: "power1.inOut", repeat: 5, yoyo: true }, "+=.5") // pulsing invite
+    .to("#s5yes", { scale: .92, duration: .12, ease: "power2.in" })
+    .to("#s5yes", { scale: 1, duration: .2, ease: "back.out(3)" })
+    .to("#s5ticket", { opacity: 1, y: 0, duration: .5, ease: "power3.out" }, "-=.05")
+    .add(() => confetti(26), "-=.4");
+
+  /* scene 6: compare panels */
+  T[6] = gsap.timeline({ paused: true })
+    .from("#s6 .kicker, #s6 h2", { y: 24, opacity: 0, duration: .5, stagger: .12, ease: "power3.out" })
+    .from("#s6 .panel.lose", { x: -60, opacity: 0, duration: .6, ease: "power3.out" }, "-=.2")
+    .from("#s6 .panel.win", { x: 60, opacity: 0, duration: .6, ease: "power3.out" }, "-=.45")
+    .from("#s6 .panel.lose li", { opacity: 0, x: -20, duration: .35, stagger: .12 }, "-=.3")
+    .from("#s6 .panel.win li", { opacity: 0, x: 20, duration: .35, stagger: .12 }, "-=.9")
+    .from("#s6 .bigline", { opacity: 0, y: 20, duration: .6, ease: "power3.out" });
+
+  /* scene 7: our build */
+  T[7] = gsap.timeline({ paused: true })
+    .from("#s7 .kicker, #s7 h2, #s7 .sub", { y: 24, opacity: 0, duration: .5, stagger: .12, ease: "power3.out" })
+    .from("#s7flow .fnode", { y: 40, opacity: 0, scale: .9, duration: .5, stagger: .16, ease: "back.out(1.5)" }, "-=.25")
+    .from("#s7flow .farrow", { opacity: 0, duration: .3, stagger: .16 }, "<+.2")
+    .from("#s7 .bigline", { opacity: 0, y: 20, duration: .6, ease: "power3.out" })
+    .add(() => confetti(40), "-=.3");
+
+  /* ---------- navigation ---------- */
+  const dotsEl = document.getElementById("dots");
+  scenes.forEach((_, i) => {
+    const d = document.createElement("div");
+    d.className = "dot2" + (i === 0 ? " on" : "");
+    d.addEventListener("click", () => goTo(i));
+    dotsEl.appendChild(d);
+  });
+  const dots = Array.from(dotsEl.children);
+
+  function goTo(i, skipAnim) {
+    i = Math.max(0, Math.min(N - 1, i));
+    if (i === cur && !skipAnim) return;
+    const prevScene = scenes[cur];
+    T[cur] && T[cur].pause();
+    cur = i;
+    const nextScene = scenes[cur];
+    prevScene.classList.remove("active");
+    nextScene.classList.add("active");
+    // crossfade
+    gsap.to(prevScene, { opacity: 0, duration: .28, onComplete: () => gsap.set(prevScene, { visibility: "hidden" }) });
+    gsap.set(nextScene, { visibility: "visible" });
+    gsap.fromTo(nextScene, { opacity: 0 }, { opacity: 1, duration: .35 });
+    // reset & play intro
+    const tl = T[cur];
+    if (tl) { tl.restart(); }
+    // ui
+    dots.forEach((d, k) => d.classList.toggle("on", k === cur));
+    document.getElementById("prevBtn").disabled = cur === 0;
+    document.getElementById("nextBtn").disabled = cur === N - 1;
+    document.getElementById("progress").style.width = ((cur) / (N - 1)) * 100 + "%";
+    if (auto) scheduleAuto();
+  }
+  function next() { goTo(cur + 1); }
+  function prev() { goTo(cur - 1); }
+
+  document.getElementById("nextBtn").addEventListener("click", next);
+  document.getElementById("prevBtn").addEventListener("click", prev);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); next(); }
+    if (e.key === "ArrowLeft") prev();
+  });
+
+  /* autoplay */
+  const autoBtn = document.getElementById("autoBtn");
+  function scheduleAuto() {
+    clearTimeout(autoTimer);
+    autoTimer = setTimeout(() => { if (auto) next(); }, 9000);
+  }
+  autoBtn.addEventListener("click", () => {
+    auto = !auto;
+    autoBtn.classList.toggle("on", auto);
+    autoBtn.textContent = auto ? "❚❚ auto-playing" : "▶ auto-play";
+    if (auto) scheduleAuto(); else clearTimeout(autoTimer);
+  });
+
+  /* kick off scene 1 */
+  T[0].restart();
+
+  /* ---------- LIVE WebMCP bonus: this explainer is itself a WebMCP page ---------- */
+  const badge = document.getElementById("mcBadge");
+  const badgeText = document.getElementById("mcBadgeText");
+  async function registerLiveTools() {
+    const mc = document.modelContext;
+    if (!mc) {
+      badge.classList.add("warn");
+      badgeText.textContent = "WebMCP not active here — open in ChatGPT's browser or enable chrome://flags/#enable-webmcp-testing to try it live";
+      return;
+    }
+    try {
+      await mc.registerTool({
+        name: "demo_next_scene",
+        description: "Advance this WebMCP explainer to the next animation scene. Call it when the user wants to continue reading the explanation.",
+        inputSchema: { type: "object", properties: {}, additionalProperties: false },
+        annotations: { readOnlyHint: false },
+        execute: () => { next(); return "Moved to scene " + (cur + 1) + " of " + N + ". Describe it to the user."; }
+      });
+      await mc.registerTool({
+        name: "demo_confetti",
+        description: "Fire a small confetti celebration in the explainer page. Purely fun.",
+        inputSchema: { type: "object", properties: {}, additionalProperties: false },
+        annotations: { readOnlyHint: true },
+        execute: () => { confetti(50); return "🎉 Confetti fired!"; }
+      });
+      badge.classList.add("ok");
+      badgeText.textContent = "✓ WebMCP is LIVE in this browser — this page registered demo_next_scene & demo_confetti. Ask your agent to call them!";
+    } catch (e) {
+      badge.classList.add("warn");
+      badgeText.textContent = "WebMCP detected but registration failed: " + (e && e.message ? e.message : e);
+    }
+  }
+  registerLiveTools();
+})();
+</script>
+</body>
+</html>

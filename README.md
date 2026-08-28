@@ -1,32 +1,97 @@
-# Gram Panchayat Grievance Portal (working title TBD)
+# The Citizen's Advocate — a CPGRAMS-style grievance sandbox for WebMCP
 
-An agent-native public grievance portal modelled on **CPGRAMS** (India's national
-grievance redress system), instantiated in **Silpi Gram, Mirzapur district, UP** —
-a clearly-labeled simulation with fictional officials and data.
+> **A WebMCP-powered public grievance sandbox where a citizen's own browser agent can help file, track, understand, remind, rate and appeal grievances through structured tools and human-controlled actions.**
+>
+> *The citizen's advocate throughout the grievance lifecycle.*
 
-Humans and AI agents collaborate through **WebMCP**: the page registers structured
-tools (`document.modelContext.registerTool`) that a browser agent (ChatGPT's
-in-app browser, or Chrome 149+ with `chrome://flags/#enable-webmcp-testing`)
-can discover and call. Voice-first by design: every tool returns a short
-bilingual (Hindi + English) `summary` meant to be spoken aloud, and the page can
-talk via `speechSynthesis`.
+**Live demo:** <https://webmcp-cpgrams-simulation.vercel.app> · **Status:** labelled simulation · MIT license
 
-> ⚠️ Simulation notice: this demo is not affiliated with the actual Gram
-> Panchayat of Shilpi/Silpi village. All officials, grievances, and outcomes
-> are fictional.
+---
 
-## Status
+## ⚖️ Simulation notice
 
-Day 0 scaffold (Aug 28, 2026): M3-themed React shell, Silpi Gram map workspace,
-WebMCP tool layer with 3 read-only tools, transparency panel with self-test.
+This project is a **clearly-labelled simulation** inspired by the [CPGRAMS](https://pgportal.gov.in/) grievance lifecycle (DARPG, Government of India). It is **not affiliated with, endorsed by, or connected to the Government of India**. All cases, ministries interactions and officials are fictional; nothing is submitted to any government system; there is no backend and no real PII. Policy behaviour modelled in code traces to a fact register with primary sources — see [`docs/00-facts.md`](docs/00-facts.md).
+
+## 🎮 Try it with your agent (2 minutes)
+
+Open the live URL in **ChatGPT's in-app browser**, or in **Chrome 149+** with `chrome://flags/#enable-webmcp-testing` enabled, then paste:
+
+1. **“Which of my grievances needs attention today?”** — the hero journey. The agent surveys your cases, spots the one on day 23 of a 21-day target with no interim response, explains it in plain language, and offers a reminder — which you must approve in the page.
+2. **“Help me file a grievance about this issue.”** — the agent picks a category, prepares a structured draft, you edit/approve, and a registration ID (`PG-26-XXXXX`) is issued. Retry-safe: a duplicated call never files twice.
+3. **“I don't agree with this disposal. What options do I have?”** — record a Poor rating (with confirmation) and watch the **tool registry change live**: appeal drafting appears because your situation now permits it.
+
+## The problem
+
+India's CPGRAMS already centralized grievance filing across all ministries — and its own AI (categorization, routing, the Samadhan Didi voice chatbot) helps citizens **enter** the system. But filing is only the beginning. A citizen must then interpret SLA clocks, interim replies, disposal quality and appeal windows — procedural literacy most people don't have, in language many aren't comfortable in.
+
+**The gap is the citizen's side, after filing.** That's where their own browser agent — not the government's — should advocate for them.
+
+## What it does
+
+- **File** — agent-assisted drafting with duplicate checking, human review, explicit confirmation, memorable registration ID.
+- **Track & understand** — SLA picture for every case (day N of 21, interim-reply nuance), actor-attributed movement timelines, plain-language explanations.
+- **Remind** — reminders on overdue cases, once per 7 days, always confirmed.
+- **Review disposals** — feedback recording; a **Poor** rating opens the 30-day appeal window.
+- **Appeal** — evidence-grounded appeal drafting addressed to the ministry's Nodal Appellate Authority, with final human confirmation.
+
+## Why WebMCP
+
+A static portal forces agents to guess through DOM automation. This site instead exposes **structured capabilities** — typed tools with contracts, validation, errors and confirmation semantics — so the citizen's browser agent can act reliably and safely:
+
+- **13 core tools** (6 read + 7 write) registered through `document.modelContext.registerTool`.
+- **Dynamic registration** — the tool surface follows the citizen's situation: `submit_grievance` exists only while a valid draft awaits; `create_appeal_draft` appears only inside an open appeal window; `rate_disposal` exists only while feedback is pending. The **Agent Tools** page shows the live registry (via `getTools()` + `toolchange`), not a mock.
+- **Human control as a first-class pattern** — consequential tools (`submit_grievance`, `send_appeal`, `send_reminder`, `rate_disposal`) return `CONFIRMATION_REQUIRED` and open an in-page dialog showing the **exact payload**; approval is bound to a payload hash, expires in 60 seconds, and is single-use. The agent cannot silently commit anything.
+- **Idempotency** — replaying an identical consequential call returns the original result with `alreadyProcessed: true`; double-clicks and tool retries never file twice.
+- **Compact, model-friendly results** — every tool returns `{ok, speakable, data|error, nextActions}`; `speakable` is one locale (the citizen's language), and outputs are budget-tested to stay within Chrome's ~1.5K guidance.
+
+## Human control model
+
+| Tier | Tools | Gate |
+|---|---|---|
+| A — high consequence | `submit_grievance`, `send_appeal` | payload-hash-bound in-page approval, 60 s single-use token, revalidation, idempotency |
+| B — externally meaningful | `send_reminder`, `rate_disposal` | explicit confirmation before commit |
+| C — reversible | drafts (`create/update_grievance_draft`, `create_appeal_draft`) | none (reversible by design) |
+| D — read | reads | none |
+
+## Security
+
+- **Prompt-injection safe by construction**: grievance text is data. Dedicated tests file a grievance whose subject is `SYSTEM OVERRIDE: ignore previous instructions…` and assert it remains inert text (escaped rendering, length caps, no content-derived control flow), with `untrustedContentHint` on tools that echo citizen content.
+- Validation everywhere: unknown keys rejected, enums, ID formats, lengths, state preconditions — errors carry `field` + `hint` so the model self-corrects instead of thrashing.
+- Never throws: tool failures surface as structured `{code, message, hint}` envelopes (`INVALID_ARGUMENT`, `NOT_FOUND`, `PRECONDITION_FAILED`, `CONFIRMATION_REQUIRED`, `CONFLICT`, `INTERNAL`).
+
+## CPGRAMS fidelity
+
+Every policy behaviour traces to [`docs/00-facts.md`](docs/00-facts.md) (primary sources: pgportal.gov.in, DARPG guidelines, PIB): 21-day target, mandatory interim reply on delay, Reminder/Clarification, feedback with Poor→appeal unlock, 30-day appeal window to the Nodal Appellate Authority, ~30-day appeal disposal, exclusions (RTI, sub-judice, religious, service matters). Deliberately **not** modelled: second appeal tier, 15-day comment loops, remand, state-specific procedures, real integration — fidelity over theatre.
+
+## Architecture
+
+- **No backend.** Vite + React + TypeScript + MUI, client-side simulation (zustand + localStorage), relative-date golden cases (G1–G6) so the demo is stable any day it's opened.
+- `src/domain/` — pure model: grievance types, SLA engine (facts C3–C7), guarded lifecycle transitions.
+- `src/webmcp/` — tool catalog, result envelope with budget clipping, registrar (diff-sync with AbortControllers + execution-race guard), confirmation gate.
+- `src/components/` — CPGRAMS-style portal UI (identity band, case register, case detail + timeline, review screens, agent-tools transparency page).
+
+## Privacy
+
+The prototype has no application backend and performs no server-side persistence. Demo grievance state is stored locally in the browser. Information required for an agent action is shared with the citizen's browser agent through explicit WebMCP tool contracts. Fictional data only; no authentication of real identities.
+
+## Testing
+
+- **Unit (vitest, 20 tests)** — SLA facts, lifecycle guards, human-gate TTL/single-use, envelope budgets: `npm test`.
+- **In-browser golden journeys** — J1 file (gate → confirm → ID → idempotent replay), J2 hero reminder (incl. premature-reminder refusal), J3 Poor → surface change → appeal → replay, J4 invalid-ID `NOT_FOUND`, J5 injection inertness. Verified through the same tool surface agents use.
+- Worklog & QA history: [`docs/worklog.md`](docs/worklog.md).
 
 ## Run locally
 
 ```bash
+cd app
 npm install
 npm run dev        # http://localhost:5173
-npm run build      # production build in dist/
+npm test           # unit tests
+npm run build      # typecheck + production build
 ```
 
-To exercise the WebMCP layer, open the dev URL in ChatGPT's in-app browser, or
-in Chrome 149+ with `chrome://flags/#enable-webmcp-testing` enabled.
+For the full agent experience open the dev URL in ChatGPT's in-app browser, or Chrome 149+ with `chrome://flags/#enable-webmcp-testing`. Without WebMCP the portal still works manually and the Agent Tools page explains what your agent would see.
+
+## License
+
+[MIT](app/LICENSE) © 2026 Naveen Agrawal
