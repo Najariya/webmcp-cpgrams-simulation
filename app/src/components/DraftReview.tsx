@@ -5,6 +5,7 @@ import { useAppStore } from "../store";
 import { categoryOf, ministryOf } from "../data/catalog";
 import { draftIsValid } from "../domain/types";
 import { goi } from "../theme";
+import { dict } from "../i18n";
 
 /**
  * Grievance review (Screen 3, v4 §14) — where an agent-prepared draft lands.
@@ -12,13 +13,14 @@ import { goi } from "../theme";
  * human gate the WebMCP tool enforces.
  */
 export default function DraftReview() {
-  const { draft, saveDraft, clearDraft, submitActiveDraft, setView } = useAppStore();
+  const { draft, lang, saveDraft, clearDraft, submitActiveDraft, setView } = useAppStore();
+  const d = dict(lang);
   if (!draft) {
     return (
       <Box sx={{ p: 4 }}>
         <Typography variant="h6">No grievance draft in progress.</Typography>
         <Typography className="longform" variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-          Ask your agent “Help me file a grievance about this issue”, or use Lodge Grievance.
+          {d.review.draftEmpty}
         </Typography>
       </Box>
     );
@@ -26,7 +28,7 @@ export default function DraftReview() {
   const cat = categoryOf(draft.categoryId);
 
   const confirm = () => {
-    if (window.confirm("Lodge this grievance in the simulation? A registration ID will be issued.")) {
+    if (window.confirm(d.review.lodgeConfirm)) {
       submitActiveDraft();
     }
   };
@@ -36,13 +38,13 @@ export default function DraftReview() {
       <Paper elevation={0} sx={{ overflow: "hidden", borderRadius: "12px" }}>
         <PageHeader
           title="Grievance review · शिकायत समीक्षा"
-          sub="Your agent prepared this draft — edit anything, then confirm. Nothing is filed until you approve."
+          sub={d.review.draftSub}
         />
         <Stack spacing={2.5} sx={{ p: { xs: 2, md: 3 } }}>
           <Paper variant="outlined" sx={{ p: 1.75, borderRadius: 1.5, bgcolor: "#F5F3FB", borderColor: "#DCD8EE", display: "flex", gap: 1.5, alignItems: "center" }}>
             <SmartToy sx={{ fontSize: "1.1875rem", color: "#5B4AA0" }} />
             <Typography variant="body2" sx={{ color: "#4A3E86" }}>
-              Draft prepared by your browser agent · reversible until you confirm.
+              {d.review.draftByAgent}
             </Typography>
           </Paper>
 
@@ -75,9 +77,9 @@ export default function DraftReview() {
 
           <Divider />
           <Stack direction="row" spacing={1.5} sx={{ justifyContent: "flex-end", flexWrap: "wrap", rowGap: 1 }}>
-            <Button color="inherit" onClick={() => { clearDraft(); setView("home"); }}>Discard draft</Button>
+            <Button color="inherit" onClick={() => { clearDraft(); setView("home"); }}>{d.review.discard}</Button>
             <Button variant="contained" disabled={!draftIsValid(draft)} onClick={confirm} sx={{ bgcolor: goi.navy, "&:hover": { bgcolor: "#123A75" } }}>
-              Confirm &amp; Lodge Grievance
+              {d.review.confirmLodge}
             </Button>
           </Stack>
         </Stack>

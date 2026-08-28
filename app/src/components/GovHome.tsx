@@ -8,13 +8,20 @@ import Campaign from "@mui/icons-material/Campaign";
 import { useAppStore } from "../store";
 import { goi } from "../theme";
 import { slaStatus } from "../domain/sla";
+import { dict } from "../i18n";
 
 const HERO_PROMPT = "Which of my grievances needs attention today?";
 
 export default function GovHome() {
-  const { grievances, simNow, citizen, setView } = useAppStore();
+  const { grievances, simNow, citizen, lang, setView } = useAppStore();
+  const d = dict(lang);
   const attention = grievances.filter((g) => slaStatus(g, simNow).needsAttention).length;
   const copy = (t: string) => navigator.clipboard?.writeText(t);
+  const news = [
+    ["28 Aug 2026", d.home.news1],
+    ["30 May 2026", d.home.news2],
+    ["2022", d.home.news3],
+  ] as const;
 
   return (
     <Box sx={{ maxWidth: 1180, mx: "auto", width: 1, px: { xs: 1.5, md: 2 }, py: 2, display: "flex", flexDirection: "column", gap: 2.5 }}>
@@ -23,10 +30,9 @@ export default function GovHome() {
         elevation={0}
         sx={{ px: 2, py: 1.25, display: "flex", gap: 1.5, alignItems: "center", bgcolor: "#FFF9EE", border: "1px solid #EDDCBF", borderRadius: 1.5 }}
       >
-        <Campaign sx={{ fontSize: "1.1875rem", color: goi.alertAmber, flexShrink: 0 }} />
+        <Campaign sx={{ fontSize: "1.187rem", color: goi.alertAmber, flexShrink: 0 }} />
         <Typography className="longform" sx={{ fontSize: "0.7812rem", lineHeight: 1.55, color: "#6B4E0E" }}>
-          <strong>Labelled simulation</strong> for the WebMCP Challenge — nothing is submitted to any government system. Inspired by
-          the CPGRAMS lifecycle; not affiliated with the Government of India.{" "}
+          <strong>{d.home.noticeStrong}</strong> {d.home.noticeRest}{" "}
           <Box component="span" sx={{ opacity: 0.7 }}>· यह एक प्रदर्शन सिमुलेशन है।</Box>
         </Typography>
       </Paper>
@@ -36,25 +42,25 @@ export default function GovHome() {
         {citizen ? (
           <ActionCard
             icon={<FactCheck />} title="View Status" hi="स्थिति देखें"
-            desc="Track grievances, SLA clocks, reminders, feedback and appeals."
-            badge={attention ? `${attention} need attention` : `${grievances.length} cases`}
+            desc={d.home.cardStatusDesc}
+            badge={attention ? d.home.cardStatusBadge(attention) : d.home.cases(grievances.length)}
             onClick={() => setView("status")}
           />
         ) : (
           <ActionCard
             icon={<LoginIcon />} title="Register / Login" hi="पंजीकरण / लॉगिन"
-            desc="Sign in (simulated) to lodge and track grievances, rate disposals and appeal."
+            desc={d.home.cardStatusDesc}
             onClick={() => setView("login")}
           />
         )}
         <ActionCard
           icon={<EditNote />} title="Lodge Grievance" hi="शिकायत दर्ज करें"
-          desc="File a service-delivery grievance to a Central Ministry. 21-day redressal target."
+          desc={d.home.cardLodgeDesc}
           onClick={() => setView(citizen ? "lodge" : "login")}
         />
         <ActionCard
           icon={<SmartToy />} title="Your Browser Agent" hi="आपका एजेंट"
-          desc="This portal also speaks WebMCP — your agent tracks, explains and acts, with your confirmation."
+          desc={d.home.cardAgentDesc}
           onClick={() => setView("transparency")}
           accent
         />
@@ -65,18 +71,18 @@ export default function GovHome() {
         <Paper elevation={0} sx={{ p: { xs: 2.5, md: 3.5 }, borderRadius: "12px" }}>
           <SectionTitle>About CPGRAMS · सीपीग्राम्स</SectionTitle>
           <Typography className="longform" variant="body2" sx={{ lineHeight: 1.8, color: "text.primary", mt: 2, maxWidth: "68ch" }}>
-            CPGRAMS is the Government of India's centralized portal for public grievances related to service delivery,
-            linked to all Central Ministries and Departments. Every grievance receives a unique registration ID; the
-            redressal target is <strong>21 days</strong>, with a mandatory <strong>interim reply</strong> when redressal
-            is delayed. After disposal, citizens rate the outcome — a <strong>Poor</strong> rating opens the{" "}
-            <strong>appeal</strong> option for 30 days before the ministry's Nodal Appellate Authority.
+            {d.home.aboutPara1}
+            <strong>{d.home.aboutPara2}</strong>
+            {d.home.aboutPara3}
+            <strong>{d.home.aboutPara4}</strong>
+            {d.home.aboutPara5}
+            <strong>{d.home.aboutPara6}</strong>
+            {d.home.aboutPara7}
+            <strong>{d.home.aboutPara8}</strong>
+            {d.home.aboutPara9}
           </Typography>
           <Box component="ul" sx={{ pl: 2.25, mt: 1.75, mb: 0 }}>
-            {[
-              "Not taken up: RTI matters, sub-judice matters, religious matters, service matters of government employees.",
-              "Grievances sent by email are not entertained — use the portal or your agent.",
-              "No fee is charged for lodging a grievance.",
-            ].map((t) => (
+            {[d.home.bullet1, d.home.bullet2, d.home.bullet3].map((t) => (
               <Typography className="longform" component="li" key={t} variant="body2" sx={{ lineHeight: 1.75, color: "text.secondary", mb: 0.5, "&::marker": { color: goi.saffron } }}>
                 {t}
               </Typography>
@@ -88,9 +94,9 @@ export default function GovHome() {
           {/* Agent assist — compact: one prompt, one hint */}
           <Paper elevation={0} sx={{ p: 2.5, borderRadius: "12px", bgcolor: goi.navy, color: "#fff" }}>
             <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 1.25 }}>
-              <SmartToy sx={{ fontSize: "1rem", color: "#FFB37E" }} />
+              <SmartToy sx={{ fontSize: 16, color: "#FFB37E" }} />
               <Typography sx={{ fontSize: "0.6875rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.09em" }}>
-                Ask your agent
+                {d.home.askAgent}
               </Typography>
             </Stack>
             <Paper
@@ -102,12 +108,12 @@ export default function GovHome() {
                 <Typography sx={{ fontSize: "0.8125rem", fontWeight: 600, lineHeight: 1.45, flex: 1 }}>
                   “{HERO_PROMPT}”
                 </Typography>
-                <ContentCopy sx={{ fontSize: "0.875rem", opacity: 0.85 }} />
+                <ContentCopy sx={{ fontSize: 14, opacity: 0.85 }} />
               </Stack>
             </Paper>
             <Typography className="longform" variant="caption" sx={{ display: "block", opacity: 0.85, mt: 1.25, lineHeight: 1.55 }}>
-              Paste in ChatGPT's browser or Chrome (WebMCP). More prompts on{" "}
-              <Box component="span" sx={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => setView("transparency")}>Agent Tools</Box>.
+              {d.home.askAgentCaption}{" "}
+              <Box component="span" sx={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => setView("transparency")}>{d.home.askAgentLink}</Box>.
             </Typography>
           </Paper>
 
@@ -115,13 +121,9 @@ export default function GovHome() {
           <Paper elevation={0} sx={{ p: 2.5, borderRadius: "12px" }}>
             <SectionTitle>What's New · नई जानकारी</SectionTitle>
             <Stack spacing={1.25} sx={{ mt: 2 }}>
-              {[
-                ["28 Aug 2026", "Agent-assisted grievance tracking added (WebMCP prototype)"],
-                ["30 May 2026", "CPGRAMS launched 'Samadhan Didi' AI voice chatbot for multilingual intake"],
-                ["2022", "CPGRAMS reforms tightened redressal to a 21-day expectation"],
-              ].map(([d, t]) => (
-                <Stack key={d} direction="row" spacing={1.5} sx={{ alignItems: "baseline" }}>
-                  <Typography variant="caption" sx={{ fontWeight: 700, color: goi.link, minWidth: 74, fontSize: "0.6875rem", fontVariantNumeric: "tabular-nums" }}>{d}</Typography>
+              {news.map(([date, t]) => (
+                <Stack key={date} direction="row" spacing={1.5} sx={{ alignItems: "baseline" }}>
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: goi.link, minWidth: 74, fontSize: "0.6875rem", fontVariantNumeric: "tabular-nums" }}>{date}</Typography>
                   <Typography variant="caption" sx={{ lineHeight: 1.55, color: "text.primary" }}>{t}</Typography>
                 </Stack>
               ))}

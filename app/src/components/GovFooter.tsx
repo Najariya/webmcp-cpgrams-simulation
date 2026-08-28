@@ -1,7 +1,11 @@
 import { Box, Divider, Stack, Typography } from "@mui/material";
 import { goi } from "../theme";
+import { dict } from "../i18n";
+import { useAppStore } from "../store";
 
 export default function GovFooter() {
+  const lang = useAppStore((s) => s.lang);
+  const d = dict(lang);
   return (
     <Box component="footer" sx={{ bgcolor: "#0A1C38", color: "rgba(255,255,255,0.85)", mt: "auto" }}>
       <Box sx={{ display: "flex", height: 3 }}>
@@ -19,13 +23,13 @@ export default function GovFooter() {
             </Typography>
           </Box>
           <Stack spacing={0.5} sx={{ alignItems: { xs: "flex-start", md: "flex-end" }, flexShrink: 0 }}>
-            <Typography sx={{ fontSize: "0.7188rem", opacity: 0.9 }}>WebMCP Challenge prototype · no backend · state stays in your browser</Typography>
-            <Typography sx={{ fontSize: "0.7188rem", opacity: 0.75 }}>Best experienced at 1440 × 900 · Chrome 149+ or ChatGPT's in-app browser</Typography>
+            <Typography sx={{ fontSize: "0.7188rem", opacity: 0.9 }}>{d.footer.line1}</Typography>
+            <Typography sx={{ fontSize: "0.7188rem", opacity: 0.75 }}>{d.footer.line2}</Typography>
           </Stack>
         </Stack>
         <Divider sx={{ my: 2, borderColor: "rgba(255,255,255,0.12)" }} />
         <Typography variant="caption" sx={{ opacity: 0.7, fontSize: "0.6875rem" }}>
-          v4 · advocate build · {new Date().getFullYear()}
+          {d.footer.version} · {new Date().getFullYear()}
         </Typography>
       </Box>
     </Box>

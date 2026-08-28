@@ -17,6 +17,7 @@ import { registrar } from "./webmcp/registrar";
 import { desiredTools } from "./webmcp/tools";
 import { useAnnounceStore } from "./webmcp/voice";
 import { applyTypeStep } from "./ui/typeScale";
+import { dict } from "./i18n";
 
 /**
  * Portal shell — CPGRAMS-style chrome over the advocate simulation.
@@ -24,10 +25,12 @@ import { applyTypeStep } from "./ui/typeScale";
  * consequential agent actions surface through the ConfirmDialog human gate.
  */
 export default function App() {
-  const { view, citizen } = useAppStore();
+  const { view, citizen, lang } = useAppStore();
+  const d = dict(lang);
 
   useEffect(() => {
     applyTypeStep(useAppStore.getState().typeStep);
+    document.documentElement.lang = useAppStore.getState().lang;
     // dynamic registration: state → desired tools → diff-sync
     const syncNow = () => void registrar.sync(desiredTools(useAppStore.getState()));
     syncNow();
@@ -52,9 +55,8 @@ export default function App() {
       <GovHeader />
 
       {!registrar.available && (
-        <Alert severity="info" sx={{ borderRadius: 0, py: 0.4, px: 2, "& .MuiAlert-message": { fontSize: 12 } }}>
-          WebMCP is not active in this browser — the portal works normally. Your agent&rsquo;s tools are shown as a
-          labelled simulation on the <strong>Agent Tools</strong> page.
+        <Alert severity="info" sx={{ borderRadius: 0, py: 0.4, px: 2, "& .MuiAlert-message": { fontSize: "0.75rem" } }}>
+          {d.banner.off}
         </Alert>
       )}
 

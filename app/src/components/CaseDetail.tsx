@@ -17,6 +17,7 @@ import { useAppStore } from "../store";
 import { categoryOf, ministryOf } from "../data/catalog";
 import { appealEligible, rateEligible, reminderEligible, slaStatus } from "../domain/sla";
 import { goi } from "../theme";
+import { dict } from "../i18n";
 import type { Actor, TimelineEvent, TimelineKind } from "../domain/types";
 
 const ACTOR_COLOR: Record<Actor, string> = {
@@ -39,11 +40,11 @@ const KIND_ICON: Partial<Record<TimelineKind, React.ReactElement<typeof Icon>>> 
   note: <InfoOutlined sx={{ fontSize: "0.875rem" }} />,
 };
 
-const ACTOR_LABEL: Record<Actor, string> = {
-  citizen: "You",
-  agent: "Your agent",
-  ministry: "Ministry",
-  system: "System",
+const ACTOR_LABEL: Record<Actor, Record<"en" | "hi", string>> = {
+  citizen: { en: "You", hi: "आप" },
+  agent: { en: "Your agent", hi: "आपका एजेंट" },
+  ministry: { en: "Ministry", hi: "मंत्रालय" },
+  system: { en: "System", hi: "प्रणाली" },
 };
 
 function fmtDate(iso: string): string {
@@ -51,13 +52,14 @@ function fmtDate(iso: string): string {
 }
 
 export default function CaseDetail() {
-  const { grievances, selectedGrievanceId, simNow, select, setView, remind, rate } = useAppStore();
+  const { grievances, selectedGrievanceId, simNow, lang, select, setView, remind, rate } = useAppStore();
+  const d = dict(lang);
   const g = grievances.find((x) => x.id === selectedGrievanceId || x.regId === selectedGrievanceId);
   if (!g) {
     return (
       <Box sx={{ p: 4 }}>
-        <Typography variant="h6">Case not found.</Typography>
-        <Button startIcon={<ArrowBack />} sx={{ mt: 2 }} onClick={() => setView("home")}>Back to my cases</Button>
+        <Typography variant="h6">{d.case.notFound}</Typography>
+        <Button startIcon={<ArrowBack />} sx={{ mt: 2 }} onClick={() => setView("home")}>{d.case.backHome}</Button>
       </Box>
     );
   }
@@ -73,7 +75,7 @@ export default function CaseDetail() {
         onClick={() => { select(null); setView("status"); }}
         sx={{ alignSelf: "flex-start", color: "text.secondary", px: 0, "&:hover": { bgcolor: "transparent", color: goi.navy } }}
       >
-        Case register
+        {d.case.backToRegister}
       </Button>
 
       {/* Record */}
@@ -87,12 +89,12 @@ export default function CaseDetail() {
           <Box>
             <Typography variant="h6" sx={{ lineHeight: 1.4 }}>{g.subject}</Typography>
             <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: "wrap", rowGap: 0.75, mt: 1 }}>
-              <Chip size="small" variant="outlined" label={categoryOf(g.categoryId)?.titleEn} sx={{ height: 24, fontSize: "0.6875rem" }} />
+              <Chip size="small" variant="outlined" label={lang === "hi" ? categoryOf(g.categoryId)?.titleHi ?? categoryOf(g.categoryId)?.titleEn : categoryOf(g.categoryId)?.titleEn} sx={{ height: 24, fontSize: "0.6875rem" }} />
               {g.evidence.length > 0 && (
-                <Chip size="small" variant="outlined" icon={<AttachFile sx={{ fontSize: "0.8125rem" }} />} label={`${g.evidence.length} evidence item${g.evidence.length > 1 ? "s" : ""}`} sx={{ height: 22, fontSize: "0.6562rem", "& .MuiChip-icon": { ml: 0.5 } }} />
+                <Chip size="small" variant="outlined" icon={<AttachFile sx={{ fontSize: "0.8125rem" }} />} label={d.case.evidenceItems(g.evidence.length)} sx={{ height: 22, fontSize: "0.6562rem", "& .MuiChip-icon": { ml: 0.5 } }} />
               )}
               {g.reminders.length > 0 && (
-                <Chip size="small" variant="outlined" icon={<NotificationsActive sx={{ fontSize: "0.8125rem" }} />} label={`${g.reminders.length} reminder${g.reminders.length > 1 ? "s" : ""} sent`} sx={{ height: 22, fontSize: "0.6562rem", "& .MuiChip-icon": { ml: 0.5 } }} />
+                <Chip size="small" variant="outlined" icon={<NotificationsActive sx={{ fontSize: "0.8125rem" }} />} label={d.case.remindersSent(g.reminders.length)} sx={{ height: 22, fontSize: "0.6562rem", "& .MuiChip-icon": { ml: 0.5 } }} />
               )}
             </Stack>
           </Box>
@@ -116,8 +118,8 @@ export default function CaseDetail() {
           )}
 
           <Divider />
-          <KV label="Grievance" body={g.description} />
-          <KV label="Relief requested" body={g.reliefRequested} />
+          <KV label={d.case.kvGrievance} body={g.description} />
+          <KV label={d.case.kvRelief} body={g.reliefRequested} />
           {g.evidence.length > 0 && (
             <Box>
               <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: "0.08em", fontSize: "0.6875rem" }}>Evidence</Typography>
@@ -129,11 +131,11 @@ export default function CaseDetail() {
             </Box>
           )}
 
-          {g.interimReply && <NoticeCard icon={<Schedule />} tone="amber" title={`Interim reply · ${fmtDate(g.interimReply.at)}`} body={g.interimReply.text} />}
+          {g.interimReply && <NoticeCard icon={<Schedule />} tone="amber" title={d.case.interimReply(fmtDate(g.interimReply.at))} body={g.interimReply.text} />}
           {g.disposal && (
             <NoticeCard
-              icon={<AccountBalance />} tone="green" title={`Disposal · ${fmtDate(g.disposal.at)}`} body={g.disposal.summary}
-              footer={g.rating ? `Your feedback: ${g.rating}` : undefined}
+              icon={<AccountBalance />} tone="green" title={d.case.disposal(fmtDate(g.disposal.at))} body={g.disposal.summary}
+              footer={g.rating ? d.case.yourFeedback(g.rating) : undefined}
             />
           )}
           {g.appeal && (
@@ -149,46 +151,46 @@ export default function CaseDetail() {
       {(canRemind || canRate || canAppeal) && (
         <Paper elevation={0} variant="outlined" sx={{ p: 2.5, borderRadius: "12px", bgcolor: "#FBFCFE" }}>
           <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: "0.08em", fontSize: "0.6875rem" }}>
-            Next actions · अगले कदम
+            {d.case.nextActions}
           </Typography>
           <Stack direction="row" spacing={1.25} useFlexGap sx={{ flexWrap: "wrap", rowGap: 1, mt: 1.25 }}>
             {canRemind && (
               <Button size="small" variant="contained" color="warning" startIcon={<NotificationsActive />} onClick={() => remind(g.id, false)}>
-                Send reminder
+                {d.case.sendReminder}
               </Button>
             )}
             {canRate && (
               <>
                 <Button size="small" variant="outlined" color="success" onClick={() => rate(g.id, "Satisfactory")}>
-                  Resolved
+                  {d.case.resolved}
                 </Button>
                 <Button size="small" variant="outlined" onClick={() => rate(g.id, "Average")}>
-                  Acceptable
+                  {d.case.acceptable}
                 </Button>
                 <Button size="small" variant="contained" color="error" startIcon={<Gavel />} onClick={() => rate(g.id, "Poor")}>
-                  Poor — I want to appeal
+                  {d.case.poorAppeal}
                 </Button>
               </>
             )}
             {canAppeal && (
               <Button size="small" variant="contained" color="secondary" startIcon={<Gavel />} onClick={() => setView("appeal_review")}>
-                Prepare appeal
+                {d.case.prepareAppeal}
               </Button>
             )}
           </Stack>
           <Typography className="longform" variant="caption" color="text.secondary" sx={{ display: "block", mt: 1.5 }}>
-            Your agent sees these same actions as WebMCP tools — consequential ones always ask you first.
+            {d.case.nextCaption}
           </Typography>
         </Paper>
       )}
 
       {/* Timeline */}
       <Paper elevation={0} sx={{ overflow: "hidden", borderRadius: 2 }}>
-        <PageHeader title="Movement timeline" sub="Every action on this case, attributed to you, your agent, the ministry or the system" />
+        <PageHeader title={d.case.timelineTitle} sub={d.case.timelineSub} />
         <Box sx={{ p: { xs: 2, md: 3 } }}>
           <Stack spacing={0}>
             {g.timeline.map((e, i) => (
-              <TimelineRow key={e.id} e={e} last={i === g.timeline.length - 1} />
+              <TimelineRow key={e.id} e={e} last={i === g.timeline.length - 1} lang={lang} />
             ))}
           </Stack>
         </Box>
@@ -230,7 +232,7 @@ function NoticeCard({ icon, tone, title, body, footer }: {
   );
 }
 
-function TimelineRow({ e, last }: { e: TimelineEvent; last: boolean }) {
+function TimelineRow({ e, last, lang }: { e: TimelineEvent; last: boolean; lang: "en" | "hi" }) {
   const color = ACTOR_COLOR[e.actor];
   return (
     <Stack direction="row" sx={{ minHeight: 52 }}>
@@ -244,7 +246,7 @@ function TimelineRow({ e, last }: { e: TimelineEvent; last: boolean }) {
         <Stack direction="row" spacing={1.25} sx={{ alignItems: "baseline", flexWrap: "wrap", rowGap: 0.25 }}>
           <Typography variant="body2" sx={{ fontWeight: 600 }}>{e.title}</Typography>
           <Typography variant="caption" sx={{ color, fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
-            {ACTOR_LABEL[e.actor]} · {fmtDate(e.at)}
+            {ACTOR_LABEL[e.actor][lang]} · {fmtDate(e.at)}
           </Typography>
         </Stack>
         {e.text && (

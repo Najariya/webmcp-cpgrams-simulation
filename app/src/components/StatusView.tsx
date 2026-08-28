@@ -8,6 +8,7 @@ import { ministryOf } from "../data/catalog";
 import { rankAttention, slaStatus } from "../domain/sla";
 import StatusChip from "./StatusChip";
 import { goi } from "../theme";
+import { dict } from "../i18n";
 
 /**
  * View Status (CPGRAMS-style): search by registration ID, or the citizen's
@@ -16,7 +17,8 @@ import { goi } from "../theme";
  * ranking the agent sees through get_sla_status).
  */
 export default function StatusView() {
-  const { grievances, simNow, select, setView, resetDemo } = useAppStore();
+  const { grievances, simNow, lang, select, setView, resetDemo } = useAppStore();
+  const d = dict(lang);
   const [q, setQ] = useState("");
   const rank = new Map(rankAttention(grievances, simNow).map((r, i) => [r.g.id, i]));
   const rows = grievances
@@ -47,14 +49,16 @@ export default function StatusView() {
       <Paper elevation={1} sx={{ p: 0, overflow: "hidden" }}>
         <Box sx={{ bgcolor: goi.navy, color: "#fff", px: { xs: 2, md: 3 }, py: 2.25, display: "flex", flexWrap: "wrap", gap: 1.5, alignItems: "center", borderBottom: "3px solid", borderColor: goi.saffron }}>
           <Box sx={{ flex: 1, minWidth: 220, py: 0.5 }}>
-            <Typography sx={{ fontSize: "1.0312rem", fontWeight: 700, letterSpacing: "0.01em", lineHeight: 1.35 }}>View Grievance Status · शिकायत की स्थिति</Typography>
+            <Typography component="h2" sx={{ fontSize: "1.0312rem", fontWeight: 700, letterSpacing: "0.01em", lineHeight: 1.35 }}>
+              {lang === "hi" ? "शिकायत की स्थिति · View Status" : "View Grievance Status · शिकायत की स्थिति"}
+            </Typography>
             <Typography className="longform" sx={{ fontSize: "0.75rem", opacity: 0.9, lineHeight: 1.55, mt: 0.25 }}>
-              Your case register — SLA clocks, interim replies, reminders, feedback and appeals.
+              {d.status.bandSub}
             </Typography>
           </Box>
           <TextField
             size="small"
-            placeholder="Search by registration ID…"
+            placeholder={d.status.search}
             value={q}
             onChange={(e) => setQ(e.target.value)}
             sx={{ bgcolor: "#fff", borderRadius: 1, width: 260, "& .MuiOutlinedInput-root": { bgcolor: "#fff" } }}
@@ -70,13 +74,13 @@ export default function StatusView() {
           <Table size="small" sx={{ minWidth: 760, "& .MuiTableCell-body": { py: 1.25, "&:first-of-type": { pt: 1 } }, "& .MuiTableCell-head": { pb: 1.25 } }} aria-label="Grievance register">
             <TableHead>
               <TableRow>
-                <TableCell>Registration ID</TableCell>
-                <TableCell>Subject</TableCell>
-                <TableCell>Ministry / Department</TableCell>
-                <TableCell>Filed</TableCell>
-                <TableCell>SLA</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell align="right">Action</TableCell>
+                <TableCell>{d.status.hReg}</TableCell>
+                <TableCell>{d.status.hSubject}</TableCell>
+                <TableCell>{d.status.hMinistry}</TableCell>
+                <TableCell>{d.status.hFiled}</TableCell>
+                <TableCell>{d.status.hSla}</TableCell>
+                <TableCell>{d.status.hStatus}</TableCell>
+                <TableCell align="right">{d.status.hAction}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -88,17 +92,17 @@ export default function StatusView() {
                     <TableCell sx={{ maxWidth: 280 }}>
                       <Typography variant="body2" noWrap>{g.subject}</Typography>
                     </TableCell>
-                    <TableCell sx={{ fontSize: "0.7812rem", color: "text.secondary", whiteSpace: "nowrap" }}>{ministryOf(g.ministryId)?.nameEn}</TableCell>
+                    <TableCell sx={{ fontSize: "0.7812rem", color: "text.secondary", whiteSpace: "nowrap" }}>{lang === "hi" ? ministryOf(g.ministryId)?.nameHi ?? ministryOf(g.ministryId)?.nameEn : ministryOf(g.ministryId)?.nameEn}</TableCell>
                     <TableCell sx={{ fontSize: "0.7812rem", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>{g.filedAt ? new Date(g.filedAt).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" }) : "—"}</TableCell>
                     <TableCell sx={{ whiteSpace: "nowrap" }}>
                       <Typography variant="caption" sx={{ fontWeight: 700, fontVariantNumeric: "tabular-nums", color: sla.phase === "overdue" ? "#B42318" : sla.phase === "within_target" ? "text.secondary" : goi.green }}>
-                        {sla.daysElapsed !== null ? `Day ${sla.daysElapsed} / ${sla.targetDays}` : "—"}
+                        {d.status.day(sla.daysElapsed, sla.targetDays)}
                       </Typography>
                     </TableCell>
                     <TableCell><StatusChip g={g} sla={sla} /></TableCell>
                     <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
                       <Button size="small" variant="outlined" color="inherit" sx={{ fontSize: "0.7188rem" }} onClick={(e) => { e.stopPropagation(); select(g.id); setView("case"); }}>
-                        Open
+                        {d.common.open}
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -107,7 +111,7 @@ export default function StatusView() {
               {rows.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={7} sx={{ textAlign: "center", py: 4, color: "text.secondary" }}>
-                    No grievances match “{q}”.
+                    {d.status.empty(q)}
                   </TableCell>
                 </TableRow>
               )}
@@ -118,14 +122,14 @@ export default function StatusView() {
 
       <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mt: 1.5, flexWrap: "wrap", gap: 1 }}>
         <Typography className="longform" variant="caption" color="text.secondary">
-          {rows.length} record{rows.length === 1 ? "" : "s"} · cases needing attention are listed first, most urgent at top · simulation data stored only in this browser
+          {d.status.caption(rows.length)}
         </Typography>
         <Stack direction="row" spacing={1}>
           <Button size="small" startIcon={<Download />} onClick={exportData} color="inherit" sx={{ color: "text.secondary" }}>
-            Export my data
+            {d.common.exportData}
           </Button>
           <Button size="small" startIcon={<RestartAlt />} onClick={resetDemo} color="inherit" sx={{ color: "text.secondary" }}>
-            Reset demo data
+            {d.common.resetDemo}
           </Button>
         </Stack>
       </Stack>

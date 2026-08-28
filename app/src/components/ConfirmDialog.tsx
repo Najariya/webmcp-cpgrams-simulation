@@ -4,6 +4,7 @@ import ShieldOutlined from "@mui/icons-material/ShieldOutlined";
 import { useConfirmStore } from "../webmcp/confirm";
 import { announce } from "../webmcp/voice";
 import { useAppStore } from "../store";
+import { dict } from "../i18n";
 
 /**
  * The human gate (v4 §28). When a consequential tool call asks for approval,
@@ -12,6 +13,8 @@ import { useAppStore } from "../store";
  */
 export default function ConfirmDialog() {
   const { request, approve, decline, clearRequest } = useConfirmStore();
+  const lang = useAppStore((s) => s.lang);
+  const d = dict(lang);
   const [left, setLeft] = useState(60);
 
   useEffect(() => {
@@ -46,8 +49,7 @@ export default function ConfirmDialog() {
       </DialogTitle>
       <DialogContent dividers sx={{ pt: 1.5 }}>
         <Typography className="longform" variant="caption" sx={{ color: "text.secondary", display: "block", mb: 1.5 }}>
-          Your browser agent ({request.action}) wants to perform this action on the simulation portal. Review the exact
-          payload — nothing is committed until you confirm.
+          {d.dialog.body.replace("{action}", request.action)}
         </Typography>
         <Paper variant="outlined" sx={{ p: 1.75, bgcolor: "#F8FAFD", borderRadius: 1.5 }}>
           <Stack spacing={0.75}>
@@ -63,8 +65,8 @@ export default function ConfirmDialog() {
         </Paper>
       </DialogContent>
       <DialogActions sx={{ px: 3, py: 2 }}>
-        <Button onClick={decline} color="inherit">Decline</Button>
-        <Button variant="contained" color="secondary" onClick={approve}>Confirm</Button>
+        <Button onClick={decline} color="inherit">{d.common.decline}</Button>
+        <Button variant="contained" color="secondary" onClick={approve}>{d.common.confirm}</Button>
       </DialogActions>
     </Dialog>
   );

@@ -11,6 +11,7 @@ import { draftIsValid, type Grievance, type GrievanceDraft, type Satisfaction } 
 import { seedGoldenCases } from "./data/catalog";
 import { announce } from "./webmcp/voice";
 import { TYPE_STEPS, applyTypeStep, loadTypeStep, saveTypeStep } from "./ui/typeScale";
+import { loadLang, saveLang } from "./i18n";
 
 /**
  * App store (zustand). Single source of truth for the simulation.
@@ -134,7 +135,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   view: "home",
   selectedGrievanceId: null,
   typeStep: loadTypeStep(),
-  lang: "en",
+  lang: loadLang(),
   simNow: new Date().toISOString(),
 
   setView: (view) => set({ view }),
@@ -148,7 +149,11 @@ export const useAppStore = create<AppState>((set, get) => ({
     const next = (get().typeStep + 1) % TYPE_STEPS.length;
     get().setTypeStep(next);
   },
-  setLang: (lang) => set({ lang }),
+  setLang: (lang) => {
+    saveLang(lang);
+    document.documentElement.lang = lang;
+    set({ lang });
+  },
 
   signIn: (c) => {
     const s = get();
