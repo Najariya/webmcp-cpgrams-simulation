@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Box, Button, InputAdornment, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from "@mui/material";
+import { Box, Button, Card, CardActionArea, Chip, InputAdornment, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
 import Search from "@mui/icons-material/Search";
 import RestartAlt from "@mui/icons-material/RestartAlt";
 import Download from "@mui/icons-material/Download";
+import ChevronRight from "@mui/icons-material/ChevronRight";
 import { useAppStore } from "../store";
 import { ministryOf } from "../data/catalog";
 import { rankAttention, slaStatus } from "../domain/sla";
@@ -19,6 +20,8 @@ import { dict } from "../i18n";
 export default function StatusView() {
   const { grievances, simNow, lang, select, setView, resetDemo } = useAppStore();
   const d = dict(lang);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [q, setQ] = useState("");
   const rank = new Map(rankAttention(grievances, simNow).map((r, i) => [r.g.id, i]));
   const rows = grievances
@@ -70,54 +73,91 @@ export default function StatusView() {
           />
         </Box>
 
-        <TableContainer>
-          <Table size="small" sx={{ minWidth: 760, "& .MuiTableCell-body": { py: 1.25, "&:first-of-type": { pt: 1 } }, "& .MuiTableCell-head": { pb: 1.25 } }} aria-label="Grievance register">
-            <TableHead>
-              <TableRow>
-                <TableCell>{d.status.hReg}</TableCell>
-                <TableCell>{d.status.hSubject}</TableCell>
-                <TableCell>{d.status.hMinistry}</TableCell>
-                <TableCell>{d.status.hFiled}</TableCell>
-                <TableCell>{d.status.hSla}</TableCell>
-                <TableCell>{d.status.hStatus}</TableCell>
-                <TableCell align="right">{d.status.hAction}</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {rows.map((g) => {
-                const sla = slaStatus(g, simNow);
-                return (
-                  <TableRow key={g.id} hover sx={{ cursor: "pointer" }} onClick={() => { select(g.id); setView("case"); }}>
-                    <TableCell sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.75rem", fontWeight: 600, whiteSpace: "nowrap" }}>{g.regId}</TableCell>
-                    <TableCell sx={{ maxWidth: 280 }}>
-                      <Typography variant="body2" noWrap>{g.subject}</Typography>
-                    </TableCell>
-                    <TableCell sx={{ fontSize: "0.7812rem", color: "text.secondary", whiteSpace: "nowrap" }}>{lang === "hi" ? ministryOf(g.ministryId)?.nameHi ?? ministryOf(g.ministryId)?.nameEn : ministryOf(g.ministryId)?.nameEn}</TableCell>
-                    <TableCell sx={{ fontSize: "0.7812rem", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>{g.filedAt ? new Date(g.filedAt).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" }) : "—"}</TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      <Typography variant="caption" sx={{ fontWeight: 700, fontVariantNumeric: "tabular-nums", color: sla.phase === "overdue" ? "#B42318" : sla.phase === "within_target" ? "text.secondary" : goi.green }}>
-                        {d.status.day(sla.daysElapsed, sla.targetDays)}
-                      </Typography>
-                    </TableCell>
-                    <TableCell><StatusChip g={g} sla={sla} /></TableCell>
-                    <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
-                      <Button size="small" variant="outlined" color="inherit" sx={{ fontSize: "0.7188rem" }} onClick={(e) => { e.stopPropagation(); select(g.id); setView("case"); }}>
-                        {d.common.open}
-                      </Button>
+        {isMobile ? (
+          <Stack spacing={1.25} sx={{ p: 1.5 }}>
+            {rows.map((g) => {
+              const sla = slaStatus(g, simNow);
+              return (
+                <Card key={g.id} elevation={0} variant="outlined" sx={{ borderRadius: 1.5, overflow: "hidden" }}>
+                  <CardActionArea onClick={() => { select(g.id); setView("case"); }} sx={{ p: 1.5, display: "flex", flexDirection: "column", alignItems: "stretch", gap: 0.75, textAlign: "left" }}>
+                    <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
+                      <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.75rem", fontWeight: 600, flex: 1 }}>{g.regId}</Typography>
+                      <Chip size="small" label={d.status.day(sla.daysElapsed, sla.targetDays)} sx={{ height: 20, fontSize: "0.625rem", fontWeight: 700, bgcolor: "#F1F4F8" }} />
+                    </Stack>
+                    <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.4 }}>{g.subject}</Typography>
+                    <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                      {lang === "hi" ? ministryOf(g.ministryId)?.nameHi ?? ministryOf(g.ministryId)?.nameEn : ministryOf(g.ministryId)?.nameEn}
+                    </Typography>
+                    <StatusChip g={g} sla={sla} />
+                  </CardActionArea>
+                </Card>
+              );
+            })}
+            {rows.length === 0 && (
+              <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center", py: 3 }}>
+                {d.status.empty(q)}
+              </Typography>
+            )}
+          </Stack>
+        ) : (
+          <TableContainer>
+            <Table size="small" sx={{ minWidth: 760, "& .MuiTableCell-body": { py: 1.25, "&:first-of-type": { pt: 1 } }, "& .MuiTableCell-head": { pb: 1.25 } }} aria-label="Grievance register">
+              <TableHead>
+                <TableRow>
+                  <TableCell>{d.status.hReg}</TableCell>
+                  <TableCell>{d.status.hSubject}</TableCell>
+                  <TableCell>{d.status.hMinistry}</TableCell>
+                  <TableCell>{d.status.hFiled}</TableCell>
+                  <TableCell>{d.status.hSla}</TableCell>
+                  <TableCell>{d.status.hStatus}</TableCell>
+                  <TableCell align="right">{d.status.hAction}</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {rows.map((g) => {
+                  const sla = slaStatus(g, simNow);
+                  const open = () => { select(g.id); setView("case"); };
+                  return (
+                    <TableRow
+                      key={g.id} hover tabIndex={0}
+                      aria-label={`${g.regId}: ${g.subject}`}
+                      sx={{ cursor: "pointer" }}
+                      onClick={open}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } }}
+                    >
+                      <TableCell sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.75rem", fontWeight: 600, whiteSpace: "nowrap" }}>{g.regId}</TableCell>
+                      <TableCell sx={{ maxWidth: 280 }}>
+                        <Tooltip title={g.subject} enterDelay={400}>
+                          <Typography variant="body2" noWrap component="span" sx={{ display: "inline-block", maxWidth: "100%" }}>{g.subject}</Typography>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell sx={{ fontSize: "0.7812rem", color: "text.secondary", whiteSpace: "nowrap" }}>{lang === "hi" ? ministryOf(g.ministryId)?.nameHi ?? ministryOf(g.ministryId)?.nameEn : ministryOf(g.ministryId)?.nameEn}</TableCell>
+                      <TableCell sx={{ fontSize: "0.7812rem", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>{g.filedAt ? new Date(g.filedAt).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" }) : "—"}</TableCell>
+                      <TableCell sx={{ whiteSpace: "nowrap" }}>
+                        <Typography variant="caption" sx={{ fontWeight: 700, fontVariantNumeric: "tabular-nums", color: sla.phase === "overdue" ? "#B42318" : sla.phase === "within_target" ? "text.secondary" : goi.green }}>
+                          {d.status.day(sla.daysElapsed, sla.targetDays)}
+                        </Typography>
+                      </TableCell>
+                      <TableCell sx={{ maxWidth: 260, py: 1.25 }}><StatusChip g={g} sla={sla} /></TableCell>
+                      <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
+                        <Button size="small" variant="outlined" color="inherit" endIcon={<ChevronRight sx={{ fontSize: "1.0625rem" }} />} sx={{ fontSize: "0.7188rem" }} onClick={(e) => { e.stopPropagation(); open(); }}>
+                          {d.common.open}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {rows.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={7} sx={{ textAlign: "center", py: 4, color: "text.secondary" }}>
+                      {d.status.empty(q)}
                     </TableCell>
                   </TableRow>
-                );
-              })}
-              {rows.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={7} sx={{ textAlign: "center", py: 4, color: "text.secondary" }}>
-                    {d.status.empty(q)}
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
       </Paper>
 
       <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mt: 1.5, flexWrap: "wrap", gap: 1 }}>
