@@ -21,7 +21,7 @@ export default function PageHeader({ title, sub, right }: { title: string; sub?:
       <Box sx={{ flex: 1, minWidth: 220 }}>
         <Typography sx={{ fontSize: 16.5, fontWeight: 700, letterSpacing: "0.01em", lineHeight: 1.35 }}>{title}</Typography>
         {sub && (
-          <Typography sx={{ fontSize: 12, opacity: 0.85, lineHeight: 1.55, mt: 0.25 }}>
+          <Typography className="longform" sx={{ fontSize: 12, opacity: 0.9, lineHeight: 1.55, mt: 0.25 }}>
             {sub}
           </Typography>
         )}

@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Paper, Stack, Typography } from "@mui/material";
 import ShieldOutlined from "@mui/icons-material/ShieldOutlined";
 import { useConfirmStore } from "../webmcp/confirm";
+import { announce } from "../webmcp/voice";
+import { useAppStore } from "../store";
 
 /**
  * The human gate (v4 §28). When a consequential tool call asks for approval,
@@ -15,6 +17,10 @@ export default function ConfirmDialog() {
   useEffect(() => {
     if (!request) return;
     setLeft(60);
+    announce(
+      `An action needs your approval in the page: ${request.title}. Nothing is committed until you confirm.`,
+      useAppStore.getState().lang,
+    );
     const t = setInterval(() => {
       setLeft((n) => {
         if (n <= 1) {
@@ -48,7 +54,7 @@ export default function ConfirmDialog() {
             {request.rows.map((r) => (
               <Stack key={r.k} direction="row" sx={{ gap: 1.5, alignItems: "baseline" }}>
                 <Typography variant="caption" sx={{ width: 110, flexShrink: 0, fontWeight: 700, color: "text.secondary" }}>{r.k}</Typography>
-                <Typography variant="body2" sx={{ lineHeight: 1.55, minWidth: 0, wordBreak: "break-word" }}>
+                <Typography className="longform" variant="body2" sx={{ lineHeight: 1.55, minWidth: 0, wordBreak: "break-word" }}>
                   {r.v.length > 220 ? `${r.v.slice(0, 220)}…` : r.v}
                 </Typography>
               </Stack>

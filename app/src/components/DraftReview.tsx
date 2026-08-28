@@ -17,7 +17,7 @@ export default function DraftReview() {
     return (
       <Box sx={{ p: 4 }}>
         <Typography variant="h6">No grievance draft in progress.</Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+        <Typography className="longform" variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
           Ask your agent “Help me file a grievance about this issue”, or use Lodge Grievance.
         </Typography>
       </Box>

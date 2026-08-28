@@ -74,7 +74,7 @@ export default function LodgeForm() {
           <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: 26, fontWeight: 700, color: goi.navy, my: 2, letterSpacing: "0.06em" }}>
             {submitted}
           </Typography>
-          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2.5, lineHeight: 1.6 }}>
+          <Typography className="longform" variant="caption" color="text.secondary" sx={{ display: "block", mb: 2.5, lineHeight: 1.6 }}>
             The 21-day redressal clock has started. Your browser agent can now watch this case for you. (Simulation —
             nothing was sent to any government system.)
           </Typography>
@@ -89,7 +89,7 @@ export default function LodgeForm() {
       <Paper elevation={1} sx={{ p: 0, overflow: "hidden" }}>
         <Box sx={{ bgcolor: goi.navy, color: "#fff", px: 3, py: 2 }}>
           <Typography sx={{ fontWeight: 700 }}>Lodge Public Grievance · लोक शिकायत दर्ज करें</Typography>
-          <Typography variant="caption" sx={{ opacity: 0.85 }}>
+          <Typography variant="caption" sx={{ opacity: 0.9 }}>
             Fields marked * are mandatory. Redressal target: 21 days from filing.
           </Typography>
         </Box>
@@ -147,7 +147,7 @@ export default function LodgeForm() {
               sx={{ mt: 1, alignItems: "flex-start" }}
               control={<Checkbox checked={declared} onChange={(e) => setDeclared(e.target.checked)} sx={{ mt: -0.5 }} />}
               label={
-                <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
+                <Typography className="longform" variant="body2" sx={{ lineHeight: 1.6 }}>
                   I declare that the information is true to the best of my knowledge, and that this is not an RTI,
                   sub-judice, religious or service matter. I understand this is a <strong>simulation</strong> and no
                   government system will receive this grievance.
@@ -156,7 +156,7 @@ export default function LodgeForm() {
             />
           </Box>
 
-          <Alert severity="warning" sx={{ "& .MuiAlert-message": { fontSize: 12.5 } }}>
+          <Alert severity="warning" className="longform" sx={{ "& .MuiAlert-message": { fontSize: 12.5 } }}>
             On submission you will see the exact grievance for a final confirmation — nothing is filed without it. Your
             browser agent follows the same rule.
           </Alert>
@@ -208,7 +208,7 @@ function KV({ k, v }: { k: string; v: string }) {
   return (
     <Stack direction="row" sx={{ gap: 1.5, alignItems: "baseline" }}>
       <Typography variant="caption" sx={{ width: 96, flexShrink: 0, fontWeight: 700, color: "text.secondary" }}>{k}</Typography>
-      <Typography variant="body2" sx={{ lineHeight: 1.5 }}>{v}</Typography>
+      <Typography className="longform" variant="body2" sx={{ lineHeight: 1.55 }}>{v}</Typography>
     </Stack>
   );
 }

@@ -38,13 +38,14 @@ India's CPGRAMS already centralized grievance filing across all ministries — a
 
 A static portal forces agents to guess through DOM automation. This site instead exposes **structured capabilities** — typed tools with contracts, validation, errors and confirmation semantics — so the citizen's browser agent can act reliably and safely:
 
-- **13 core tools** (6 read + 7 write) registered through `document.modelContext.registerTool`.
+- **13 core tools + voice preference** (6 read + 7 write + `set_voice_mode`) registered through `document.modelContext.registerTool`.
 - **Dynamic registration** — the tool surface follows the citizen's situation: `submit_grievance` exists only while a valid draft awaits; `create_appeal_draft` appears only inside an open appeal window; `rate_disposal` exists only while feedback is pending. The **Agent Tools** page shows the live registry (via `getTools()` + `toolchange`), not a mock.
 - **Ranked attention, one recommendation** — asked "which of my grievances needs attention today?", tools don't return a flat list: an urgency ranking (overdue-without-interim first, worsening as the target slips; a closing appeal window next; unrated disposals aging toward urgency) puts a single **most urgent** case at the top of `get_sla_status`/`get_app_state` and leads the speakable line with it. The case register uses the same order.
 - **Authorization parity** — the portal UI gates the case register behind sign-in, and the tools enforce the same gate: signed out, citizen-scoped tools answer `PRECONDITION_FAILED` with a one-tap sign-in hint and leak no case data. General-knowledge tools (categories, process KB, speak-aloud) stay open.
 - **Human control as a first-class pattern** — consequential tools (`submit_grievance`, `send_appeal`, `send_reminder`, `rate_disposal`) return `CONFIRMATION_REQUIRED` and open an in-page dialog showing the **exact payload**; approval is bound to a payload hash, expires in 60 seconds, and is single-use. The agent cannot silently commit anything.
 - **Idempotency** — replaying an identical consequential call returns the original result with `alreadyProcessed: true`; double-clicks and tool retries never file twice.
 - **Compact, model-friendly results** — every tool returns `{ok, speakable, data|error, nextActions}`; `speakable` is one locale (the citizen's language), and outputs are budget-tested to stay within Chrome's ~1.5K guidance.
+- **Voice-ready by design** — WebMCP has no native voice API and always requires a visible page, so voice-readiness is the page's job: compact one-locale `speakable` lines sized for speech, an `aria-live` region announcing every tool-driven state change (filings, reminders, ratings, appeals, approval prompts) for screen readers and voice agents, a **Voice Mode** narration preference (header toggle or the `set_voice_mode` tool) that speaks key citizen moments aloud in English or Hindi, and `speak_aloud` for explicit page-side TTS. Speech degrades gracefully where `speechSynthesis` is unavailable.
 
 ## Human control model
 
@@ -79,7 +80,7 @@ The prototype has no application backend and performs no server-side persistence
 
 ## Testing
 
-- **Unit (vitest, 35 tests)** — SLA facts, attention ranking, lifecycle guards, human-gate TTL/single-use, envelope budgets, authorization parity, adversarial inputs: `npm test`.
+- **Unit (vitest, 41 tests)** — SLA facts, attention ranking, lifecycle guards, human-gate TTL/single-use, envelope budgets, authorization parity, voice layer, adversarial inputs: `npm test`.
 - **In-browser golden journeys** — J1 file (gate → confirm → ID → idempotent replay), J2 hero reminder (incl. premature-reminder refusal), J3 Poor → surface change → appeal → replay, J4 invalid-ID `NOT_FOUND`, J5 injection inertness. Verified through the same tool surface agents use.
 - Worklog & QA history: [`docs/worklog.md`](docs/worklog.md).
 

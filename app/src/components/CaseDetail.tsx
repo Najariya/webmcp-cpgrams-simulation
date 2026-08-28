@@ -109,7 +109,7 @@ export default function CaseDetail() {
               {sla.needsAttention
                 ? <WarningAmber sx={{ fontSize: 19, color: "#B45309", mt: 0.25 }} />
                 : <InfoOutlined sx={{ fontSize: 19, color: "#3A6EA5", mt: 0.25 }} />}
-              <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.55, color: sla.needsAttention ? "#7A4608" : "#33506E" }}>
+              <Typography className="longform" variant="body2" sx={{ fontWeight: 600, lineHeight: 1.6, color: sla.needsAttention ? "#7A4608" : "#33506E" }}>
                 {sla.attentionReason}
               </Typography>
             </Paper>
@@ -176,7 +176,7 @@ export default function CaseDetail() {
               </Button>
             )}
           </Stack>
-          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1.5 }}>
+          <Typography className="longform" variant="caption" color="text.secondary" sx={{ display: "block", mt: 1.5 }}>
             Your agent sees these same actions as WebMCP tools — consequential ones always ask you first.
           </Typography>
         </Paper>
@@ -243,12 +243,12 @@ function TimelineRow({ e, last }: { e: TimelineEvent; last: boolean }) {
       <Box sx={{ pb: last ? 0 : 2, pt: 0.25, pl: 1.5, minWidth: 0 }}>
         <Stack direction="row" spacing={1.25} sx={{ alignItems: "baseline", flexWrap: "wrap", rowGap: 0.25 }}>
           <Typography variant="body2" sx={{ fontWeight: 600 }}>{e.title}</Typography>
-          <Typography variant="caption" sx={{ color, fontWeight: 600 }}>
+          <Typography variant="caption" sx={{ color, fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
             {ACTOR_LABEL[e.actor]} · {fmtDate(e.at)}
           </Typography>
         </Stack>
         {e.text && (
-          <Typography variant="caption" sx={{ display: "block", mt: 0.25, lineHeight: 1.6, color: "text.secondary", maxWidth: 560 }}>
+          <Typography className="longform" variant="caption" sx={{ display: "block", mt: 0.25, lineHeight: 1.6, color: "text.secondary", maxWidth: 560 }}>
             {e.text}
           </Typography>
         )}

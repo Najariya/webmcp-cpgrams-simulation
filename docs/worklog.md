@@ -177,3 +177,27 @@ Tests: 29 → 35 (3 ranking + 3 authorization-parity; adversarial suite signs th
 citizen in per-test). Evals E21–E23 and UAT-11 recorded. README gained an
 "Independent skeptical-agent exercise" section; devpost copy, tool-contract doc and
 video script updated to match new behaviour.
+
+
+## 2026-08-28 — Voice layer + legibility/justification polish (owner feedback round)
+
+Owner feedback: "Ask your agent" panel not clearly visible on navy; texts not justified everywhere;
+font/style and layout to improve; voice-enabled agents should be first-class.
+
+- **Voice layer**: src/webmcp/voice.ts — Voice Mode preference (persisted, advocate-voice-v1),
+  shared speak() helper (locale voice selection incl. Devanagari, cancel-previous, node/embedded-safe),
+  announce() store feeding an aria-live polite region in App. Store actions announce filings (with
+  registration ID), reminders, ratings, appeals, sign-ins, draft saves; ConfirmDialog announces approval
+  prompts. Header RecordVoiceOver toggle. New set_voice_mode tool (tier-C preference, works signed-out,
+  always registered → 14th tool). Agent Tools page gained a "Voice-ready by design" section with EN/HI
+  test buttons. speak_aloud refactored onto the shared helper.
+- **Legibility**: agent panel brightened (eyebrow 100% + saffron icon, card 14%/32% white, 13px prompt,
+  caption 85%); footer opacity floor 0.7; header ministry line 100%; band subs 90%.
+- **Justification sweep**: .longform added to ~20 blocks (page-band subs, case notices/timeline bodies,
+  lodge declaration + alerts + dialog values, login texts, review screens, status captions, transparency
+  subs, confirm-dialog payload rows).
+- **Typography**: tabular numerals for dates/day-counts (status table, timeline); agent panel padding
+  aligned to What's New (2.5).
+- Tests 35 → 41 (voice suite). Vision verification PASS on home + Agent Tools (voice section renders in
+  page language; aria-live present; set_voice_mode card consistent). Docs updated (README voice section,
+  devpost, E24, UAT-12, video beat).

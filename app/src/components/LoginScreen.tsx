@@ -33,7 +33,7 @@ export default function LoginScreen() {
           <Typography sx={{ fontWeight: 700, fontSize: 17 }}>
             {mode === "signin" ? "Citizen Sign In · नागरिक साइन इन" : "Citizen Registration · नागरिक पंजीकरण"}
           </Typography>
-          <Typography variant="caption" sx={{ opacity: 0.85 }}>
+          <Typography className="longform" variant="caption" sx={{ opacity: 0.9 }}>
             Sign in to lodge, track, rate and appeal grievances. · शिकायत दर्ज करने व स्थिति देखने के लिए साइन इन करें।
           </Typography>
         </Box>
@@ -65,7 +65,7 @@ export default function LoginScreen() {
           >
             {mode === "signin" ? "New user? Register with mobile" : "Already registered? Sign in"}
           </Button>
-          <Alert severity="info" sx={{ "& .MuiAlert-message": { fontSize: 12.5 } }}>
+          <Alert severity="info" className="longform" sx={{ "& .MuiAlert-message": { fontSize: 12.5 } }}>
             Simulation — credentials are never checked or stored anywhere; one click signs you in as the demo citizen
             (Sita Sharma). The real CPGRAMS requires registered login for grievance status and appeals.
           </Alert>

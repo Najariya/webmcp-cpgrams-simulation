@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Box, Button, Chip, Paper, Stack, Typography } from "@mui/material";
 import PlayArrow from "@mui/icons-material/PlayArrow";
 import VolumeUp from "@mui/icons-material/VolumeUp";
+import RecordVoiceOver from "@mui/icons-material/RecordVoiceOver";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import Close from "@mui/icons-material/Close";
 import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
@@ -13,6 +14,7 @@ import PageHeader from "./PageHeader";
 import { registrar } from "../webmcp/registrar";
 import { getModelContext, type RegisteredToolInfo } from "../webmcp/types";
 import { getSlaStatusTool, speakAloudTool } from "../webmcp/tools";
+import { speak, useVoiceStore } from "../webmcp/voice";
 import { goi } from "../theme";
 
 /**
@@ -29,6 +31,8 @@ export default function TransparencyScreen() {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const available = registrar.available;
   const [live, setLive] = useState<RegisteredToolInfo[] | null>(null);
+  const voiceMode = useVoiceStore((s) => s.voiceMode);
+  const setVoiceMode = useVoiceStore((s) => s.setVoiceMode);
 
   useEffect(() => {
     const unsub = registrar.subscribe(() => force((n) => n + 1));
@@ -89,7 +93,7 @@ export default function TransparencyScreen() {
             <Typography sx={{ fontSize: 13, fontWeight: 700, color: available ? "#1A5C33" : "#7A4608", lineHeight: 1.4 }}>
               {available ? "WebMCP active in this browser — this is the live registry" : "WebMCP not active — simulation view of the intended registry"}
             </Typography>
-            <Typography sx={{ fontSize: 12, lineHeight: 1.6, color: "text.secondary", mt: 0.25 }}>
+            <Typography className="longform" sx={{ fontSize: 12, lineHeight: 1.65, color: "text.secondary", mt: 0.25 }}>
               {available ? (
                 <>Tools below are read from <code>document.modelContext.getTools()</code> and update live via <code>toolchange</code>.</>
               ) : (
@@ -122,7 +126,7 @@ export default function TransparencyScreen() {
           icon={<PanToolOutlined sx={{ fontSize: 16 }} />}
           title={`Action tools · कार्रवाई के टूल`}
           count={writes.length}
-          blurb="These change something on your record. Every one of them pauses for your explicit in-page confirmation, bound to the exact payload, before anything is committed."
+          blurb="These change something — your record or your preferences. Record-changing actions pause for your explicit in-page confirmation, bound to the exact payload, before anything is committed; preference changes are reversible and need none."
         >
           {writes.map((t, i) => (
             <ToolCard key={t.name} t={t} index={reads.length + i} expanded={expanded.has(t.name)} onToggle={() => toggle(t.name)} />
@@ -132,7 +136,7 @@ export default function TransparencyScreen() {
 
       {tools.length === 0 && (
         <Paper elevation={0} variant="outlined" sx={{ p: 4, borderRadius: 2, textAlign: "center" }}>
-          <Typography variant="body2" color="text.secondary">No tools are currently exposed. Lodge or select a grievance to activate the context-sensitive surface.</Typography>
+          <Typography className="longform" variant="body2" color="text.secondary">No tools are currently exposed. Lodge or select a grievance to activate the context-sensitive surface.</Typography>
         </Paper>
       )}
 
@@ -180,6 +184,43 @@ export default function TransparencyScreen() {
             </Box>
           </Paper>
         )}
+      </Paper>
+
+      {/* Voice-ready */}
+      <Paper elevation={0} variant="outlined" sx={{ p: { xs: 2, md: 2.5 }, borderRadius: "12px" }}>
+        <Stack direction="row" spacing={1.25} sx={{ alignItems: "center" }}>
+          <RecordVoiceOver sx={{ fontSize: 17, color: goi.navy }} />
+          <Typography component="h2" sx={{ fontSize: 12.5, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.09em", color: goi.navy }}>
+            Voice-ready by design · आवाज़ के लिए तैयार
+          </Typography>
+        </Stack>
+        <Stack spacing={1} sx={{ mt: 1.5 }}>
+          {[
+            ["Speakable envelopes", "Every tool returns a one-locale speakable line sized for speech — compact, plain-language, never bilingual concatenation. Voice agents read it directly."],
+            ["Live announcements", "Page state changes — filings, reminders, ratings, appeals, approval prompts — are announced through an aria-live region, so voice agents and screen readers hear what changed."],
+            ["Voice Mode", "A narration preference (toggle in the header, or the set_voice_mode tool) makes the page speak key citizen moments aloud in English or Hindi."],
+          ].map(([t, d]) => (
+            <Box key={t} sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "180px 1fr" }, gap: { xs: 0.25, sm: 2 } }}>
+              <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: goi.navyDark }}>{t}</Typography>
+              <Typography className="longform" sx={{ fontSize: 12, lineHeight: 1.65, color: "text.secondary" }}>{d}</Typography>
+            </Box>
+          ))}
+        </Stack>
+        <Stack direction="row" spacing={1.5} useFlexGap sx={{ flexWrap: "wrap", rowGap: 1, mt: 2 }}>
+          <Button
+            variant={voiceMode ? "contained" : "outlined"} size="small" startIcon={<RecordVoiceOver />}
+            color={voiceMode ? "success" : "inherit"}
+            onClick={() => setVoiceMode(!voiceMode)}
+          >
+            {voiceMode ? "Voice mode is on — turn off" : "Turn Voice Mode on"}
+          </Button>
+          <Button variant="outlined" size="small" startIcon={<VolumeUp />} onClick={() => speak("Your agent sees the same case list you do. Every consequential action asks you first.", "en-IN")}>
+            Test voice · English
+          </Button>
+          <Button variant="outlined" size="small" startIcon={<VolumeUp />} onClick={() => speak("आपका एजेंट वही केस देखता है जो आप देखते हैं। हर ज़रूरी काम से पहले आपकी पुष्टि ली जाती है।", "hi-IN")}>
+            बोलकर सुनें · हिंदी
+          </Button>
+        </Stack>
       </Paper>
 
       {/* Guarantees */}

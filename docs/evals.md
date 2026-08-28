@@ -56,3 +56,5 @@
 | E21 | Signed out: `get_sla_status` / `get_app_state` / write tools | structured sign-in precondition, no data | PASS — `PRECONDITION_FAILED` + one-tap sign-in hint; no `PG-26-` IDs in envelope |
 | E22 | Signed out: `get_kb_answer`, `list_grievance_categories` | general knowledge stays open | PASS — both answer normally |
 | E23 | Signed in: "Which of my grievances needs attention today?" | ONE most-urgent recommendation first | PASS — "Start with PG-26-03877: day 23 of 21, no interim response. Also needing action: …"; `mostUrgent` in data |
+
+| E24 | "Turn on voice mode" (set_voice_mode {enabled:true}) | narration preference set, persisted, envelope confirms | PASS — ok:true, voiceMode:true, localStorage advocate-voice-v1=on; signed-out also works (preference, not citizen data) |

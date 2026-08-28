@@ -9,6 +9,7 @@ import {
 import { appealEligible, needsAttentionToday, rateEligible, reminderEligible, slaStatus } from "./domain/sla";
 import { draftIsValid, type Grievance, type GrievanceDraft, type Satisfaction } from "./domain/types";
 import { seedGoldenCases } from "./data/catalog";
+import { announce } from "./webmcp/voice";
 
 /**
  * App store (zustand). Single source of truth for the simulation.
@@ -143,6 +144,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const s = get();
     set({ citizen: c, view: s.view === "login" ? "status" : s.view });
     persist({ grievances: s.grievances, draft: s.draft, appealDraft: s.appealDraft, citizen: c });
+    announce(`Signed in as ${c.name}.`, s.lang);
   },
   signOut: () => {
     const s = get();
@@ -155,6 +157,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const draft: GrievanceDraft = { ...d, id: s.draft?.id ?? `d-${Date.now().toString(36)}`, updatedAt: s.simNow };
     set({ draft });
     persist({ grievances: s.grievances, draft, appealDraft: s.appealDraft, citizen: s.citizen });
+    announce(s.draft ? "Draft updated. Review it on the portal before anything is submitted." : "Draft prepared. Review it on the portal before anything is submitted.", s.lang);
   },
   clearDraft: () => {
     const s = get();
@@ -173,6 +176,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const g = submitDraft(s.draft, s.simNow, regId);
     set({ grievances: [g, ...s.grievances], draft: null, view: "case", selectedGrievanceId: g.id });
     persist({ grievances: [g, ...s.grievances], draft: null, appealDraft: s.appealDraft });
+    announce(`Grievance lodged. Your registration ID is ${g.regId}. Quote it for status, reminders and appeals.`, s.lang);
     return g;
   },
 
@@ -184,6 +188,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const grievances = s.grievances.map((g, i) => (i === idx ? updated : g));
     set({ grievances });
     persist({ grievances, draft: s.draft, appealDraft: s.appealDraft });
+    announce(`Reminder recorded on ${updated.regId}. The case timeline shows it.`, s.lang);
   },
 
   rate: (grievanceId, rating) => {
@@ -194,6 +199,12 @@ export const useAppStore = create<AppState>((set, get) => ({
     const grievances = s.grievances.map((g, i) => (i === idx ? updated : g));
     set({ grievances });
     persist({ grievances, draft: s.draft, appealDraft: s.appealDraft });
+    announce(
+      rating === "Poor"
+        ? `Feedback recorded as Poor on ${updated.regId}. The appeal option is open for 30 days.`
+        : `Feedback recorded as ${rating} on ${updated.regId}. The case will close.`,
+      s.lang,
+    );
   },
 
   startAppealDraft: (grievanceId, grounds, argument) => {
@@ -213,6 +224,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const grievances = s.grievances.map((g, i) => (i === idx ? updated : g));
     set({ grievances, appealDraft: null });
     persist({ grievances, draft: s.draft, appealDraft: null });
+    announce(`Appeal filed on ${updated.regId} with the Nodal Appellate Authority.`, s.lang);
     return updated;
   },
 

@@ -3,8 +3,10 @@ import AccountBalance from "@mui/icons-material/AccountBalance";
 import LoginIcon from "@mui/icons-material/Login";
 import LogoutIcon from "@mui/icons-material/Logout";
 import TextIncrease from "@mui/icons-material/TextIncrease";
+import RecordVoiceOver from "@mui/icons-material/RecordVoiceOver";
 import { goi } from "../theme";
 import { useAppStore, type View } from "../store";
+import { useVoiceStore } from "../webmcp/voice";
 
 /**
  * CPGRAMS-style portal header (simulation). Identity band → tricolour rule →
@@ -20,6 +22,7 @@ const NAV: { view: View | null; href?: string; label: string; hi: string }[] = [
 
 export default function GovHeader() {
   const { view, setView, citizen, signOut, largeType, toggleLargeType, lang, setLang } = useAppStore();
+  const { voiceMode, toggleVoiceMode } = useVoiceStore();
 
   return (
     <Box component="header" sx={{ position: "sticky", top: 0, zIndex: 10 }}>
@@ -39,7 +42,7 @@ export default function GovHeader() {
             <AccountBalance sx={{ fontSize: 22, color: "rgba(255,255,255,0.92)" }} />
           </Box>
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography sx={{ fontSize: 11.5, lineHeight: 1.35, opacity: 0.95 }}>
+            <Typography sx={{ fontSize: 11.5, lineHeight: 1.35 }}>
               भारत सरकार · Government of India <span style={{ opacity: 0.55 }}>|</span> कार्मिक, लोक शिकायत और पेंशन मंत्रालय · Department of Administrative Reforms &amp; Public Grievances
             </Typography>
             <Typography sx={{ fontSize: 21, fontWeight: 800, lineHeight: 1.2, letterSpacing: "0.01em" }}>
@@ -67,6 +70,15 @@ export default function GovHeader() {
                   </Button>
                 ))}
               </Box>
+              <IconButton
+                size="small"
+                onClick={toggleVoiceMode}
+                sx={{ color: voiceMode ? "#FFB37E" : "#fff", border: "1px solid rgba(255,255,255,0.4)", width: 28, height: 28, borderRadius: 1 }}
+                aria-label={voiceMode ? "Voice mode on — click to turn narration off" : "Voice mode off — click to speak key updates"}
+                aria-pressed={voiceMode}
+              >
+                <RecordVoiceOver sx={{ fontSize: 15 }} />
+              </IconButton>
               <IconButton size="small" onClick={toggleLargeType} sx={{ color: largeType ? "#FFB37E" : "#fff", border: "1px solid rgba(255,255,255,0.4)", width: 28, height: 28, borderRadius: 1 }} aria-label="Large type">
                 <TextIncrease sx={{ fontSize: 15 }} />
               </IconButton>

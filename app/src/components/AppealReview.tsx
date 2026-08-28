@@ -16,7 +16,7 @@ export default function AppealReview() {
     return (
       <Box sx={{ p: 4 }}>
         <Typography variant="h6">No appeal draft in progress.</Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, maxWidth: 560, lineHeight: 1.6 }}>
+        <Typography className="longform" variant="body2" color="text.secondary" sx={{ mt: 0.5, maxWidth: 560, lineHeight: 1.6 }}>
           Appeals unlock after you rate a disposal <strong>Poor</strong>.{" "}
           {eligible.length > 0
             ? "You have a disposed case awaiting feedback — open it from the case register to rate it."
@@ -52,7 +52,7 @@ export default function AppealReview() {
             <Typography variant="overline" sx={{ color: "text.secondary", fontSize: 11, pt: 0.5 }}>Original relief</Typography>
             <Typography className="longform" variant="body2" sx={{ lineHeight: 1.7 }}>{g.reliefRequested}</Typography>
             <Typography variant="overline" sx={{ color: "text.secondary", fontSize: 11, pt: 0.5 }}>Disposal being appealed</Typography>
-            <Typography variant="body2" sx={{ lineHeight: 1.7, color: "text.secondary" }}>{g.disposal?.summary ?? "—"}</Typography>
+            <Typography className="longform" variant="body2" sx={{ lineHeight: 1.7, color: "text.secondary" }}>{g.disposal?.summary ?? "—"}</Typography>
           </Box>
 
           <Divider />

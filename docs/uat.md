@@ -17,4 +17,5 @@
 
 **Critical/High failures: 0.** Medium/Low backlog: none open. Notes: (a) real-agent (ChatGPT in-app browser) walkthrough to be recorded in `qa-log.md` when performed on the live URL — the deterministic layer it depends on is fully verified here; (b) `aria-live` for tool-result announcements is a post-freeze nice-to-have, tracked as SHOULD-tier.
 
+| UAT-12 | Citizen | Voice layer | Narration + live announcements | Header voice toggle turns Voice Mode on (persisted across reload); aria-live region present; set_voice_mode card on Agent Tools; EN/HI test buttons speak; filings/reminders/ratings/appeals announce | PASS | — | tests/voice.test.ts + live dev verification |
 | UAT-11 | Judge | Skeptical-agent verdict follow-ups | Ranked attention, sign-in parity, data export | `get_sla_status`/`get_app_state` lead with most-urgent case (PG-26-03877 hero); signed-out tools return sign-in precondition with zero case data; "Export my data" downloads full local JSON; case register pins attention rows to top | PASS | — | docs/judge-verdict.md W1–W3 responses |

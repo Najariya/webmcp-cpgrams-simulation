@@ -48,7 +48,7 @@ export default function StatusView() {
         <Box sx={{ bgcolor: goi.navy, color: "#fff", px: { xs: 2, md: 3 }, py: 2.25, display: "flex", flexWrap: "wrap", gap: 1.5, alignItems: "center", borderBottom: "3px solid", borderColor: goi.saffron }}>
           <Box sx={{ flex: 1, minWidth: 220, py: 0.5 }}>
             <Typography sx={{ fontSize: 16.5, fontWeight: 700, letterSpacing: "0.01em", lineHeight: 1.35 }}>View Grievance Status · शिकायत की स्थिति</Typography>
-            <Typography sx={{ fontSize: 12, opacity: 0.85, lineHeight: 1.55, mt: 0.25 }}>
+            <Typography className="longform" sx={{ fontSize: 12, opacity: 0.9, lineHeight: 1.55, mt: 0.25 }}>
               Your case register — SLA clocks, interim replies, reminders, feedback and appeals.
             </Typography>
           </Box>
@@ -89,9 +89,9 @@ export default function StatusView() {
                       <Typography variant="body2" noWrap>{g.subject}</Typography>
                     </TableCell>
                     <TableCell sx={{ fontSize: 12.5, color: "text.secondary", whiteSpace: "nowrap" }}>{ministryOf(g.ministryId)?.nameEn}</TableCell>
-                    <TableCell sx={{ fontSize: 12.5, whiteSpace: "nowrap" }}>{g.filedAt ? new Date(g.filedAt).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" }) : "—"}</TableCell>
+                    <TableCell sx={{ fontSize: 12.5, whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>{g.filedAt ? new Date(g.filedAt).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" }) : "—"}</TableCell>
                     <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      <Typography variant="caption" sx={{ fontWeight: 700, color: sla.phase === "overdue" ? "#B42318" : sla.phase === "within_target" ? "text.secondary" : goi.green }}>
+                      <Typography variant="caption" sx={{ fontWeight: 700, fontVariantNumeric: "tabular-nums", color: sla.phase === "overdue" ? "#B42318" : sla.phase === "within_target" ? "text.secondary" : goi.green }}>
                         {sla.daysElapsed !== null ? `Day ${sla.daysElapsed} / ${sla.targetDays}` : "—"}
                       </Typography>
                     </TableCell>
@@ -117,7 +117,7 @@ export default function StatusView() {
       </Paper>
 
       <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mt: 1.5, flexWrap: "wrap", gap: 1 }}>
-        <Typography variant="caption" color="text.secondary">
+        <Typography className="longform" variant="caption" color="text.secondary">
           {rows.length} record{rows.length === 1 ? "" : "s"} · cases needing attention are listed first, most urgent at top · simulation data stored only in this browser
         </Typography>
         <Stack direction="row" spacing={1}>

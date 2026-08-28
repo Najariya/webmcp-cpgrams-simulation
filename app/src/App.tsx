@@ -15,6 +15,7 @@ import AppealReview from "./components/AppealReview";
 import { useAppStore } from "./store";
 import { registrar } from "./webmcp/registrar";
 import { desiredTools } from "./webmcp/tools";
+import { useAnnounceStore } from "./webmcp/voice";
 
 /**
  * Portal shell — CPGRAMS-style chrome over the advocate simulation.
@@ -70,6 +71,23 @@ export default function App() {
 
       <ConfirmDialog />
       <GovFooter />
+      <LiveAnnouncer />
+    </Box>
+  );
+}
+
+/** aria-live region for voice agents and screen readers: page state changes
+ *  (filings, reminders, ratings, appeals, approval prompts) are announced
+ *  here; when Voice Mode is on they are also spoken aloud. */
+function LiveAnnouncer() {
+  const { message, seq } = useAnnounceStore();
+  return (
+    <Box
+      role="status"
+      aria-live="polite"
+      sx={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)", whiteSpace: "nowrap" }}
+    >
+      {message && <span key={seq}>{message}</span>}
     </Box>
   );
 }

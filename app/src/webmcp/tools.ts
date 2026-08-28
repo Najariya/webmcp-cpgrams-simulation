@@ -1,6 +1,7 @@
 import { err, guarded, ok } from "./envelope";
 import type { ModelContextTool } from "./types";
 import { checkGate, consumeApproval, hashPayload, useConfirmStore } from "./confirm";
+import { speak, useVoiceStore } from "./voice";
 import { useAppStore } from "../store";
 import { CATEGORIES, categoryOf, ministryOf } from "../data/catalog";
 import { appealEligible, daysElapsed, rankAttention, rateEligible, reminderEligible, slaStatus } from "../domain/sla";
@@ -416,17 +417,55 @@ export const speakAloudTool: ModelContextTool = {
       const i = input as Input;
       const text = typeof i.text === "string" ? i.text.slice(0, 300) : "";
       const lang = i.lang === "hi-IN" ? "hi-IN" : "en-IN";
-      if (!("speechSynthesis" in window)) {
+      const spoken = speak(text, lang);
+      if (!spoken) {
         return ok("speak_aloud", "Speech is not supported in this browser.", { spoken: false, lang });
       }
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.lang = lang;
-      const voices = window.speechSynthesis.getVoices();
-      const match = voices.find((v) => v.lang === lang) ?? voices.find((v) => v.lang.startsWith(lang.slice(0, 2)));
-      if (match) utter.voice = match;
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(utter);
       return ok("speak_aloud", `Speaking: "${text.slice(0, 60)}…"`, { spoken: true, lang });
+    }),
+};
+
+export const setVoiceModeTool: ModelContextTool = {
+  name: "set_voice_mode",
+  title: "Set voice mode",
+  description:
+    "Turn the portal's voice narration on or off (input {enabled: boolean}). When on, the page SPEAKS key citizen moments aloud in their language — the registration ID after filing, approval prompts, reminders, ratings, appeals — alongside the screen-reader live announcements that stay active either way. Use for citizens who prefer listening. Reversible preference, no confirmation needed. Returns JSON {ok, speakable, data:{voiceMode}}.",
+  inputSchema: {
+    type: "object",
+    properties: { enabled: { type: "boolean", description: "true to enable page narration, false to disable." } },
+    required: ["enabled"],
+    additionalProperties: false,
+  },
+  annotations: {},
+  execute: async (input) =>
+    guarded("set_voice_mode", "Could not change voice mode.", async () => {
+      const i = input as Input;
+      const rej = rejectUnknownKeys("set_voice_mode", i, ["enabled"]);
+      if (rej) return rej;
+      if (typeof i.enabled !== "boolean") {
+        return err("set_voice_mode", "The enabled field must be true or false.", {
+          code: "INVALID_ARGUMENT",
+          field: "enabled",
+          message: `"enabled" must be a boolean.`,
+          hint: "Ask the citizen whether they want narration, then pass enabled: true or false.",
+        });
+      }
+      const lang = useAppStore.getState().lang;
+      useVoiceStore.getState().setVoiceMode(i.enabled);
+      if (i.enabled) {
+        speak(
+          lang === "hi" ? "वॉइस मोड चालू है। अब से ज़रूरी अपडेट बोलकर बताए जाएंगे।" : "Voice mode is on. From now on, key updates will be spoken aloud.",
+          lang === "hi" ? "hi-IN" : "en-IN",
+        );
+      }
+      return ok(
+        "set_voice_mode",
+        i.enabled
+          ? "Voice narration enabled — the page will speak key moments to the citizen in their language."
+          : "Voice narration disabled. Screen-reader live announcements remain active.",
+        { voiceMode: i.enabled },
+        i.enabled ? ["get_sla_status"] : [],
+      );
     }),
 };
 
@@ -904,7 +943,7 @@ export function desiredTools(state: ReturnType<typeof useAppStore.getState>): Mo
     }
   })();
   const confirm = useConfirmStore.getState();
-  const tools = [...READ_TOOLS];
+  const tools = [...READ_TOOLS, setVoiceModeTool];
   if (!surf) return tools;
   if (surf.noDraft) tools.push(createGrievanceDraftTool);
   else tools.push(updateGrievanceDraftTool);

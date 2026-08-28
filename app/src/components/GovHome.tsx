@@ -86,26 +86,26 @@ export default function GovHome() {
 
         <Stack spacing={2}>
           {/* Agent assist — compact: one prompt, one hint */}
-          <Paper elevation={0} sx={{ p: 2, borderRadius: "12px", bgcolor: goi.navy, color: "#fff" }}>
+          <Paper elevation={0} sx={{ p: 2.5, borderRadius: "12px", bgcolor: goi.navy, color: "#fff" }}>
             <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 1.25 }}>
-              <SmartToy sx={{ fontSize: 15, opacity: 0.9 }} />
-              <Typography sx={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.09em", opacity: 0.9 }}>
+              <SmartToy sx={{ fontSize: 16, color: "#FFB37E" }} />
+              <Typography sx={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.09em" }}>
                 Ask your agent
               </Typography>
             </Stack>
             <Paper
               elevation={0}
               onClick={() => copy(HERO_PROMPT)}
-              sx={{ p: 1.25, bgcolor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 1.5, cursor: "pointer", transition: "background-color .15s", "&:hover": { bgcolor: "rgba(255,255,255,0.16)" } }}
+              sx={{ p: 1.25, bgcolor: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.32)", borderRadius: 1.5, cursor: "pointer", transition: "background-color .15s", "&:hover": { bgcolor: "rgba(255,255,255,0.2)" } }}
             >
               <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                <Typography sx={{ fontSize: 12.5, fontWeight: 600, lineHeight: 1.45, flex: 1 }}>
+                <Typography sx={{ fontSize: 13, fontWeight: 600, lineHeight: 1.45, flex: 1 }}>
                   “{HERO_PROMPT}”
                 </Typography>
-                <ContentCopy sx={{ fontSize: 14, opacity: 0.7 }} />
+                <ContentCopy sx={{ fontSize: 14, opacity: 0.85 }} />
               </Stack>
             </Paper>
-            <Typography variant="caption" sx={{ display: "block", opacity: 0.65, mt: 1.25, lineHeight: 1.5 }}>
+            <Typography className="longform" variant="caption" sx={{ display: "block", opacity: 0.85, mt: 1.25, lineHeight: 1.55 }}>
               Paste in ChatGPT's browser or Chrome (WebMCP). More prompts on{" "}
               <Box component="span" sx={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => setView("transparency")}>Agent Tools</Box>.
             </Typography>
