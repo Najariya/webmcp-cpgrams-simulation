@@ -132,3 +132,22 @@ Durable project record. Newest entries at the top. Conventional commits referenc
 ### Next (S1, Aug 29)
 
 Docs alignment → grievance model + lifecycle engine + SLA → 6 golden cases (G1–G6, relative dates) → premium Home/My Cases + Case Detail + timeline → preview deploy.
+
+## 2026-08-28 — UI gap-analysis pass (alignment / spacing / justification / typography)
+
+Vision-model gap analysis on live screenshots (18 defects on Agent Tools page), then:
+
+- **Agent Tools page redesigned**: grouped Read/Action sections with counts and blurbs;
+  numbered tool cards (mono name + baseline-aligned tinted chips + human title + clamped
+  description) with "Show full contract" expansion incl. parameter table (required `*`,
+  types/enums); terminal-style self-test response panel; icon'd Human-control / Privacy
+  guarantee cards; app-level alert deduplicated against the page status strip.
+- **Site-wide normalization**: navy PageHeader bands share one rhythm (py 2.25, 16.5px
+  titles, 12px sublines, 3px saffron bottom rule); Status band search vertically centered;
+  table row density comfortable and header/first-row gap normalized; GovHeader control
+  cluster aligned (28px A+ button); metadata chips unified at 22–24px / 10.5–11px.
+- Verification loop: screenshot → vision model PASS on Agent Tools (×2), Case Detail,
+  Home, Status (×2 after fixes: dangling ellipsis, code-chip wrap, subordinate untrusted
+  chip, search centering, first-row gap). Build clean, 29/29 tests green.
+- Shipped: commit 0264b89 pushed; production redeployed via dedicated project and
+  verified live at https://webmcp-cpgrams-simulation.vercel.app.
