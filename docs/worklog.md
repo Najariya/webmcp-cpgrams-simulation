@@ -151,3 +151,29 @@ Vision-model gap analysis on live screenshots (18 defects on Agent Tools page), 
   chip, search centering, first-row gap). Build clean, 29/29 tests green.
 - Shipped: commit 0264b89 pushed; production redeployed via dedicated project and
   verified live at https://webmcp-cpgrams-simulation.vercel.app.
+
+## 2026-08-28 — Skeptical-judge verdict responses (W1–W3)
+
+An independent browser agent (ChatGPT, WebMCP enabled) attacked the live deployment
+(docs/judge-verdict.md): the confirmation gate held everywhere, no bypass succeeded.
+Its three critiques, and what shipped:
+
+- **W1 ranked attention** — `rankAttention()` in domain/sla.ts (overdue-no-interim,
+  worsening with days over target > closing appeal window > unrated disposal aging
+  toward urgency). `get_sla_status` survey sorts by it, flags `mostUrgent`, and leads
+  the speakable line with "Start with PG-26-03877…"; `get_app_state` attention is
+  ordered with `mostUrgent: true` on the first entry; the case register pins attention
+  rows to the top in the same order.
+- **W2 authorization parity** — the judge saw tools acting for the demo citizen while
+  the page showed a sign-in surface (signOut kept grievances; tools never checked
+  `citizen`). Now every citizen-scoped tool (4 reads + 7 writes) gates on sign-in:
+  signed out → `PRECONDITION_FAILED` + one-tap sign-in hint, zero case data in the
+  envelope. General-knowledge tools (categories, KB, speak_aloud) stay open. Tools stay
+  discoverable so the agent learns the precondition instead of losing capabilities.
+- **W3 data ownership** — "Export my data" on the case register downloads the full
+  browser-local state as JSON (with an honesty note); Privacy card and README updated.
+
+Tests: 29 → 35 (3 ranking + 3 authorization-parity; adversarial suite signs the demo
+citizen in per-test). Evals E21–E23 and UAT-11 recorded. README gained an
+"Independent skeptical-agent exercise" section; devpost copy, tool-contract doc and
+video script updated to match new behaviour.

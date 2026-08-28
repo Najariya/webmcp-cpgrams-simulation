@@ -2,20 +2,45 @@ import { useState } from "react";
 import { Box, Button, InputAdornment, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from "@mui/material";
 import Search from "@mui/icons-material/Search";
 import RestartAlt from "@mui/icons-material/RestartAlt";
+import Download from "@mui/icons-material/Download";
 import { useAppStore } from "../store";
 import { ministryOf } from "../data/catalog";
-import { slaStatus } from "../domain/sla";
+import { rankAttention, slaStatus } from "../domain/sla";
 import StatusChip from "./StatusChip";
 import { goi } from "../theme";
 
 /**
  * View Status (CPGRAMS-style): search by registration ID, or the citizen's
  * full case register as a government table with SLA and next-action columns.
+ * Cases needing attention are pinned to the top, most urgent first (the same
+ * ranking the agent sees through get_sla_status).
  */
 export default function StatusView() {
   const { grievances, simNow, select, setView, resetDemo } = useAppStore();
   const [q, setQ] = useState("");
-  const rows = grievances.filter((g) => !q.trim() || (g.regId ?? "").toLowerCase().includes(q.trim().toLowerCase()) || g.subject.toLowerCase().includes(q.trim().toLowerCase()));
+  const rank = new Map(rankAttention(grievances, simNow).map((r, i) => [r.g.id, i]));
+  const rows = grievances
+    .filter((g) => !q.trim() || (g.regId ?? "").toLowerCase().includes(q.trim().toLowerCase()) || g.subject.toLowerCase().includes(q.trim().toLowerCase()))
+    .slice()
+    .sort((a, b) => (rank.get(a.id) ?? Number.MAX_SAFE_INTEGER) - (rank.get(b.id) ?? Number.MAX_SAFE_INTEGER));
+
+  const exportData = () => {
+    const s = useAppStore.getState();
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      note: "Browser-local simulation data. Nothing here was ever sent to a server; this file is your copy.",
+      citizen: s.citizen,
+      grievances: s.grievances,
+      draft: s.draft,
+      appealDraft: s.appealDraft,
+    };
+    const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "cpgrams-simulation-my-data.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <Box sx={{ maxWidth: 1180, mx: "auto", width: 1, px: { xs: 1.5, md: 2 }, py: 2.5 }}>
@@ -93,11 +118,16 @@ export default function StatusView() {
 
       <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", mt: 1.5, flexWrap: "wrap", gap: 1 }}>
         <Typography variant="caption" color="text.secondary">
-          {rows.length} record{rows.length === 1 ? "" : "s"} · simulation data stored only in this browser
+          {rows.length} record{rows.length === 1 ? "" : "s"} · cases needing attention are listed first, most urgent at top · simulation data stored only in this browser
         </Typography>
-        <Button size="small" startIcon={<RestartAlt />} onClick={resetDemo} color="inherit" sx={{ color: "text.secondary" }}>
-          Reset demo data
-        </Button>
+        <Stack direction="row" spacing={1}>
+          <Button size="small" startIcon={<Download />} onClick={exportData} color="inherit" sx={{ color: "text.secondary" }}>
+            Export my data
+          </Button>
+          <Button size="small" startIcon={<RestartAlt />} onClick={resetDemo} color="inherit" sx={{ color: "text.secondary" }}>
+            Reset demo data
+          </Button>
+        </Stack>
       </Stack>
     </Box>
   );

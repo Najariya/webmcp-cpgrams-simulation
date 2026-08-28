@@ -192,7 +192,7 @@ export default function TransparencyScreen() {
         <GuaranteeCard
           icon={<PrivacyTipOutlined sx={{ fontSize: 19 }} />}
           title="Privacy"
-          body="The prototype has no application backend and performs no server-side persistence. Demo grievance state is stored locally in your browser. Information required for an agent action is shared with your browser agent through explicit WebMCP tool contracts. All cases are fictional; no government connectivity."
+          body="The prototype has no application backend and performs no server-side persistence. Demo grievance state is stored locally in your browser — you can export it as a file or erase it at any time from the case register. Information required for an agent action is shared with your browser agent through explicit WebMCP tool contracts. All cases are fictional; no government connectivity."
         />
       </Box>
     </Box>

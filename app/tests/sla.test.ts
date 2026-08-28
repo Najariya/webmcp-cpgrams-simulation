@@ -3,6 +3,7 @@ import {
   appealEligible,
   daysBetween,
   needsAttentionToday,
+  rankAttention,
   rateEligible,
   reminderEligible,
   slaStatus,
@@ -88,5 +89,46 @@ describe("SLA engine (facts C3–C7)", () => {
     expect(needsAttentionToday(pendingCase(23), iso(now))).toBe(true);
     expect(needsAttentionToday(pendingCase(26, true), iso(now))).toBe(false);
     expect(needsAttentionToday(pendingCase(9), iso(now))).toBe(false);
+  });
+});
+
+describe("attention ranking (judge feedback W1 — one recommended action, not a flat list)", () => {
+  const disposedUnrated: Grievance = {
+    ...pendingCase(40),
+    id: "g2",
+    regId: "PG-26-00002",
+    status: "DISPOSED",
+    disposedAt: iso(now - 6 * DAY),
+    disposal: { at: iso(now - 6 * DAY), summary: "Claim initiated." },
+  };
+  const poorInWindow: Grievance = {
+    ...disposedUnrated,
+    id: "g3",
+    regId: "PG-26-00003",
+    status: "RATED",
+    rating: "Poor",
+    ratingAt: iso(now - 20 * DAY),
+    disposedAt: iso(now - 22 * DAY),
+  };
+
+  it("overdue-no-interim outranks unrated disposal — most urgent leads", () => {
+    const ranked = rankAttention([disposedUnrated, pendingCase(23)], iso(now));
+    expect(ranked).toHaveLength(2);
+    expect(ranked[0].g.regId).toBe("PG-26-00001");
+    expect(ranked[0].kind).toBe("overdue_no_interim");
+    expect(ranked[0].label).toContain("no interim response");
+    expect(ranked[1].kind).toBe("awaiting_rating");
+  });
+
+  it("an appeal window closing soon outranks a fresh unrated disposal", () => {
+    const ranked = rankAttention([disposedUnrated, poorInWindow], iso(now));
+    expect(ranked[0].kind).toBe("appeal_window");
+    expect(ranked[0].label).toContain("8 days left");
+    expect(ranked[1].kind).toBe("awaiting_rating");
+  });
+
+  it("explained overdue (interim on file) and healthy cases are not ranked", () => {
+    const ranked = rankAttention([pendingCase(26, true), pendingCase(9)], iso(now));
+    expect(ranked).toHaveLength(0);
   });
 });

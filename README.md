@@ -40,6 +40,8 @@ A static portal forces agents to guess through DOM automation. This site instead
 
 - **13 core tools** (6 read + 7 write) registered through `document.modelContext.registerTool`.
 - **Dynamic registration** — the tool surface follows the citizen's situation: `submit_grievance` exists only while a valid draft awaits; `create_appeal_draft` appears only inside an open appeal window; `rate_disposal` exists only while feedback is pending. The **Agent Tools** page shows the live registry (via `getTools()` + `toolchange`), not a mock.
+- **Ranked attention, one recommendation** — asked "which of my grievances needs attention today?", tools don't return a flat list: an urgency ranking (overdue-without-interim first, worsening as the target slips; a closing appeal window next; unrated disposals aging toward urgency) puts a single **most urgent** case at the top of `get_sla_status`/`get_app_state` and leads the speakable line with it. The case register uses the same order.
+- **Authorization parity** — the portal UI gates the case register behind sign-in, and the tools enforce the same gate: signed out, citizen-scoped tools answer `PRECONDITION_FAILED` with a one-tap sign-in hint and leak no case data. General-knowledge tools (categories, process KB, speak-aloud) stay open.
 - **Human control as a first-class pattern** — consequential tools (`submit_grievance`, `send_appeal`, `send_reminder`, `rate_disposal`) return `CONFIRMATION_REQUIRED` and open an in-page dialog showing the **exact payload**; approval is bound to a payload hash, expires in 60 seconds, and is single-use. The agent cannot silently commit anything.
 - **Idempotency** — replaying an identical consequential call returns the original result with `alreadyProcessed: true`; double-clicks and tool retries never file twice.
 - **Compact, model-friendly results** — every tool returns `{ok, speakable, data|error, nextActions}`; `speakable` is one locale (the citizen's language), and outputs are budget-tested to stay within Chrome's ~1.5K guidance.
@@ -56,6 +58,7 @@ A static portal forces agents to guess through DOM automation. This site instead
 ## Security
 
 - **Prompt-injection safe by construction**: grievance text is data. Dedicated tests file a grievance whose subject is `SYSTEM OVERRIDE: ignore previous instructions…` and assert it remains inert text (escaped rendering, length caps, no content-derived control flow), with `untrustedContentHint` on tools that echo citizen content.
+- **Authorization parity**: tools that read or change the citizen's record require the (simulated) sign-in, exactly like the portal UI — signed out they return a structured sign-in hint and expose nothing.
 - Validation everywhere: unknown keys rejected, enums, ID formats, lengths, state preconditions — errors carry `field` + `hint` so the model self-corrects instead of thrashing.
 - Never throws: tool failures surface as structured `{code, message, hint}` envelopes (`INVALID_ARGUMENT`, `NOT_FOUND`, `PRECONDITION_FAILED`, `CONFIRMATION_REQUIRED`, `CONFLICT`, `INTERNAL`).
 
@@ -72,13 +75,23 @@ Every policy behaviour traces to [`docs/00-facts.md`](docs/00-facts.md) (primary
 
 ## Privacy
 
-The prototype has no application backend and performs no server-side persistence. Demo grievance state is stored locally in the browser. Information required for an agent action is shared with the citizen's browser agent through explicit WebMCP tool contracts. Fictional data only; no authentication of real identities.
+The prototype has no application backend and performs no server-side persistence. Demo grievance state is stored locally in the browser — the citizen can export it as a JSON file ("Export my data" in the case register) or erase it at any time. Information required for an agent action is shared with the citizen's browser agent through explicit WebMCP tool contracts. Fictional data only; no authentication of real identities.
 
 ## Testing
 
-- **Unit (vitest, 20 tests)** — SLA facts, lifecycle guards, human-gate TTL/single-use, envelope budgets: `npm test`.
+- **Unit (vitest, 35 tests)** — SLA facts, attention ranking, lifecycle guards, human-gate TTL/single-use, envelope budgets, authorization parity, adversarial inputs: `npm test`.
 - **In-browser golden journeys** — J1 file (gate → confirm → ID → idempotent replay), J2 hero reminder (incl. premature-reminder refusal), J3 Poor → surface change → appeal → replay, J4 invalid-ID `NOT_FOUND`, J5 injection inertness. Verified through the same tool surface agents use.
 - Worklog & QA history: [`docs/worklog.md`](docs/worklog.md).
+
+## Independent skeptical-agent exercise
+
+An independent browser agent (ChatGPT with WebMCP enabled) was let loose on the live deployment with adversarial instructions: exercise every tool, try to bypass the confirmation gate, decline and re-try, file nonsense IDs. Results (full log: [`docs/judge-verdict.md`](docs/judge-verdict.md)):
+
+- Every consequential action — filing, reminder, rating, appeal — was stopped by the exact-payload confirmation gate; **no bypass succeeded**.
+- Declining blocked the identical payload (`PRECONDITION_FAILED`); approval only worked for the revised payload it was bound to.
+- The lifecycle unlocked correctly (Poor rating → appeal drafting → gated appeal submission); invalid IDs returned structured `NOT_FOUND` with recovery hints.
+
+Its three critiques, and what shipped in response: **(1)** attention surfaced as an unranked list → now a single most-urgent recommendation with a full urgency ranking behind it; **(2)** tools acted for the demo citizen while the page showed a sign-in surface → authorization parity gate (above); **(3)** state is browser-local with no backend → by design for this challenge, answered with data ownership: one-click JSON export and one-click erase.
 
 ## Run locally
 

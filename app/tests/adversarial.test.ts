@@ -6,8 +6,8 @@
  */
 import { beforeEach, describe, expect, it } from "vitest";
 import { hashPayload, useConfirmStore } from "../src/webmcp/confirm";
-import { desiredTools, getKbAnswerTool, getSlaStatusTool, rateDisposalTool, sendReminderTool, submitGrievanceTool } from "../src/webmcp/tools";
-import { computeSurface } from "../src/store";
+import { desiredTools, getAppStateTool, getKbAnswerTool, getSlaStatusTool, listGrievanceCategoriesTool, rateDisposalTool, sendReminderTool, submitGrievanceTool } from "../src/webmcp/tools";
+import { computeSurface, DEMO_CITIZEN, useAppStore } from "../src/store";
 
 const signal = new AbortController().signal;
 const j = (s: string | Promise<string>) => Promise.resolve(s).then(JSON.parse) as Promise<Record<string, never> & { ok: boolean; error?: { code: string; message: string } }>;
@@ -28,6 +28,7 @@ describe("adversarial inputs", () => {
   beforeEach(() => {
     useConfirmStore.setState({ request: null, decisions: {}, results: {} });
     localStorageStub.clear();
+    useAppStore.setState({ citizen: DEMO_CITIZEN });
     // re-seed golden cases through a fresh import cycle is awkward in one
     // process; these tests target validation paths that run before state.
   });
@@ -101,5 +102,39 @@ describe("adversarial inputs", () => {
     expect(names).not.toContain("send_reminder");
     expect(names).not.toContain("rate_disposal");
     expect(names).not.toContain("send_appeal");
+  });
+});
+
+describe("authorization parity (judge feedback W2 — signed out, tools see nothing)", () => {
+  beforeEach(() => {
+    useConfirmStore.setState({ request: null, decisions: {}, results: {} });
+    useAppStore.setState({ citizen: null });
+  });
+
+  it("citizen-scoped reads and writes return PRECONDITION_FAILED with a sign-in hint", async () => {
+    for (const r of [
+      await j(getAppStateTool.execute({}, { signal })),
+      await j(getSlaStatusTool.execute({}, { signal })),
+      await j(getSlaStatusTool.execute({ grievanceId: "PG-26-03877" }, { signal })),
+      await j(submitGrievanceTool.execute({}, { signal })),
+      await j(sendReminderTool.execute({ grievanceId: "PG-26-03877" }, { signal })),
+      await j(rateDisposalTool.execute({ grievanceId: "PG-26-02640", rating: "Poor" }, { signal })),
+    ]) {
+      expect(r.ok).toBe(false);
+      expect(r.error?.code).toBe("PRECONDITION_FAILED");
+      expect((r.error as unknown as { hint: string }).hint).toContain("Sign In");
+    }
+  });
+
+  it("signed out leaks no case data in the envelope", async () => {
+    const r = await j(getSlaStatusTool.execute({}, { signal }));
+    expect(JSON.stringify(r)).not.toContain("PG-26-");
+  });
+
+  it("general-knowledge tools stay open signed out", async () => {
+    const kb = await j(getKbAnswerTool.execute({ question: "how long do grievances take?" }, { signal }));
+    expect(kb.ok).toBe(true);
+    const cats = await j(listGrievanceCategoriesTool.execute({}, { signal }));
+    expect(cats.ok).toBe(true);
   });
 });

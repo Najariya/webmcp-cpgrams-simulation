@@ -132,3 +132,48 @@ export function appealWindowDaysLeft(g: Grievance, nowIso: string): number | nul
 export function needsAttentionToday(g: Grievance, nowIso: string): boolean {
   return slaStatus(g, nowIso).needsAttention || rateEligible(g) || appealEligible(g, nowIso);
 }
+
+export type AttentionKind = "overdue_no_interim" | "awaiting_rating" | "appeal_window";
+
+export interface AttentionRank {
+  g: Grievance;
+  sla: SlaStatus;
+  kind: AttentionKind;
+  score: number;
+  /** Short citizen-facing label for speakable lines and ranking surfaces. */
+  label: string;
+}
+
+/** Ordered version of needsAttentionToday (judge feedback W1): the citizen
+ *  should get ONE recommended action, not a flat list. Ranking:
+ *  1. overdue with no interim reply — worse the further past target;
+ *  2. open appeal window on a Poor rating — more urgent as it closes;
+ *  3. unrated disposal — ages toward urgency as the appeal window runs down
+ *     (rating Poor is the gateway to appealing, C6+C7). */
+export function rankAttention(grievances: Grievance[], nowIso: string): AttentionRank[] {
+  const out: AttentionRank[] = [];
+  for (const g of grievances) {
+    const sla = slaStatus(g, nowIso);
+    let kind: AttentionKind | null = null;
+    if (sla.phase === "overdue" && sla.needsAttention) kind = "overdue_no_interim";
+    else if (rateEligible(g)) kind = "awaiting_rating";
+    else if (appealEligible(g, nowIso)) kind = "appeal_window";
+    if (!kind) continue;
+    let score: number;
+    let label: string;
+    if (kind === "overdue_no_interim") {
+      score = 100 + (sla.daysOver ?? 0);
+      label = `day ${sla.daysElapsed} of ${SLA_TARGET_DAYS}, no interim response`;
+    } else if (kind === "appeal_window") {
+      const left = Math.max(0, appealWindowDaysLeft(g, nowIso) ?? APPEAL_WINDOW_DAYS);
+      score = 60 + (APPEAL_WINDOW_DAYS - left);
+      label = `Poor-rated; appeal window open, ${left} day${left === 1 ? "" : "s"} left`;
+    } else {
+      const since = g.disposedAt ? daysBetween(g.disposedAt, nowIso) : 0;
+      score = 50 + Math.min(since, APPEAL_WINDOW_DAYS);
+      label = "disposed; your feedback is pending";
+    }
+    out.push({ g, sla, kind, score, label });
+  }
+  return out.sort((a, b) => b.score - a.score);
+}

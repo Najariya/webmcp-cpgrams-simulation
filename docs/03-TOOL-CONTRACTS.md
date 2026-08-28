@@ -57,6 +57,11 @@ Registrar safety: defer reconciliation while `activeExecutions > 0`; reconcile a
 - **B (send_reminder, rate_disposal):** clear confirmation before commit (UI confirm dialog bound to the same request).
 - **C (drafts):** no gate — reversible by design.
 - **D (reads):** none.
+- **Tier 0 — authorization parity (all citizen-scoped tools, reads included):** the portal UI gates the case register behind the simulated sign-in; the tools enforce the same gate. Signed out they return `PRECONDITION_FAILED` with a one-tap sign-in hint and expose no case data. General-knowledge tools (`list_grievance_categories`, `get_kb_answer`, `speak_aloud`) stay open.
+
+## 4a. Attention ranking (judge feedback)
+
+`get_sla_status` (survey) and `get_app_state` never return a flat attention list: `rankAttention()` orders overdue-without-interim (worsening with days over target) above a closing appeal window, above unrated disposals aging toward urgency. The most urgent case leads the `cases` array, is flagged `mostUrgent`, and opens the `speakable` line ("Start with …"). The case register uses the same order.
 
 ## 5. Validation (every tool)
 
