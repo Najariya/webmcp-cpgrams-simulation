@@ -18,6 +18,38 @@ import { desiredTools } from "./webmcp/tools";
 import { useAnnounceStore } from "./webmcp/voice";
 import { applyTypeStep } from "./ui/typeScale";
 import { dict } from "./i18n";
+import type { View } from "./store";
+
+/* ---------- hash routing (deep links, back/forward, reload restore) ---------- */
+
+const GATED_VIEWS: View[] = ["lodge", "status", "case", "draft_review", "appeal_review"];
+
+function viewFromHash(hash: string): { view: View; id: string | null } {
+  const h = hash.replace(/^#\/?/, "");
+  if (h.startsWith("lodge")) return { view: "lodge", id: null };
+  if (h.startsWith("agent-tools")) return { view: "transparency", id: null };
+  if (h.startsWith("faqs")) return { view: "faq", id: null };
+  if (h.startsWith("signin")) return { view: "login", id: null };
+  if (h.startsWith("draft-review")) return { view: "draft_review", id: null };
+  if (h.startsWith("appeal-review")) return { view: "appeal_review", id: null };
+  if (h.startsWith("cases/")) return { view: "case", id: decodeURIComponent(h.slice("cases/".length)) };
+  if (h.startsWith("cases")) return { view: "status", id: null };
+  return { view: "home", id: null };
+}
+
+function hashFromState(view: View, selectedGrievanceId: string | null): string {
+  switch (view) {
+    case "lodge": return "#/lodge";
+    case "transparency": return "#/agent-tools";
+    case "faq": return "#/faqs";
+    case "login": return "#/signin";
+    case "draft_review": return "#/draft-review";
+    case "appeal_review": return "#/appeal-review";
+    case "status": return "#/cases";
+    case "case": return selectedGrievanceId ? `#/cases/${encodeURIComponent(selectedGrievanceId)}` : "#/cases";
+    default: return "#/";
+  }
+}
 
 /**
  * Portal shell — CPGRAMS-style chrome over the advocate simulation.
@@ -31,11 +63,34 @@ export default function App() {
   useEffect(() => {
     applyTypeStep(useAppStore.getState().typeStep);
     document.documentElement.lang = useAppStore.getState().lang;
+
+    // hash → state (boot, reload, back/forward)
+    const applyHash = () => {
+      const { view: v, id } = viewFromHash(location.hash);
+      const s = useAppStore.getState();
+      if (GATED_VIEWS.includes(v) && !s.citizen) {
+        useAppStore.setState({ view: "login", postSignInView: v, selectedGrievanceId: id });
+        return;
+      }
+      useAppStore.setState({ view: v, selectedGrievanceId: id, postSignInView: null });
+    };
+    applyHash();
+    window.addEventListener("hashchange", applyHash);
+
+    // state → hash (shareable links prefer the registration ID)
+    const unsubHash = useAppStore.subscribe((s) => {
+      const g = s.grievances.find((x) => x.id === s.selectedGrievanceId || x.regId === s.selectedGrievanceId);
+      const want = hashFromState(s.view, g?.regId ?? s.selectedGrievanceId);
+      if (want !== location.hash) location.hash = want;
+    });
+
     // dynamic registration: state → desired tools → diff-sync
     const syncNow = () => void registrar.sync(desiredTools(useAppStore.getState()));
     syncNow();
     const unsub = useAppStore.subscribe(syncNow);
     return () => {
+      unsubHash();
+      window.removeEventListener("hashchange", applyHash);
       unsub();
       void registrar.unregisterAll();
     };
