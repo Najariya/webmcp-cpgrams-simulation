@@ -30,7 +30,7 @@ export default function LoginScreen() {
     <Box sx={{ maxWidth: 480, mx: "auto", width: 1, p: { xs: 2, md: 3 } }}>
       <Paper elevation={1} sx={{ p: 0, overflow: "hidden" }}>
         <Box sx={{ bgcolor: goi.navy, color: "#fff", px: 3, py: 2 }}>
-          <Typography sx={{ fontWeight: 700, fontSize: 17 }}>
+          <Typography sx={{ fontWeight: 700, fontSize: "1.0625rem" }}>
             {mode === "signin" ? "Citizen Sign In · नागरिक साइन इन" : "Citizen Registration · नागरिक पंजीकरण"}
           </Typography>
           <Typography className="longform" variant="caption" sx={{ opacity: 0.9 }}>
@@ -65,7 +65,7 @@ export default function LoginScreen() {
           >
             {mode === "signin" ? "New user? Register with mobile" : "Already registered? Sign in"}
           </Button>
-          <Alert severity="info" className="longform" sx={{ "& .MuiAlert-message": { fontSize: 12.5 } }}>
+          <Alert severity="info" className="longform" sx={{ "& .MuiAlert-message": { fontSize: "0.7812rem" } }}>
             Simulation — credentials are never checked or stored anywhere; one click signs you in as the demo citizen
             (Sita Sharma). The real CPGRAMS requires registered login for grievance status and appeals.
           </Alert>

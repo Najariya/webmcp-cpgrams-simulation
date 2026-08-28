@@ -10,6 +10,7 @@ import { appealEligible, needsAttentionToday, rateEligible, reminderEligible, sl
 import { draftIsValid, type Grievance, type GrievanceDraft, type Satisfaction } from "./domain/types";
 import { seedGoldenCases } from "./data/catalog";
 import { announce } from "./webmcp/voice";
+import { TYPE_STEPS, applyTypeStep, loadTypeStep, saveTypeStep } from "./ui/typeScale";
 
 /**
  * App store (zustand). Single source of truth for the simulation.
@@ -102,13 +103,14 @@ export function computeSurface(s: { grievances: Grievance[]; draft: GrievanceDra
 interface AppState extends PersistedShape {
   view: View;
   selectedGrievanceId: string | null;
-  largeType: boolean;
+  typeStep: number;
   lang: "en" | "hi";
   /** Simulation clock — frozen at load so relative-day facts stay stable within a session. */
   simNow: string;
   setView: (view: View) => void;
   select: (id: string | null) => void;
-  toggleLargeType: () => void;
+  setTypeStep: (step: number) => void;
+  cycleTypeStep: () => void;
   setLang: (lang: "en" | "hi") => void;
   signIn: (c: Citizen) => void;
   signOut: () => void;
@@ -131,13 +133,21 @@ export const useAppStore = create<AppState>((set, get) => ({
   ...initial,
   view: "home",
   selectedGrievanceId: null,
-  largeType: false,
+  typeStep: loadTypeStep(),
   lang: "en",
   simNow: new Date().toISOString(),
 
   setView: (view) => set({ view }),
   select: (selectedGrievanceId) => set({ selectedGrievanceId }),
-  toggleLargeType: () => set((s) => ({ largeType: !s.largeType })),
+  setTypeStep: (step) => {
+    applyTypeStep(step);
+    saveTypeStep(step);
+    set({ typeStep: step });
+  },
+  cycleTypeStep: () => {
+    const next = (get().typeStep + 1) % TYPE_STEPS.length;
+    get().setTypeStep(next);
+  },
   setLang: (lang) => set({ lang }),
 
   signIn: (c) => {

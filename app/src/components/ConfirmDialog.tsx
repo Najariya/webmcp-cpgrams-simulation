@@ -37,8 +37,8 @@ export default function ConfirmDialog() {
 
   return (
     <Dialog open onClose={decline} maxWidth="sm" fullWidth>
-      <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1.25, fontSize: 16, fontWeight: 700, pb: 1 }}>
-        <ShieldOutlined sx={{ fontSize: 20, color: "secondary.main" }} />
+      <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1.25, fontSize: "1rem", fontWeight: 700, pb: 1 }}>
+        <ShieldOutlined sx={{ fontSize: "1.25rem", color: "secondary.main" }} />
         Confirm action · पुष्टि करें
         <Typography component="span" variant="caption" sx={{ ml: "auto", color: "text.secondary", fontWeight: 600 }}>
           {left}s

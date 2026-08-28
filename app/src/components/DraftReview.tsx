@@ -40,7 +40,7 @@ export default function DraftReview() {
         />
         <Stack spacing={2.5} sx={{ p: { xs: 2, md: 3 } }}>
           <Paper variant="outlined" sx={{ p: 1.75, borderRadius: 1.5, bgcolor: "#F5F3FB", borderColor: "#DCD8EE", display: "flex", gap: 1.5, alignItems: "center" }}>
-            <SmartToy sx={{ fontSize: 19, color: "#5B4AA0" }} />
+            <SmartToy sx={{ fontSize: "1.1875rem", color: "#5B4AA0" }} />
             <Typography variant="body2" sx={{ color: "#4A3E86" }}>
               Draft prepared by your browser agent · reversible until you confirm.
             </Typography>

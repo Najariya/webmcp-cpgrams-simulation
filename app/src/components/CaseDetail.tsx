@@ -27,16 +27,16 @@ const ACTOR_COLOR: Record<Actor, string> = {
 };
 
 const KIND_ICON: Partial<Record<TimelineKind, React.ReactElement<typeof Icon>>> = {
-  filed: <Description sx={{ fontSize: 14 }} />,
-  received: <Inbox sx={{ fontSize: 14 }} />,
-  under_process: <PendingActions sx={{ fontSize: 14 }} />,
-  interim_reply: <Schedule sx={{ fontSize: 14 }} />,
-  reminder: <NotificationsActive sx={{ fontSize: 14 }} />,
-  disposal: <AccountBalance sx={{ fontSize: 14 }} />,
-  rating: <StarRate sx={{ fontSize: 14 }} />,
-  appeal_filed: <Gavel sx={{ fontSize: 14 }} />,
-  appeal_disposed: <Gavel sx={{ fontSize: 14 }} />,
-  note: <InfoOutlined sx={{ fontSize: 14 }} />,
+  filed: <Description sx={{ fontSize: "0.875rem" }} />,
+  received: <Inbox sx={{ fontSize: "0.875rem" }} />,
+  under_process: <PendingActions sx={{ fontSize: "0.875rem" }} />,
+  interim_reply: <Schedule sx={{ fontSize: "0.875rem" }} />,
+  reminder: <NotificationsActive sx={{ fontSize: "0.875rem" }} />,
+  disposal: <AccountBalance sx={{ fontSize: "0.875rem" }} />,
+  rating: <StarRate sx={{ fontSize: "0.875rem" }} />,
+  appeal_filed: <Gavel sx={{ fontSize: "0.875rem" }} />,
+  appeal_disposed: <Gavel sx={{ fontSize: "0.875rem" }} />,
+  note: <InfoOutlined sx={{ fontSize: "0.875rem" }} />,
 };
 
 const ACTOR_LABEL: Record<Actor, string> = {
@@ -87,12 +87,12 @@ export default function CaseDetail() {
           <Box>
             <Typography variant="h6" sx={{ lineHeight: 1.4 }}>{g.subject}</Typography>
             <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: "wrap", rowGap: 0.75, mt: 1 }}>
-              <Chip size="small" variant="outlined" label={categoryOf(g.categoryId)?.titleEn} sx={{ height: 24, fontSize: 11 }} />
+              <Chip size="small" variant="outlined" label={categoryOf(g.categoryId)?.titleEn} sx={{ height: 24, fontSize: "0.6875rem" }} />
               {g.evidence.length > 0 && (
-                <Chip size="small" variant="outlined" icon={<AttachFile sx={{ fontSize: 13 }} />} label={`${g.evidence.length} evidence item${g.evidence.length > 1 ? "s" : ""}`} sx={{ height: 22, fontSize: 10.5, "& .MuiChip-icon": { ml: 0.5 } }} />
+                <Chip size="small" variant="outlined" icon={<AttachFile sx={{ fontSize: "0.8125rem" }} />} label={`${g.evidence.length} evidence item${g.evidence.length > 1 ? "s" : ""}`} sx={{ height: 22, fontSize: "0.6562rem", "& .MuiChip-icon": { ml: 0.5 } }} />
               )}
               {g.reminders.length > 0 && (
-                <Chip size="small" variant="outlined" icon={<NotificationsActive sx={{ fontSize: 13 }} />} label={`${g.reminders.length} reminder${g.reminders.length > 1 ? "s" : ""} sent`} sx={{ height: 22, fontSize: 10.5, "& .MuiChip-icon": { ml: 0.5 } }} />
+                <Chip size="small" variant="outlined" icon={<NotificationsActive sx={{ fontSize: "0.8125rem" }} />} label={`${g.reminders.length} reminder${g.reminders.length > 1 ? "s" : ""} sent`} sx={{ height: 22, fontSize: "0.6562rem", "& .MuiChip-icon": { ml: 0.5 } }} />
               )}
             </Stack>
           </Box>
@@ -107,8 +107,8 @@ export default function CaseDetail() {
               }}
             >
               {sla.needsAttention
-                ? <WarningAmber sx={{ fontSize: 19, color: "#B45309", mt: 0.25 }} />
-                : <InfoOutlined sx={{ fontSize: 19, color: "#3A6EA5", mt: 0.25 }} />}
+                ? <WarningAmber sx={{ fontSize: "1.1875rem", color: "#B45309", mt: 0.25 }} />
+                : <InfoOutlined sx={{ fontSize: "1.1875rem", color: "#3A6EA5", mt: 0.25 }} />}
               <Typography className="longform" variant="body2" sx={{ fontWeight: 600, lineHeight: 1.6, color: sla.needsAttention ? "#7A4608" : "#33506E" }}>
                 {sla.attentionReason}
               </Typography>
@@ -120,10 +120,10 @@ export default function CaseDetail() {
           <KV label="Relief requested" body={g.reliefRequested} />
           {g.evidence.length > 0 && (
             <Box>
-              <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: "0.08em", fontSize: 11 }}>Evidence</Typography>
+              <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: "0.08em", fontSize: "0.6875rem" }}>Evidence</Typography>
               <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: "wrap", rowGap: 0.75, mt: 0.75 }}>
                 {g.evidence.map((e) => (
-                  <Chip key={e.name} size="small" variant="outlined" icon={<AttachFile sx={{ fontSize: 13 }} />} label={e.name} sx={{ height: 24, fontSize: 11, "& .MuiChip-icon": { ml: 0.5 } }} />
+                  <Chip key={e.name} size="small" variant="outlined" icon={<AttachFile sx={{ fontSize: "0.8125rem" }} />} label={e.name} sx={{ height: 24, fontSize: "0.6875rem", "& .MuiChip-icon": { ml: 0.5 } }} />
                 ))}
               </Stack>
             </Box>
@@ -148,7 +148,7 @@ export default function CaseDetail() {
       {/* Next actions — same eligibility the WebMCP tools enforce */}
       {(canRemind || canRate || canAppeal) && (
         <Paper elevation={0} variant="outlined" sx={{ p: 2.5, borderRadius: "12px", bgcolor: "#FBFCFE" }}>
-          <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: "0.08em", fontSize: 11 }}>
+          <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: "0.08em", fontSize: "0.6875rem" }}>
             Next actions · अगले कदम
           </Typography>
           <Stack direction="row" spacing={1.25} useFlexGap sx={{ flexWrap: "wrap", rowGap: 1, mt: 1.25 }}>
@@ -200,7 +200,7 @@ export default function CaseDetail() {
 function KV({ label, body }: { label: string; body: string }) {
   return (
     <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "160px 1fr" }, gap: { xs: 0.5, sm: 2 } }}>
-      <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: "0.08em", fontSize: 11, pt: 0.5 }}>{label}</Typography>
+      <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: "0.08em", fontSize: "0.6875rem", pt: 0.5 }}>{label}</Typography>
       <Typography className="longform" variant="body2" sx={{ lineHeight: 1.75, color: "text.primary" }}>{body}</Typography>
     </Box>
   );
@@ -222,7 +222,7 @@ function NoticeCard({ icon, tone, title, body, footer }: {
         {icon}
       </Box>
       <Box sx={{ minWidth: 0 }}>
-        <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: t.color, letterSpacing: "0.02em" }}>{title}</Typography>
+        <Typography sx={{ fontSize: "0.7812rem", fontWeight: 700, color: t.color, letterSpacing: "0.02em" }}>{title}</Typography>
         <Typography className="longform" variant="body2" sx={{ mt: 0.5, lineHeight: 1.65 }}>{body}</Typography>
         {footer && <Typography variant="caption" sx={{ display: "block", mt: 0.75, color: "text.secondary" }}>{footer}</Typography>}
       </Box>
@@ -236,7 +236,7 @@ function TimelineRow({ e, last }: { e: TimelineEvent; last: boolean }) {
     <Stack direction="row" sx={{ minHeight: 52 }}>
       <Stack sx={{ alignItems: "center", width: 30, flexShrink: 0 }}>
         <Box sx={{ width: 28, height: 28, borderRadius: "50%", display: "grid", placeItems: "center", bgcolor: "#fff", border: `1.5px solid ${color}`, color }}>
-          {KIND_ICON[e.kind] ?? <InfoOutlined sx={{ fontSize: 14 }} />}
+          {KIND_ICON[e.kind] ?? <InfoOutlined sx={{ fontSize: "0.875rem" }} />}
         </Box>
         {!last && <Box sx={{ width: 1.5, flex: 1, bgcolor: "divider", my: 0.25 }} />}
       </Stack>

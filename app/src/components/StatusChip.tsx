@@ -16,7 +16,7 @@ import { appealWindowDaysLeft } from "../domain/sla";
  */
 export default function StatusChip({ g, sla, size = "small" }: { g: Grievance; sla: SlaStatus; size?: "small" | "medium" }) {
   const { label, color, variant, icon } = describe(g, sla);
-  return <Chip size={size} label={label} color={color} variant={variant} icon={icon} sx={{ fontWeight: 600, height: 28, "& .MuiChip-icon": { fontSize: 17, ml: 0.75 } }} />;
+  return <Chip size={size} label={label} color={color} variant={variant} icon={icon} sx={{ fontWeight: 600, height: 28, "& .MuiChip-icon": { fontSize: "1.0625rem", ml: 0.75 } }} />;
 }
 
 function describe(g: Grievance, sla: SlaStatus): {

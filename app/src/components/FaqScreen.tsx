@@ -49,7 +49,7 @@ export default function FaqScreen() {
         <Box sx={{ p: { xs: 1.5, md: 2.5 } }}>
           {FAQS.map((f, i) => (
             <Accordion key={f.q} expanded={open === i} onChange={(_, v) => setOpen(v ? i : false)} disableGutters>
-              <AccordionSummary expandIcon={<ExpandMore />} sx={{ fontWeight: 600, fontSize: 14 }}>
+              <AccordionSummary expandIcon={<ExpandMore />} sx={{ fontWeight: 600, fontSize: "0.875rem" }}>
                 {f.q}
               </AccordionSummary>
               <AccordionDetails sx={{ pt: 0 }}>

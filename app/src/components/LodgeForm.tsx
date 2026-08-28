@@ -66,12 +66,12 @@ export default function LodgeForm() {
     return (
       <Box sx={{ maxWidth: 640, mx: "auto", width: 1, p: { xs: 2, md: 3 } }}>
         <Paper elevation={1} sx={{ p: 4, textAlign: "center" }}>
-          <TaskAlt sx={{ fontSize: 54, color: goi.green }} />
+          <TaskAlt sx={{ fontSize: "3.375rem", color: goi.green }} />
           <Typography variant="h6" sx={{ mt: 1.5 }}>Grievance lodged successfully</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             Your registration ID — quote this for status, reminders and appeals:
           </Typography>
-          <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: 26, fontWeight: 700, color: goi.navy, my: 2, letterSpacing: "0.06em" }}>
+          <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "1.625rem", fontWeight: 700, color: goi.navy, my: 2, letterSpacing: "0.06em" }}>
             {submitted}
           </Typography>
           <Typography className="longform" variant="caption" color="text.secondary" sx={{ display: "block", mb: 2.5, lineHeight: 1.6 }}>
@@ -111,7 +111,7 @@ export default function LodgeForm() {
             <FieldLegend>2 · Grievance details · शिकायत विवरण</FieldLegend>
             <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2, mt: 1.5 }}>
               <Box>
-                <InputLabel sx={{ fontSize: 12.5, mb: 0.5 }}>Ministry / Department · मंत्रालय *</InputLabel>
+                <InputLabel sx={{ fontSize: "0.7812rem", mb: 0.5 }}>Ministry / Department · मंत्रालय *</InputLabel>
                 <Select fullWidth value={ministryId} onChange={(e) => { setMinistryId(e.target.value); setCategoryId(""); }} displayEmpty>
                   <MenuItem value="" disabled>Select ministry</MenuItem>
                   {MINISTRIES.map((m) => (
@@ -120,7 +120,7 @@ export default function LodgeForm() {
                 </Select>
               </Box>
               <Box>
-                <InputLabel sx={{ fontSize: 12.5, mb: 0.5 }}>Category · श्रेणी *</InputLabel>
+                <InputLabel sx={{ fontSize: "0.7812rem", mb: 0.5 }}>Category · श्रेणी *</InputLabel>
                 <Select fullWidth value={categoryId} onChange={(e) => setCategoryId(e.target.value)} displayEmpty disabled={!ministryId}>
                   <MenuItem value="" disabled>{ministryId ? "Select category" : "Select ministry first"}</MenuItem>
                   {cats.map((c) => (
@@ -156,7 +156,7 @@ export default function LodgeForm() {
             />
           </Box>
 
-          <Alert severity="warning" className="longform" sx={{ "& .MuiAlert-message": { fontSize: 12.5 } }}>
+          <Alert severity="warning" className="longform" sx={{ "& .MuiAlert-message": { fontSize: "0.7812rem" } }}>
             On submission you will see the exact grievance for a final confirmation — nothing is filed without it. Your
             browser agent follows the same rule.
           </Alert>
@@ -170,7 +170,7 @@ export default function LodgeForm() {
 
       {/* Tier A confirmation gate — payload shown verbatim */}
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontSize: 16, fontWeight: 700 }}>
+        <DialogTitle sx={{ fontSize: "1rem", fontWeight: 700 }}>
           Confirm submission · जमा करने की पुष्टि करें
         </DialogTitle>
         <DialogContent dividers>
@@ -198,7 +198,7 @@ export default function LodgeForm() {
 
 function FieldLegend({ children }: { children: React.ReactNode }) {
   return (
-    <Typography sx={{ fontSize: 12.5, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.05em", color: goi.saffronDark }}>
+    <Typography sx={{ fontSize: "0.7812rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.05em", color: goi.saffronDark }}>
       {children}
     </Typography>
   );

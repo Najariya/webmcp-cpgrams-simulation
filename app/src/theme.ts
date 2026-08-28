@@ -39,7 +39,7 @@ export const theme = createTheme({
     fontFamily: '"IBM Plex Sans", "IBM Plex Sans Devanagari", "SF Pro Text", system-ui, -apple-system, sans-serif',
     allVariants: { letterSpacing: "0" },
     h5: { fontWeight: 700 },
-    h6: { fontWeight: 700, fontSize: 17 },
+    h6: { fontWeight: 700, fontSize: "1.0625rem" },
     subtitle1: { fontWeight: 600 },
     subtitle2: { fontWeight: 600 },
     button: { textTransform: "none", fontWeight: 600 },
@@ -65,7 +65,7 @@ export const theme = createTheme({
         root: { borderColor: goi.cardBorder },
       },
     },
-    MuiTooltip: { styleOverrides: { tooltip: { fontSize: 12 } } },
+    MuiTooltip: { styleOverrides: { tooltip: { fontSize: "0.75rem" } } },
   },
 });
 

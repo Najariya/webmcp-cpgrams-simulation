@@ -90,15 +90,15 @@ export default function TransparencyScreen() {
         >
           <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: available ? goi.green : "#B45309", mt: "7px", flexShrink: 0 }} />
           <Box sx={{ minWidth: 0 }}>
-            <Typography sx={{ fontSize: 13, fontWeight: 700, color: available ? "#1A5C33" : "#7A4608", lineHeight: 1.4 }}>
+            <Typography sx={{ fontSize: "0.8125rem", fontWeight: 700, color: available ? "#1A5C33" : "#7A4608", lineHeight: 1.4 }}>
               {available ? "WebMCP active in this browser — this is the live registry" : "WebMCP not active — simulation view of the intended registry"}
             </Typography>
-            <Typography className="longform" sx={{ fontSize: 12, lineHeight: 1.65, color: "text.secondary", mt: 0.25 }}>
+            <Typography className="longform" sx={{ fontSize: "0.75rem", lineHeight: 1.65, color: "text.secondary", mt: 0.25 }}>
               {available ? (
                 <>Tools below are read from <code>document.modelContext.getTools()</code> and update live via <code>toolchange</code>.</>
               ) : (
                 <>Open this page in ChatGPT&rsquo;s in-app browser, or enable{" "}
-                  <Box component="code" sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: 10.5, bgcolor: "#F1F4F8", border: "1px solid #D8DFE8", borderRadius: 0.5, px: 0.5, py: 0.25, wordBreak: "break-all" }}>
+                  <Box component="code" sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.6562rem", bgcolor: "#F1F4F8", border: "1px solid #D8DFE8", borderRadius: 0.5, px: 0.5, py: 0.25, wordBreak: "break-all" }}>
                     chrome://flags/#enable-webmcp-testing
                   </Box>{" "}
                   in Chrome 149+ and relaunch.</>
@@ -110,7 +110,7 @@ export default function TransparencyScreen() {
 
       {reads.length > 0 && (
         <ToolGroup
-          icon={<VisibilityOutlined sx={{ fontSize: 16 }} />}
+          icon={<VisibilityOutlined sx={{ fontSize: "1rem" }} />}
           title={`Read tools · पढ़ने के टूल`}
           count={reads.length}
           blurb="Free for your agent to call at any time — they only read your record, so no confirmation is needed."
@@ -123,7 +123,7 @@ export default function TransparencyScreen() {
 
       {writes.length > 0 && (
         <ToolGroup
-          icon={<PanToolOutlined sx={{ fontSize: 16 }} />}
+          icon={<PanToolOutlined sx={{ fontSize: "1rem" }} />}
           title={`Action tools · कार्रवाई के टूल`}
           count={writes.length}
           blurb="These change something — your record or your preferences. Record-changing actions pause for your explicit in-page confirmation, bound to the exact payload, before anything is committed; preference changes are reversible and need none."
@@ -143,12 +143,12 @@ export default function TransparencyScreen() {
       {/* Self-test */}
       <Paper elevation={0} variant="outlined" sx={{ p: { xs: 2, md: 2.5 }, borderRadius: "12px" }}>
         <Stack direction="row" spacing={1.25} sx={{ alignItems: "center" }}>
-          <TerminalOutlined sx={{ fontSize: 17, color: goi.navy }} />
-          <Typography component="h2" sx={{ fontSize: 12.5, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.09em", color: goi.navy }}>
+          <TerminalOutlined sx={{ fontSize: "1.0625rem", color: goi.navy }} />
+          <Typography component="h2" sx={{ fontSize: "0.7812rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.09em", color: goi.navy }}>
             Try it yourself · स्वयं आज़माएँ
           </Typography>
         </Stack>
-        <Typography className="longform" sx={{ fontSize: 12.5, lineHeight: 1.65, color: "text.secondary", mt: 1 }}>
+        <Typography className="longform" sx={{ fontSize: "0.7812rem", lineHeight: 1.65, color: "text.secondary", mt: 1 }}>
           Run the exact tool your agent would call — same validation, same envelope, no agent required. The response below is precisely what your agent receives.
         </Typography>
         <Stack direction="row" spacing={1.5} useFlexGap sx={{ flexWrap: "wrap", rowGap: 1, mt: 1.75 }}>
@@ -170,15 +170,15 @@ export default function TransparencyScreen() {
                   <Box key={c} sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: c, opacity: 0.85 }} />
                 ))}
               </Stack>
-              <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: 11, color: "#8FB3E0", flex: 1 }}>
+              <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.6875rem", color: "#8FB3E0", flex: 1 }}>
                 get_sla_status → response envelope
               </Typography>
               <Button size="small" sx={{ minWidth: 28, p: 0.5, color: "#8FB3E0" }} onClick={() => setResult(null)} aria-label="Close response">
-                <Close sx={{ fontSize: 15 }} />
+                <Close sx={{ fontSize: "0.9375rem" }} />
               </Button>
             </Stack>
             <Box sx={{ p: 2, maxHeight: 320, overflow: "auto" }}>
-              <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: 11.5, color: "#C7DAF5", whiteSpace: "pre-wrap", wordBreak: "break-word", lineHeight: 1.65 }}>
+              <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.7188rem", color: "#C7DAF5", whiteSpace: "pre-wrap", wordBreak: "break-word", lineHeight: 1.65 }}>
                 {result}
               </Typography>
             </Box>
@@ -189,8 +189,8 @@ export default function TransparencyScreen() {
       {/* Voice-ready */}
       <Paper elevation={0} variant="outlined" sx={{ p: { xs: 2, md: 2.5 }, borderRadius: "12px" }}>
         <Stack direction="row" spacing={1.25} sx={{ alignItems: "center" }}>
-          <RecordVoiceOver sx={{ fontSize: 17, color: goi.navy }} />
-          <Typography component="h2" sx={{ fontSize: 12.5, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.09em", color: goi.navy }}>
+          <RecordVoiceOver sx={{ fontSize: "1.0625rem", color: goi.navy }} />
+          <Typography component="h2" sx={{ fontSize: "0.7812rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.09em", color: goi.navy }}>
             Voice-ready by design · आवाज़ के लिए तैयार
           </Typography>
         </Stack>
@@ -201,8 +201,8 @@ export default function TransparencyScreen() {
             ["Voice Mode", "A narration preference (toggle in the header, or the set_voice_mode tool) makes the page speak key citizen moments aloud in English or Hindi."],
           ].map(([t, d]) => (
             <Box key={t} sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "180px 1fr" }, gap: { xs: 0.25, sm: 2 } }}>
-              <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: goi.navyDark }}>{t}</Typography>
-              <Typography className="longform" sx={{ fontSize: 12, lineHeight: 1.65, color: "text.secondary" }}>{d}</Typography>
+              <Typography sx={{ fontSize: "0.7812rem", fontWeight: 700, color: goi.navyDark }}>{t}</Typography>
+              <Typography className="longform" sx={{ fontSize: "0.75rem", lineHeight: 1.65, color: "text.secondary" }}>{d}</Typography>
             </Box>
           ))}
         </Stack>
@@ -226,12 +226,12 @@ export default function TransparencyScreen() {
       {/* Guarantees */}
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
         <GuaranteeCard
-          icon={<VerifiedUserOutlined sx={{ fontSize: 19 }} />}
+          icon={<VerifiedUserOutlined sx={{ fontSize: "1.1875rem" }} />}
           title="Human control"
           body="Reads are free. Drafting is reversible. Consequential actions — submitting a grievance or sending an appeal — require your explicit confirmation in the page, bound to the exact payload. The agent can never silently commit them."
         />
         <GuaranteeCard
-          icon={<PrivacyTipOutlined sx={{ fontSize: 19 }} />}
+          icon={<PrivacyTipOutlined sx={{ fontSize: "1.1875rem" }} />}
           title="Privacy"
           body="The prototype has no application backend and performs no server-side persistence. Demo grievance state is stored locally in your browser — you can export it as a file or erase it at any time from the case register. Information required for an agent action is shared with your browser agent through explicit WebMCP tool contracts. All cases are fictional; no government connectivity."
         />
@@ -247,15 +247,15 @@ function ToolGroup({ icon, title, count, blurb, children }: {
     <Box>
       <Stack direction="row" spacing={1.25} sx={{ alignItems: "center", mb: 0.75 }}>
         <Box sx={{ display: "grid", placeItems: "center", width: 26, height: 26, borderRadius: 1, bgcolor: "rgba(11,47,99,0.07)", color: goi.navy }}>{icon}</Box>
-        <Typography component="h2" sx={{ fontSize: 13.5, fontWeight: 800, color: goi.navy, letterSpacing: "0.01em" }}>
+        <Typography component="h2" sx={{ fontSize: "0.8438rem", fontWeight: 800, color: goi.navy, letterSpacing: "0.01em" }}>
           {title}
-          <Typography component="span" sx={{ fontSize: 11.5, fontWeight: 700, color: "text.disabled", ml: 1, fontVariantNumeric: "tabular-nums" }}>
+          <Typography component="span" sx={{ fontSize: "0.7188rem", fontWeight: 700, color: "text.disabled", ml: 1, fontVariantNumeric: "tabular-nums" }}>
             {count}
           </Typography>
         </Typography>
         <Box sx={{ flex: 1, height: 2, bgcolor: "#E8EDF3", borderRadius: 1, maxWidth: 140 }} />
       </Stack>
-      <Typography className="longform" sx={{ fontSize: 12, lineHeight: 1.6, color: "text.secondary", mb: 1.5, pl: { sm: 5.25 } }}>{blurb}</Typography>
+      <Typography className="longform" sx={{ fontSize: "0.75rem", lineHeight: 1.6, color: "text.secondary", mb: 1.5, pl: { sm: 5.25 } }}>{blurb}</Typography>
       <Stack spacing={1.25}>{children}</Stack>
     </Box>
   );
@@ -278,35 +278,35 @@ function ToolCard({ t, index, expanded, onToggle }: {
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "30px 1fr" }, gap: { xs: 0, sm: 1.75 } }}>
         <Typography
           aria-hidden
-          sx={{ display: { xs: "none", sm: "block" }, fontFamily: '"IBM Plex Mono", monospace', fontSize: 11, fontWeight: 600, color: "#9AA8B8", pt: "3px", fontVariantNumeric: "tabular-nums" }}
+          sx={{ display: { xs: "none", sm: "block" }, fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.6875rem", fontWeight: 600, color: "#9AA8B8", pt: "3px", fontVariantNumeric: "tabular-nums" }}
         >
           {String(index + 1).padStart(2, "0")}
         </Typography>
         <Box sx={{ minWidth: 0 }}>
           <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: "center", flexWrap: "wrap", rowGap: 0.75 }}>
-            <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: 13, fontWeight: 600, color: goi.navyDark, letterSpacing: "0.01em", lineHeight: "20px" }}>
+            <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.8125rem", fontWeight: 600, color: goi.navyDark, letterSpacing: "0.01em", lineHeight: "20px" }}>
               {t.name}
             </Typography>
             <Chip
               size="small" label={isRead ? "read" : "write"}
               sx={isRead
-                ? { height: 20, fontSize: 10, fontWeight: 700, letterSpacing: "0.04em", bgcolor: "#EEF4FB", color: "#2B5B8C", border: "1px solid #C9DBF0", "& .MuiChip-label": { px: 0.75 } }
-                : { height: 20, fontSize: 10, fontWeight: 700, letterSpacing: "0.04em", bgcolor: "#FDF3E7", color: "#8A5A00", border: "1px solid #EBD5BC", "& .MuiChip-label": { px: 0.75 } }}
+                ? { height: 20, fontSize: "0.625rem", fontWeight: 700, letterSpacing: "0.04em", bgcolor: "#EEF4FB", color: "#2B5B8C", border: "1px solid #C9DBF0", "& .MuiChip-label": { px: 0.75 } }
+                : { height: 20, fontSize: "0.625rem", fontWeight: 700, letterSpacing: "0.04em", bgcolor: "#FDF3E7", color: "#8A5A00", border: "1px solid #EBD5BC", "& .MuiChip-label": { px: 0.75 } }}
             />
             {t.annotations?.untrustedContentHint && (
-              <Chip size="small" label="untrusted content" sx={{ height: 20, fontSize: 10, fontWeight: 600, letterSpacing: "0.04em", bgcolor: "transparent", color: "#8A97A6", border: "1px dashed #C6D0DC", "& .MuiChip-label": { px: 0.75 } }} />
+              <Chip size="small" label="untrusted content" sx={{ height: 20, fontSize: "0.625rem", fontWeight: 600, letterSpacing: "0.04em", bgcolor: "transparent", color: "#8A97A6", border: "1px dashed #C6D0DC", "& .MuiChip-label": { px: 0.75 } }} />
             )}
           </Stack>
-          <Typography sx={{ fontSize: 13, fontWeight: 600, color: "text.primary", lineHeight: 1.45, mt: 0.75 }}>
+          <Typography sx={{ fontSize: "0.8125rem", fontWeight: 600, color: "text.primary", lineHeight: 1.45, mt: 0.75 }}>
             {t.title}
           </Typography>
-          <Typography className="longform" sx={{ fontSize: 12, lineHeight: 1.7, color: "text.secondary", mt: 0.5 }}>
+          <Typography className="longform" sx={{ fontSize: "0.75rem", lineHeight: 1.7, color: "text.secondary", mt: 0.5 }}>
             {expanded ? full : clamp(full, 220)}
           </Typography>
           <Button
             size="small" color="inherit" onClick={onToggle}
-            sx={{ mt: 0.25, ml: -1, px: 1, fontSize: 11, fontWeight: 700, color: goi.link, textTransform: "none", "&:hover": { bgcolor: "transparent", textDecoration: "underline" } }}
-            endIcon={<ExpandMore sx={{ fontSize: 15, transform: expanded ? "rotate(180deg)" : "none", transition: "transform .15s", ml: -0.5 }} />}
+            sx={{ mt: 0.25, ml: -1, px: 1, fontSize: "0.6875rem", fontWeight: 700, color: goi.link, textTransform: "none", "&:hover": { bgcolor: "transparent", textDecoration: "underline" } }}
+            endIcon={<ExpandMore sx={{ fontSize: "0.9375rem", transform: expanded ? "rotate(180deg)" : "none", transition: "transform .15s", ml: -0.5 }} />}
           >
             {expanded ? "Hide" : "Show"} full contract{paramNames.length > 0 ? ` · ${paramNames.length} parameter${paramNames.length > 1 ? "s" : ""}` : ""}
           </Button>
@@ -317,11 +317,11 @@ function ToolCard({ t, index, expanded, onToggle }: {
                 return (
                   <Box key={p} sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "180px 1fr" }, gap: { xs: 0.25, sm: 2 }, px: 1.5, py: 1, bgcolor: i % 2 === 0 ? "#FBFCFE" : "#fff", borderTop: i === 0 ? "none" : "1px solid #EDF1F6" }}>
                     <Stack direction="row" spacing={0.5} sx={{ alignItems: "baseline" }}>
-                      <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: 11, fontWeight: 600, color: goi.navyDark, wordBreak: "break-all" }}>{p}</Typography>
-                      {required.has(p) && <Typography component="span" sx={{ fontSize: 10, fontWeight: 800, color: "#B42318" }}>*</Typography>}
+                      <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.6875rem", fontWeight: 600, color: goi.navyDark, wordBreak: "break-all" }}>{p}</Typography>
+                      {required.has(p) && <Typography component="span" sx={{ fontSize: "0.625rem", fontWeight: 800, color: "#B42318" }}>*</Typography>}
                     </Stack>
-                    <Typography sx={{ fontSize: 11, lineHeight: 1.55, color: "text.secondary" }}>
-                      <Box component="span" sx={{ color: "#5B6774", fontFamily: '"IBM Plex Mono", monospace', fontSize: 10.5 }}>{spec.type}{spec.enum ? ` · ${spec.enum.join(" | ")}` : ""}</Box>
+                    <Typography sx={{ fontSize: "0.6875rem", lineHeight: 1.55, color: "text.secondary" }}>
+                      <Box component="span" sx={{ color: "#5B6774", fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.6562rem" }}>{spec.type}{spec.enum ? ` · ${spec.enum.join(" | ")}` : ""}</Box>
                       {spec.description && <Box component="span"> — {spec.description}</Box>}
                     </Typography>
                   </Box>
@@ -342,8 +342,8 @@ function GuaranteeCard({ icon, title, body }: { icon: React.ReactNode; title: st
         {icon}
       </Box>
       <Box sx={{ minWidth: 0 }}>
-        <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: goi.navy }}>{title}</Typography>
-        <Typography className="longform" sx={{ fontSize: 12.5, lineHeight: 1.7, color: "text.secondary", mt: 0.75 }}>
+        <Typography sx={{ fontSize: "0.8438rem", fontWeight: 700, color: goi.navy }}>{title}</Typography>
+        <Typography className="longform" sx={{ fontSize: "0.7812rem", lineHeight: 1.7, color: "text.secondary", mt: 0.75 }}>
           {body}
         </Typography>
       </Box>

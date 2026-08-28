@@ -7,6 +7,7 @@ import RecordVoiceOver from "@mui/icons-material/RecordVoiceOver";
 import { goi } from "../theme";
 import { useAppStore, type View } from "../store";
 import { useVoiceStore } from "../webmcp/voice";
+import { TYPE_STEP_LABELS } from "../ui/typeScale";
 
 /**
  * CPGRAMS-style portal header (simulation). Identity band → tricolour rule →
@@ -21,7 +22,7 @@ const NAV: { view: View | null; href?: string; label: string; short: string; hi:
 ];
 
 export default function GovHeader() {
-  const { view, setView, citizen, signOut, largeType, toggleLargeType, lang, setLang } = useAppStore();
+  const { view, setView, citizen, signOut, typeStep, cycleTypeStep, lang, setLang } = useAppStore();
   const { voiceMode, toggleVoiceMode } = useVoiceStore();
   const theme = useTheme();
   const compact = useMediaQuery(theme.breakpoints.down("md"));
@@ -41,18 +42,18 @@ export default function GovHeader() {
             }}
             aria-label="Simulation seal"
           >
-            <AccountBalance sx={{ fontSize: { xs: 18, md: 22 }, color: "rgba(255,255,255,0.92)" }} />
+            <AccountBalance sx={{ fontSize: { xs: "1.125rem", md: "1.375rem" }, color: "rgba(255,255,255,0.92)" }} />
           </Box>
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography sx={{ display: { xs: "none", md: "block" }, fontSize: 11.5, lineHeight: 1.35 }}>
+            <Typography sx={{ display: { xs: "none", md: "block" }, fontSize: "0.7188rem", lineHeight: 1.35 }}>
               भारत सरकार · Government of India <span style={{ opacity: 0.55 }}>|</span> कार्मिक, लोक शिकायत और पेंशन मंत्रालय · Department of Administrative Reforms &amp; Public Grievances
             </Typography>
-            <Typography sx={{ fontSize: { xs: 17, md: 21 }, fontWeight: 800, lineHeight: 1.2, letterSpacing: "0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-              CPGRAMS {!compact && <span style={{ fontWeight: 500, fontSize: 13.5, opacity: 0.9 }}>— Centralized Public Grievance Redress and Monitoring System</span>}
+            <Typography sx={{ fontSize: { xs: "1.0625rem", md: "1.3125rem" }, fontWeight: 800, lineHeight: 1.2, letterSpacing: "0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              CPGRAMS {!compact && <span style={{ fontWeight: 500, fontSize: "0.8438rem", opacity: 0.9 }}>— Centralized Public Grievance Redress and Monitoring System</span>}
             </Typography>
           </Box>
           <Stack sx={{ alignItems: { xs: "flex-end", md: "flex-end" }, gap: 0.75, flexShrink: 0 }}>
-            <Chip size="small" label="SIMULATION · सिमुलेशन" sx={{ bgcolor: "rgba(255,153,51,0.22)", color: "#FFD9B8", border: "1px solid rgba(255,153,51,0.55)", fontWeight: 700, fontSize: 10.5, height: 20 }} />
+            <Chip size="small" label="SIMULATION · सिमुलेशन" sx={{ bgcolor: "rgba(255,153,51,0.22)", color: "#FFD9B8", border: "1px solid rgba(255,153,51,0.55)", fontWeight: 700, fontSize: "0.6562rem", height: 20 }} />
             <Stack direction="row" spacing={{ xs: 0.75, md: 1 }} sx={{ alignItems: "center" }}>
               <Box sx={{ border: "1px solid rgba(255,255,255,0.4)", borderRadius: 1, overflow: "hidden", display: "flex" }}>
                 {(["en", "hi"] as const).map((l) => (
@@ -62,7 +63,7 @@ export default function GovHeader() {
                     disableRipple
                     onClick={() => setLang(l)}
                     sx={{
-                      minWidth: 40, px: 1, py: 0.15, fontSize: 11.5, borderRadius: 0,
+                      minWidth: 40, px: 1, py: 0.15, fontSize: "0.7188rem", borderRadius: 0,
                       color: lang === l ? goi.navy : "#fff",
                       bgcolor: lang === l ? "#fff" : "transparent",
                       fontWeight: 700,
@@ -79,17 +80,23 @@ export default function GovHeader() {
                 aria-label={voiceMode ? "Voice mode on — click to turn narration off" : "Voice mode off — click to speak key updates"}
                 aria-pressed={voiceMode}
               >
-                <RecordVoiceOver sx={{ fontSize: 15 }} />
+                <RecordVoiceOver sx={{ fontSize: "0.9375rem" }} />
               </IconButton>
-              <IconButton size="small" onClick={toggleLargeType} sx={{ color: largeType ? "#FFB37E" : "#fff", border: "1px solid rgba(255,255,255,0.4)", width: 28, height: 28, borderRadius: 1 }} aria-label="Large type">
-                <TextIncrease sx={{ fontSize: 15 }} />
+              <IconButton
+                size="small"
+                onClick={cycleTypeStep}
+                sx={{ color: typeStep > 0 ? "#FFB37E" : "#fff", border: "1px solid rgba(255,255,255,0.4)", bgcolor: typeStep > 0 ? "rgba(255,179,126,0.15)" : "transparent", width: 28, height: 28, borderRadius: 1 }}
+                aria-label={`Text size ${TYPE_STEP_LABELS[typeStep]} — click to change`}
+                aria-pressed={typeStep > 0}
+              >
+                <TextIncrease sx={{ fontSize: "0.9375rem" }} />
               </IconButton>
               {citizen ? (
                 <Button
                   size="small"
                   startIcon={<LogoutIcon />}
                   onClick={signOut}
-                  sx={{ color: "#fff", borderColor: "rgba(255,255,255,0.5)", border: 1, borderRadius: 1, fontSize: 11.5, py: 0.15 }}
+                  sx={{ color: "#fff", borderColor: "rgba(255,255,255,0.5)", border: 1, borderRadius: 1, fontSize: "0.7188rem", py: 0.15 }}
                 >
                   {citizen.name}
                 </Button>
@@ -99,7 +106,7 @@ export default function GovHeader() {
                   variant="contained"
                   startIcon={<LoginIcon />}
                   onClick={() => setView("login")}
-                  sx={{ fontSize: 11.5, py: 0.15, bgcolor: goi.saffron, "&:hover": { bgcolor: goi.saffronDark } }}
+                  sx={{ fontSize: "0.7188rem", py: 0.15, bgcolor: goi.saffron, "&:hover": { bgcolor: goi.saffronDark } }}
                 >
                   Sign In
                 </Button>
@@ -131,7 +138,7 @@ export default function GovHeader() {
                   borderRadius: 0,
                   px: { xs: 1.25, md: 1.75 },
                   py: 1,
-                  fontSize: { xs: 12.5, md: 13 },
+                  fontSize: { xs: "0.7812rem", md: "0.8125rem" },
                   lineHeight: 1.4,
                   height: 44,
                   boxSizing: "border-box",

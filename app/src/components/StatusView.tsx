@@ -47,8 +47,8 @@ export default function StatusView() {
       <Paper elevation={1} sx={{ p: 0, overflow: "hidden" }}>
         <Box sx={{ bgcolor: goi.navy, color: "#fff", px: { xs: 2, md: 3 }, py: 2.25, display: "flex", flexWrap: "wrap", gap: 1.5, alignItems: "center", borderBottom: "3px solid", borderColor: goi.saffron }}>
           <Box sx={{ flex: 1, minWidth: 220, py: 0.5 }}>
-            <Typography sx={{ fontSize: 16.5, fontWeight: 700, letterSpacing: "0.01em", lineHeight: 1.35 }}>View Grievance Status · शिकायत की स्थिति</Typography>
-            <Typography className="longform" sx={{ fontSize: 12, opacity: 0.9, lineHeight: 1.55, mt: 0.25 }}>
+            <Typography sx={{ fontSize: "1.0312rem", fontWeight: 700, letterSpacing: "0.01em", lineHeight: 1.35 }}>View Grievance Status · शिकायत की स्थिति</Typography>
+            <Typography className="longform" sx={{ fontSize: "0.75rem", opacity: 0.9, lineHeight: 1.55, mt: 0.25 }}>
               Your case register — SLA clocks, interim replies, reminders, feedback and appeals.
             </Typography>
           </Box>
@@ -60,7 +60,7 @@ export default function StatusView() {
             sx={{ bgcolor: "#fff", borderRadius: 1, width: 260, "& .MuiOutlinedInput-root": { bgcolor: "#fff" } }}
             slotProps={{
               input: {
-                startAdornment: (<InputAdornment position="start"><Search sx={{ fontSize: 18 }} /></InputAdornment>),
+                startAdornment: (<InputAdornment position="start"><Search sx={{ fontSize: "1.125rem" }} /></InputAdornment>),
               },
             }}
           />
@@ -84,12 +84,12 @@ export default function StatusView() {
                 const sla = slaStatus(g, simNow);
                 return (
                   <TableRow key={g.id} hover sx={{ cursor: "pointer" }} onClick={() => { select(g.id); setView("case"); }}>
-                    <TableCell sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: 12, fontWeight: 600, whiteSpace: "nowrap" }}>{g.regId}</TableCell>
+                    <TableCell sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.75rem", fontWeight: 600, whiteSpace: "nowrap" }}>{g.regId}</TableCell>
                     <TableCell sx={{ maxWidth: 280 }}>
                       <Typography variant="body2" noWrap>{g.subject}</Typography>
                     </TableCell>
-                    <TableCell sx={{ fontSize: 12.5, color: "text.secondary", whiteSpace: "nowrap" }}>{ministryOf(g.ministryId)?.nameEn}</TableCell>
-                    <TableCell sx={{ fontSize: 12.5, whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>{g.filedAt ? new Date(g.filedAt).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" }) : "—"}</TableCell>
+                    <TableCell sx={{ fontSize: "0.7812rem", color: "text.secondary", whiteSpace: "nowrap" }}>{ministryOf(g.ministryId)?.nameEn}</TableCell>
+                    <TableCell sx={{ fontSize: "0.7812rem", whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>{g.filedAt ? new Date(g.filedAt).toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" }) : "—"}</TableCell>
                     <TableCell sx={{ whiteSpace: "nowrap" }}>
                       <Typography variant="caption" sx={{ fontWeight: 700, fontVariantNumeric: "tabular-nums", color: sla.phase === "overdue" ? "#B42318" : sla.phase === "within_target" ? "text.secondary" : goi.green }}>
                         {sla.daysElapsed !== null ? `Day ${sla.daysElapsed} / ${sla.targetDays}` : "—"}
@@ -97,7 +97,7 @@ export default function StatusView() {
                     </TableCell>
                     <TableCell><StatusChip g={g} sla={sla} /></TableCell>
                     <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
-                      <Button size="small" variant="outlined" color="inherit" sx={{ fontSize: 11.5 }} onClick={(e) => { e.stopPropagation(); select(g.id); setView("case"); }}>
+                      <Button size="small" variant="outlined" color="inherit" sx={{ fontSize: "0.7188rem" }} onClick={(e) => { e.stopPropagation(); select(g.id); setView("case"); }}>
                         Open
                       </Button>
                     </TableCell>

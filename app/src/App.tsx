@@ -16,6 +16,7 @@ import { useAppStore } from "./store";
 import { registrar } from "./webmcp/registrar";
 import { desiredTools } from "./webmcp/tools";
 import { useAnnounceStore } from "./webmcp/voice";
+import { applyTypeStep } from "./ui/typeScale";
 
 /**
  * Portal shell — CPGRAMS-style chrome over the advocate simulation.
@@ -23,9 +24,10 @@ import { useAnnounceStore } from "./webmcp/voice";
  * consequential agent actions surface through the ConfirmDialog human gate.
  */
 export default function App() {
-  const { view, largeType, citizen } = useAppStore();
+  const { view, citizen } = useAppStore();
 
   useEffect(() => {
+    applyTypeStep(useAppStore.getState().typeStep);
     // dynamic registration: state → desired tools → diff-sync
     const syncNow = () => void registrar.sync(desiredTools(useAppStore.getState()));
     syncNow();
@@ -44,7 +46,6 @@ export default function App() {
         minHeight: "100dvh",
         display: "flex",
         flexDirection: "column",
-        fontSize: largeType ? 17.5 : undefined,
         background: (t) => t.palette.background.default,
       }}
     >

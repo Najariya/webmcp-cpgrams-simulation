@@ -23,8 +23,8 @@ export default function GovHome() {
         elevation={0}
         sx={{ px: 2, py: 1.25, display: "flex", gap: 1.5, alignItems: "center", bgcolor: "#FFF9EE", border: "1px solid #EDDCBF", borderRadius: 1.5 }}
       >
-        <Campaign sx={{ fontSize: 19, color: goi.alertAmber, flexShrink: 0 }} />
-        <Typography className="longform" sx={{ fontSize: 12.5, lineHeight: 1.55, color: "#6B4E0E" }}>
+        <Campaign sx={{ fontSize: "1.1875rem", color: goi.alertAmber, flexShrink: 0 }} />
+        <Typography className="longform" sx={{ fontSize: "0.7812rem", lineHeight: 1.55, color: "#6B4E0E" }}>
           <strong>Labelled simulation</strong> for the WebMCP Challenge — nothing is submitted to any government system. Inspired by
           the CPGRAMS lifecycle; not affiliated with the Government of India.{" "}
           <Box component="span" sx={{ opacity: 0.7 }}>· यह एक प्रदर्शन सिमुलेशन है।</Box>
@@ -88,8 +88,8 @@ export default function GovHome() {
           {/* Agent assist — compact: one prompt, one hint */}
           <Paper elevation={0} sx={{ p: 2.5, borderRadius: "12px", bgcolor: goi.navy, color: "#fff" }}>
             <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 1.25 }}>
-              <SmartToy sx={{ fontSize: 16, color: "#FFB37E" }} />
-              <Typography sx={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.09em" }}>
+              <SmartToy sx={{ fontSize: "1rem", color: "#FFB37E" }} />
+              <Typography sx={{ fontSize: "0.6875rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.09em" }}>
                 Ask your agent
               </Typography>
             </Stack>
@@ -99,10 +99,10 @@ export default function GovHome() {
               sx={{ p: 1.25, bgcolor: "rgba(255,255,255,0.14)", border: "1px solid rgba(255,255,255,0.32)", borderRadius: 1.5, cursor: "pointer", transition: "background-color .15s", "&:hover": { bgcolor: "rgba(255,255,255,0.2)" } }}
             >
               <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                <Typography sx={{ fontSize: 13, fontWeight: 600, lineHeight: 1.45, flex: 1 }}>
+                <Typography sx={{ fontSize: "0.8125rem", fontWeight: 600, lineHeight: 1.45, flex: 1 }}>
                   “{HERO_PROMPT}”
                 </Typography>
-                <ContentCopy sx={{ fontSize: 14, opacity: 0.85 }} />
+                <ContentCopy sx={{ fontSize: "0.875rem", opacity: 0.85 }} />
               </Stack>
             </Paper>
             <Typography className="longform" variant="caption" sx={{ display: "block", opacity: 0.85, mt: 1.25, lineHeight: 1.55 }}>
@@ -121,7 +121,7 @@ export default function GovHome() {
                 ["2022", "CPGRAMS reforms tightened redressal to a 21-day expectation"],
               ].map(([d, t]) => (
                 <Stack key={d} direction="row" spacing={1.5} sx={{ alignItems: "baseline" }}>
-                  <Typography variant="caption" sx={{ fontWeight: 700, color: goi.link, minWidth: 74, fontSize: 11, fontVariantNumeric: "tabular-nums" }}>{d}</Typography>
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: goi.link, minWidth: 74, fontSize: "0.6875rem", fontVariantNumeric: "tabular-nums" }}>{d}</Typography>
                   <Typography variant="caption" sx={{ lineHeight: 1.55, color: "text.primary" }}>{t}</Typography>
                 </Stack>
               ))}
@@ -135,7 +135,7 @@ export default function GovHome() {
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <Typography component="h2" sx={{ fontSize: 12.5, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.09em", color: goi.navy, display: "flex", alignItems: "center", gap: 1.25 }}>
+    <Typography component="h2" sx={{ fontSize: "0.7812rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.09em", color: goi.navy, display: "flex", alignItems: "center", gap: 1.25 }}>
       {children}
       <Box sx={{ flex: 1, height: 2, bgcolor: "#E8EDF3", borderRadius: 1, maxWidth: 120 }} />
     </Typography>
@@ -153,16 +153,16 @@ function ActionCard({
             {icon}
           </Box>
           {badge && (
-            <Chip size="small" label={badge} sx={{ ml: "auto", bgcolor: "#EBF2EE", color: goi.green, fontSize: 10.5, height: 21, fontWeight: 700 }} />
+            <Chip size="small" label={badge} sx={{ ml: "auto", bgcolor: "#EBF2EE", color: goi.green, fontSize: "0.6562rem", height: 21, fontWeight: 700 }} />
           )}
         </Stack>
         <Box>
-          <Typography sx={{ fontWeight: 700, fontSize: 15, lineHeight: 1.25, display: "flex", alignItems: "baseline", gap: 1 }}>
+          <Typography sx={{ fontWeight: 700, fontSize: "0.9375rem", lineHeight: 1.25, display: "flex", alignItems: "baseline", gap: 1 }}>
             {title}
             <Typography component="span" variant="caption" sx={{ color: "text.secondary", fontWeight: 500 }}>{hi}</Typography>
           </Typography>
         </Box>
-        <Typography className="longform" variant="body2" sx={{ color: "text.secondary", lineHeight: 1.6, fontSize: 12.5 }}>{desc}</Typography>
+        <Typography className="longform" variant="body2" sx={{ color: "text.secondary", lineHeight: 1.6, fontSize: "0.7812rem" }}>{desc}</Typography>
       </CardActionArea>
     </Card>
   );
