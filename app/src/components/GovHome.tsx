@@ -6,7 +6,10 @@ import FactCheck from "@mui/icons-material/FactCheck";
 import LoginIcon from "@mui/icons-material/Login";
 import SmartToy from "@mui/icons-material/SmartToy";
 import Campaign from "@mui/icons-material/Campaign";
+import HelpOutline from "@mui/icons-material/HelpOutlineOutlined";
 import Close from "@mui/icons-material/Close";
+import ExpandMore from "@mui/icons-material/ExpandMore";
+import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
 import { registrar } from "../webmcp/registrar";
 import { useAppStore } from "../store";
 import { goi } from "../theme";
@@ -61,6 +64,22 @@ export default function GovHome() {
           </Button>
         </Paper>
       )}
+
+      {/* Plain-language explainer */}
+      <Accordion elevation={0} disableGutters sx={{ border: "1px solid #D8DFE8", borderRadius: "8px !important", "&:before": { display: "none" } }}>
+        <AccordionSummary expandIcon={<ExpandMore />} sx={{ minHeight: 44, "& .MuiAccordionSummary-content": { my: 0.5 } }}>
+          <HelpOutline sx={{ fontSize: "1.0625rem", color: goi.navy, mr: 1.25 }} />
+          <Typography sx={{ fontSize: "0.8125rem", fontWeight: 700, color: goi.navy }}>{d.home.explainerTitle} · ब्राउज़र एजेंट क्या है?</Typography>
+        </AccordionSummary>
+        <AccordionDetails sx={{ pt: 0 }}>
+          <Typography className="longform" variant="body2" sx={{ lineHeight: 1.7, color: "text.secondary" }}>
+            {d.home.explainerBody1}
+          </Typography>
+          <Typography className="longform" variant="body2" sx={{ lineHeight: 1.7, color: "text.secondary", mt: 1 }}>
+            {d.home.explainerBody2}
+          </Typography>
+        </AccordionDetails>
+      </Accordion>
 
       {/* Action cards */}
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "repeat(3, 1fr)" }, gap: 2 }}>

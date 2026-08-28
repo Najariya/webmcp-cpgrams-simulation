@@ -16,6 +16,8 @@ import { getModelContext, type RegisteredToolInfo } from "../webmcp/types";
 import { getSlaStatusTool, speakAloudTool } from "../webmcp/tools";
 import { speak, useVoiceStore } from "../webmcp/voice";
 import { goi } from "../theme";
+import { dict } from "../i18n";
+import { useAppStore } from "../store";
 
 /**
  * Screen 5 — "How your agent works". The app demonstrates WebMCP with WebMCP:
@@ -33,6 +35,8 @@ export default function TransparencyScreen() {
   const [live, setLive] = useState<RegisteredToolInfo[] | null>(null);
   const voiceMode = useVoiceStore((s) => s.voiceMode);
   const setVoiceMode = useVoiceStore((s) => s.setVoiceMode);
+  const lang = useAppStore((s) => s.lang);
+  const dd = dict(lang);
 
   useEffect(() => {
     const unsub = registrar.subscribe(() => force((n) => n + 1));
@@ -103,6 +107,9 @@ export default function TransparencyScreen() {
                   </Box>{" "}
                   in Chrome 149+ and relaunch.</>
               )}
+            </Typography>
+            <Typography className="longform" sx={{ fontSize: "0.75rem", lineHeight: 1.65, color: "text.secondary", mt: 0.75 }}>
+              {dd.agentTools.plainWords}
             </Typography>
           </Box>
         </Stack>

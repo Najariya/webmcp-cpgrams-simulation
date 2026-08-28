@@ -127,6 +127,9 @@ export const DICT = {
       bullet2: "Grievances sent by email are not entertained — use the portal or your agent.",
       bullet3: "No fee is charged for lodging a grievance.",
       askAgent: "Ask your agent",
+      explainerTitle: "What is a browser agent?",
+      explainerBody1: "A browser agent is an AI helper that can use a website for you. You say what you need in plain words; it reads the page, fills forms and clicks buttons while you watch. Before anything important happens, it asks you first.",
+      explainerBody2: "Examples: ChatGPT's in-app browser, or Chrome with WebMCP turned on. On this portal the agent gets safe, structured tools instead of guessing at buttons, and every big action needs your approval in the page.",
       askAgentCaption: "Paste in ChatGPT's browser or Chrome (WebMCP). More prompts on",
       askAgentLink: "Agent Tools",
       news1: "Agent-assisted grievance tracking added (WebMCP prototype)",
@@ -246,6 +249,9 @@ export const DICT = {
     dialog: {
       body: "Your browser agent ({action}) wants to perform this action on the simulation portal. Review the exact payload — nothing is committed until you confirm.",
     },
+    agentTools: {
+      plainWords: "In plain words: a browser agent is an AI helper that uses this site for you and asks you before doing anything consequential. Examples: ChatGPT's in-app browser, or Chrome 149+ with the WebMCP flag.",
+    },
   },
   hi: {
     common: {
@@ -287,6 +293,9 @@ export const DICT = {
       bullet2: "ईमेल से भेजी गई शिकायतें स्वीकार नहीं होतीं — पोर्टल या अपना एजेंट उपयोग करें।",
       bullet3: "शिकायत दर्ज करने के लिए कोई शुल्क नहीं है।",
       askAgent: "अपने एजेंट से पूछें",
+      explainerTitle: "ब्राउज़र एजेंट क्या है?",
+      explainerBody1: "ब्राउज़र एजेंट एक AI सहायक है जो वेबसाइट को आपके लिए इस्तेमाल कर सकता है। आप अपनी ज़रूरत सादे शब्दों में बताते हैं; वह पेज पढ़ता है, फ़ॉर्म भरता है और बटन दबाता है — और कोई बड़ा काम करने से पहले आपसे पूछता है।",
+      explainerBody2: "उदाहरण: ChatGPT का इन-ऐप ब्राउज़र, या WebMCP चालू करने वाला Chrome। इस पोर्टल पर एजेंट को अनुमान लगाने के बजाय सुरक्षित टूल मिलते हैं, और हर बड़े काम के लिए पेज में आपकी मंज़ूरी चाहिए।",
       askAgentCaption: "ChatGPT के ब्राउज़र या Chrome (WebMCP) में चिपकाएँ। और प्रॉम्प्ट यहाँ:",
       askAgentLink: "एजेंट टूल्स",
       news1: "एजेंट-सहायता शिकायत ट्रैकिंग जोड़ी गई (WebMCP प्रोटोटाइप)",
@@ -405,6 +414,9 @@ export const DICT = {
     },
     dialog: {
       body: "आपका ब्राउज़र एजेंट ({action}) सिमुलेशन पोर्टल पर यह कार्य करना चाहता है। पूरा पेलोड जाँचें — पुष्टि के बिना कुछ भी दर्ज नहीं होता।",
+    },
+    agentTools: {
+      plainWords: "सादे शब्दों में: ब्राउज़र एजेंट एक AI सहायक है जो यह साइट आपके लिए इस्तेमाल करता है और कोई बड़ा काम करने से पहले आपसे पूछता है। उदाहरण: ChatGPT का इन-ऐप ब्राउज़र, या WebMCP फ़्लैग वाला Chrome 149+।",
     },
   },
 } as const;
