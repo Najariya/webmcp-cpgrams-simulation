@@ -70,7 +70,8 @@ export default function App() {
         useAppStore.setState({ view: "login", postSignInView: v, selectedGrievanceId: id });
         return;
       }
-      useAppStore.setState({ view: v, selectedGrievanceId: id, postSignInView: null });
+      // keep the sign-in intent when landing on the login view itself
+      useAppStore.setState({ view: v, selectedGrievanceId: id, ...(v === "login" ? {} : { postSignInView: null }) });
     };
     applyHash();
     window.addEventListener("hashchange", applyHash);

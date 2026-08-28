@@ -201,3 +201,34 @@ font/style and layout to improve; voice-enabled agents should be first-class.
 - Tests 35 → 41 (voice suite). Vision verification PASS on home + Agent Tools (voice section renders in
   page language; aria-live present; set_voice_mode card consistent). Docs updated (README voice section,
   devpost, E24, UAT-12, video beat).
+
+## 2026-08-29 — External 12-point UI/UX fix list + owner copy requests (14 commits)
+
+Owner supplied a ChatGPT-authored 12-item fix prompt plus three own asks (simple-language
+browser-agent explainer, remove unnecessary dashes, no comma-before-and). All executed,
+one commit per item, tool contracts and simulation labelling untouched:
+
+1. `ff60fea` responsive masthead/nav (collapse below md, short labels, ≤120px header target)
+2. `69ccc41` working 3-step A+ text size (html root font-size, full px→rem sweep, persisted)
+3. `3f3d056` complete Hindi toggle (src/i18n.ts en/hi table: home/lodge/status/login/FAQ/
+   case/reviews/dialogs/footer + Hindi status chips & ministry names; persisted; html lang)
+4. `3eb4d3b` registration success banner on case detail (Copy ID, 21-day target, bilingual)
+5. `c08915f` sign-in intent preservation (contextual login card, redirect after OTP)
+6. `a0362e9` hash routing (#/, #/lodge, #/cases[/:regId], #/agent-tools, #/faqs; back/forward;
+   gated routes via intent flow; fixed hash round-trip wiping intent post-verif)
+7. `628b33d` one dismissible merged Home banner (WebMCP status + not-affiliated; badge+footer stay)
+8. `d52fb88` pretty-printed try-it response (speakable line, ok-chip, collapsible JSON tree, copy)
+9. `5030ecf` case table legibility (subject tooltips, wrapping status chips, chevron, keyboard
+   rows, stacked cards below md)
+10. `28b8180` type scale minimums (≥12px everywhere, footer 12.5px, chip heights)
+11. `26bcf9e` one H1 per view (masthead) + per-route document.title + unified tab title
+12. `bb85cde` three copyable agent-prompt chips with Copied ✓ feedback (AA on navy)
+13. `3381e1b` plain-language "What is a browser agent?" explainer (Home expandable + Agent Tools line, EN/HI)
+14. `811687e` copy pass — unnecessary dashes and Oxford commas removed from UI text (contracts untouched)
+
+Journey re-verified live: signed-out Lodge → contextual sign-in → form → Tier-A dialog →
+success banner with Copy ID → deep-linkable case (#/cases/PG-26-XXXXX, per-route title) →
+Agent Tools try-it (speakable line + JSON tree). 41/41 tests green throughout.
+Deviations: 375/768 viewport screenshots not possible in this embedded browser (verified at
+native width + breakpoint audit); Lighthouse/axe not runnable here (manual a11y checks:
+1×H1, aria-live, keyboard rows, aria-pressed, focus-visible rings).
