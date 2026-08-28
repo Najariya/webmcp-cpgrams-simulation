@@ -4,6 +4,8 @@ import EditNote from "@mui/icons-material/EditNote";
 import FactCheck from "@mui/icons-material/FactCheck";
 import LoginIcon from "@mui/icons-material/Login";
 import SmartToy from "@mui/icons-material/SmartToy";
+import Campaign from "@mui/icons-material/Campaign";
+import ArrowForward from "@mui/icons-material/ArrowForward";
 import { useAppStore } from "../store";
 import { goi } from "../theme";
 import { slaStatus } from "../domain/sla";
@@ -12,7 +14,6 @@ const HERO_PROMPT = "Which of my grievances needs attention today?";
 
 const PROMPTS = [
   "Help me file a grievance about this issue.",
-  HERO_PROMPT,
   "Why is this grievance delayed and what can I do?",
   "I don't agree with this disposal. What options do I have?",
   "What actions can you currently perform on this website?",
@@ -24,112 +25,124 @@ export default function GovHome() {
   const copy = (t: string) => navigator.clipboard?.writeText(t);
 
   return (
-    <Box sx={{ maxWidth: 1180, mx: "auto", width: 1, px: { xs: 1.5, md: 2 }, py: 2.5, display: "flex", flexDirection: "column", gap: 2.5 }}>
-      {/* Statutory-style alert strip, like the portal's email notice */}
-      <Paper elevation={0} sx={{ bgcolor: "#FFF7E8", border: `1px solid #F0D9B5`, px: 2, py: 1.25, display: "flex", gap: 1.25, alignItems: "flex-start" }}>
-        <Typography sx={{ color: goi.alertAmber, fontWeight: 800, fontSize: 15, lineHeight: 1 }}>!</Typography>
-        <Typography sx={{ fontSize: 13, lineHeight: 1.55, color: "#5A4310" }}>
-          This is a <strong>labelled simulation</strong> for the WebMCP Challenge — no grievance is actually submitted to any
-          government system. Inspired by the CPGRAMS lifecycle; not affiliated with the Government of India. · यह एक
-          प्रदर्शन सिमुलेशन है।
+    <Box sx={{ maxWidth: 1180, mx: "auto", width: 1, px: { xs: 1.5, md: 2 }, py: 2, display: "flex", flexDirection: "column", gap: 2.5 }}>
+      {/* Statutory notice strip */}
+      <Paper
+        elevation={0}
+        sx={{ px: 2, py: 1.25, display: "flex", gap: 1.5, alignItems: "center", bgcolor: "#FFF9EE", border: "1px solid #EDDCBF", borderRadius: 1.5 }}
+      >
+        <Campaign sx={{ fontSize: 19, color: goi.alertAmber, flexShrink: 0 }} />
+        <Typography sx={{ fontSize: 12.5, lineHeight: 1.55, color: "#6B4E0E" }}>
+          <strong>Labelled simulation</strong> for the WebMCP Challenge — nothing is submitted to any government system. Inspired by
+          the CPGRAMS lifecycle; not affiliated with the Government of India.{" "}
+          <Box component="span" sx={{ opacity: 0.7 }}>· यह एक प्रदर्शन सिमुलेशन है।</Box>
         </Typography>
       </Paper>
 
-      {/* Action cards — the portal's Register/Login · Lodge · View Status trio */}
-      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "1fr 1fr 1fr" }, gap: 2 }}>
+      {/* Action cards */}
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "repeat(3, 1fr)" }, gap: 2 }}>
         {citizen ? (
           <ActionCard
-            icon={<FactCheck />}
-            title="View Status · स्थिति देखें"
-            desc="Track your grievances, SLA clocks, reminders, feedback and appeals."
+            icon={<FactCheck />} title="View Status" hi="स्थिति देखें"
+            desc="Track grievances, SLA clocks, reminders, feedback and appeals."
             badge={attention ? `${attention} need attention` : `${grievances.length} cases`}
             onClick={() => setView("status")}
           />
         ) : (
           <ActionCard
-            icon={<LoginIcon />}
-            title="Register / Login · पंजीकरण / लॉगिन"
+            icon={<LoginIcon />} title="Register / Login" hi="पंजीकरण / लॉगिन"
             desc="Sign in (simulated) to lodge and track grievances, rate disposals and appeal."
             onClick={() => setView("login")}
           />
         )}
         <ActionCard
-          icon={<EditNote />}
-          title="Lodge Public Grievance · शिकायत दर्ज करें"
+          icon={<EditNote />} title="Lodge Grievance" hi="शिकायत दर्ज करें"
           desc="File a service-delivery grievance to a Central Ministry. 21-day redressal target."
           onClick={() => setView(citizen ? "lodge" : "login")}
         />
         <ActionCard
-          icon={<SmartToy />}
-          title="Your Browser Agent · आपका एजेंट"
-          desc="This portal also speaks WebMCP: your own agent can track, explain, remind and help appeal — with your confirmation."
+          icon={<SmartToy />} title="Your Browser Agent" hi="आपका एजेंट"
+          desc="This portal also speaks WebMCP — your agent tracks, explains and acts, with your confirmation."
           onClick={() => setView("transparency")}
           accent
         />
       </Box>
 
-      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1.55fr 1fr" }, gap: 2, alignItems: "start" }}>
-        {/* About — mirrors the portal's About CPGRAMS block */}
-        <Paper elevation={1} sx={{ p: { xs: 2, md: 3 } }}>
-          <SectionTitle>About CPGRAMS · सीपीग्राम्स के बारे में</SectionTitle>
-          <Typography variant="body2" sx={{ lineHeight: 1.75, color: "text.primary", mt: 1 }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1.6fr 1fr" }, gap: 2, alignItems: "start" }}>
+        {/* About */}
+        <Paper elevation={0} sx={{ p: { xs: 2.5, md: 3.5 }, borderRadius: 2 }}>
+          <SectionTitle>About CPGRAMS · सीपीग्राम्स</SectionTitle>
+          <Typography variant="body2" sx={{ lineHeight: 1.8, color: "text.primary", mt: 2, maxWidth: "68ch" }}>
             CPGRAMS is the Government of India's centralized portal for public grievances related to service delivery,
-            linked to all Central Ministries/Departments and States/UTs. Every grievance receives a unique registration
-            ID; the redressal target is <strong>21 days</strong>, with a mandatory <strong>interim reply</strong> when
-            redressal is delayed. After disposal, citizens rate the outcome — a <strong>Poor</strong> rating opens the
-            <strong> appeal</strong> option for 30 days before the ministry's Nodal Appellate Authority.
+            linked to all Central Ministries and Departments. Every grievance receives a unique registration ID; the
+            redressal target is <strong>21 days</strong>, with a mandatory <strong>interim reply</strong> when redressal
+            is delayed. After disposal, citizens rate the outcome — a <strong>Poor</strong> rating opens the{" "}
+            <strong>appeal</strong> option for 30 days before the ministry's Nodal Appellate Authority.
           </Typography>
-          <Box component="ul" sx={{ pl: 2.5, mt: 1.25 }}>
+          <Box component="ul" sx={{ pl: 2.25, mt: 1.75, mb: 0 }}>
             {[
               "Not taken up: RTI matters, sub-judice matters, religious matters, service matters of government employees.",
               "Grievances sent by email are not entertained — use the portal or your agent.",
               "No fee is charged for lodging a grievance.",
             ].map((t) => (
-              <Typography component="li" key={t} variant="body2" sx={{ lineHeight: 1.7, color: "text.secondary", mb: 0.25 }}>
+              <Typography component="li" key={t} variant="body2" sx={{ lineHeight: 1.75, color: "text.secondary", mb: 0.5, "&::marker": { color: goi.saffron } }}>
                 {t}
               </Typography>
             ))}
           </Box>
         </Paper>
 
-        {/* What's new + agent prompt rail */}
         <Stack spacing={2}>
-          <Paper elevation={1} sx={{ p: 2 }}>
-            <SectionTitle>What's New · नई जानकारी</SectionTitle>
-            {[
-              ["28 Aug 2026", "Agent-assisted grievance tracking added (WebMCP prototype)"],
-              ["30 May 2026", "Real CPGRAMS launched 'Samadhan Didi' AI voice chatbot for multilingual intake"],
-              ["2022", "CPGRAMS reforms tightened redressal to a 21-day expectation"],
-            ].map(([d, t]) => (
-              <Stack key={d} direction="row" sx={{ gap: 1.25, py: 0.75, borderBottom: "1px dashed", borderColor: "divider", "&:last-of-type": { borderBottom: 0 } }}>
-                <Typography variant="caption" sx={{ fontWeight: 700, color: goi.link, minWidth: 78 }}>{d}</Typography>
-                <Typography variant="caption" sx={{ lineHeight: 1.5, color: "text.primary" }}>{t}</Typography>
-              </Stack>
-            ))}
-          </Paper>
-
-          <Paper elevation={1} sx={{ p: 2, bgcolor: "#F5F8FD", borderColor: "#C7D8EF" }}>
-            <SectionTitle>Ask your agent · अपने एजेंट से पूछें</SectionTitle>
-            <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mb: 1 }}>
+          {/* Agent assist panel */}
+          <Paper elevation={0} sx={{ p: 2.5, borderRadius: "12px", bgcolor: goi.navy, color: "#fff", backgroundImage: "none" }}>
+            <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 0.75 }}>
+              <SmartToy sx={{ fontSize: 17, opacity: 0.9 }} />
+              <Typography sx={{ fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.09em", opacity: 0.9 }}>
+                Ask your agent
+              </Typography>
+            </Stack>
+            <Typography variant="caption" sx={{ display: "block", opacity: 0.75, mb: 1.5, lineHeight: 1.5 }}>
               In ChatGPT's browser or Chrome (WebMCP enabled), paste:
             </Typography>
-            <Box
+            <Paper
+              elevation={0}
               onClick={() => copy(HERO_PROMPT)}
-              sx={{ border: `1px dashed ${goi.link}`, bgcolor: "#fff", borderRadius: 1, px: 1.5, py: 1, cursor: "pointer", mb: 1.25 }}
+              sx={{ p: 1.5, mb: 1.5, bgcolor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 1.5, cursor: "pointer", transition: "background-color .15s", "&:hover": { bgcolor: "rgba(255,255,255,0.16)" } }}
             >
-              <Typography sx={{ fontSize: 13, fontWeight: 600, color: goi.link }}>
-                “{HERO_PROMPT}” <ContentCopy sx={{ fontSize: 13, verticalAlign: "middle", opacity: 0.6 }} />
-              </Typography>
-            </Box>
-            <Stack spacing={0.5}>
-              {PROMPTS.slice(0, 2).concat(PROMPTS.slice(3)).map((p) => (
-                <Typography
-                  key={p}
-                  onClick={() => copy(p)}
-                  sx={{ fontSize: 11.5, color: "text.secondary", cursor: "pointer", "&:hover": { color: goi.link } }}
-                >
-                  › {p}
+              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                <Typography sx={{ fontSize: 13, fontWeight: 600, lineHeight: 1.45, flex: 1 }}>
+                  “{HERO_PROMPT}”
                 </Typography>
+                <ContentCopy sx={{ fontSize: 15, opacity: 0.7 }} />
+              </Stack>
+            </Paper>
+            <Stack spacing={0.25}>
+              {PROMPTS.map((p) => (
+                <Stack
+                  key={p} direction="row" spacing={0.75} sx={{ alignItems: "center", py: 0.5, cursor: "pointer", opacity: 0.85, "&:hover": { opacity: 1 } }}
+                  onClick={() => copy(p)}
+                >
+                  <ArrowForward sx={{ fontSize: 12, opacity: 0.6 }} />
+                  <Typography variant="caption" sx={{ lineHeight: 1.5, flex: 1 }}>{p}</Typography>
+                  <ContentCopy sx={{ fontSize: 12, opacity: 0 }} className="copy-hover" />
+                </Stack>
+              ))}
+            </Stack>
+          </Paper>
+
+          {/* What's new */}
+          <Paper elevation={0} sx={{ p: 2.5, borderRadius: 2 }}>
+            <SectionTitle>What's New · नई जानकारी</SectionTitle>
+            <Stack spacing={1.25} sx={{ mt: 2 }}>
+              {[
+                ["28 Aug 2026", "Agent-assisted grievance tracking added (WebMCP prototype)"],
+                ["30 May 2026", "CPGRAMS launched 'Samadhan Didi' AI voice chatbot for multilingual intake"],
+                ["2022", "CPGRAMS reforms tightened redressal to a 21-day expectation"],
+              ].map(([d, t]) => (
+                <Stack key={d} direction="row" spacing={1.5} sx={{ alignItems: "baseline" }}>
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: goi.link, minWidth: 74, fontSize: 11, fontVariantNumeric: "tabular-nums" }}>{d}</Typography>
+                  <Typography variant="caption" sx={{ lineHeight: 1.55, color: "text.primary" }}>{t}</Typography>
+                </Stack>
               ))}
             </Stack>
           </Paper>
@@ -141,26 +154,34 @@ export default function GovHome() {
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <Typography sx={{ fontSize: 13, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.04em", color: goi.navy, pb: 0.75, borderBottom: `2px solid ${goi.saffron}`, display: "inline-block" }}>
+    <Typography component="h2" sx={{ fontSize: 12.5, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.09em", color: goi.navy, display: "flex", alignItems: "center", gap: 1.25 }}>
       {children}
+      <Box sx={{ flex: 1, height: 2, bgcolor: "#E8EDF3", borderRadius: 1, maxWidth: 120 }} />
     </Typography>
   );
 }
 
 function ActionCard({
-  icon, title, desc, badge, onClick, accent,
-}: { icon: React.ReactNode; title: string; desc: string; badge?: string; onClick: () => void; accent?: boolean }) {
+  icon, title, hi, desc, badge, onClick, accent,
+}: { icon: React.ReactNode; title: string; hi: string; desc: string; badge?: string; onClick: () => void; accent?: boolean }) {
   return (
-    <Card elevation={1} sx={{ borderRadius: 2, ...(accent ? { border: `1px solid #C7D8EF`, bgcolor: "#F5F8FD" } : {}) }}>
-      <CardActionArea onClick={onClick} sx={{ p: 2.25, display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 0.75, minHeight: 150, height: "100%" }}>
-        <Stack direction="row" sx={{ alignItems: "center", gap: 1, width: 1 }}>
-          <Box sx={{ width: 34, height: 34, borderRadius: 1, display: "grid", placeItems: "center", bgcolor: accent ? goi.navy : "rgba(11,47,99,0.08)", color: accent ? "#fff" : goi.navy }}>
+    <Card elevation={0} sx={{ borderRadius: "12px", ...(accent ? { border: "1px solid #C9D8EC", bgcolor: "#F5F8FC" } : {}) }}>
+      <CardActionArea onClick={onClick} sx={{ p: 2.5, display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 1, minHeight: 148, height: "100%" }}>
+        <Stack direction="row" sx={{ alignItems: "center", gap: 1.25, width: 1 }}>
+          <Box sx={{ width: 38, height: 38, borderRadius: "10px", display: "grid", placeItems: "center", bgcolor: "rgba(11,47,99,0.07)", color: goi.navy }}>
             {icon}
           </Box>
-          {badge && <Chip size="small" label={badge} sx={{ ml: "auto", bgcolor: accent ? "#E3ECF9" : "rgba(26,122,60,0.1)", color: accent ? goi.navy : goi.green, fontSize: 10.5, height: 20 }} />}
+          {badge && (
+            <Chip size="small" label={badge} sx={{ ml: "auto", bgcolor: "#EBF2EE", color: goi.green, fontSize: 10.5, height: 21, fontWeight: 700 }} />
+          )}
         </Stack>
-        <Typography sx={{ fontWeight: 700, fontSize: 14.5, lineHeight: 1.3 }}>{title}</Typography>
-        <Typography variant="caption" sx={{ color: "text.secondary", lineHeight: 1.55 }}>{desc}</Typography>
+        <Box>
+          <Typography sx={{ fontWeight: 700, fontSize: 15, lineHeight: 1.25, display: "flex", alignItems: "baseline", gap: 1 }}>
+            {title}
+            <Typography component="span" variant="caption" sx={{ color: "text.secondary", fontWeight: 500 }}>{hi}</Typography>
+          </Typography>
+        </Box>
+        <Typography variant="body2" sx={{ color: "text.secondary", lineHeight: 1.55, fontSize: 12.5 }}>{desc}</Typography>
       </CardActionArea>
     </Card>
   );

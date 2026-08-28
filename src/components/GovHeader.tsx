@@ -1,4 +1,5 @@
 import { Box, Button, Chip, IconButton, Stack, Typography } from "@mui/material";
+import AccountBalance from "@mui/icons-material/AccountBalance";
 import LoginIcon from "@mui/icons-material/Login";
 import LogoutIcon from "@mui/icons-material/Logout";
 import TextIncrease from "@mui/icons-material/TextIncrease";
@@ -29,14 +30,13 @@ export default function GovHeader() {
           <Box
             sx={{
               width: 46, height: 46, borderRadius: "50%", flexShrink: 0,
-              border: "2px solid rgba(255,255,255,0.85)",
+              border: "1.5px solid rgba(255,255,255,0.7)",
               display: "grid", placeItems: "center",
-              bgcolor: "rgba(255,255,255,0.08)",
-              fontSize: 19,
+              bgcolor: "rgba(255,255,255,0.07)",
             }}
             aria-label="Simulation seal"
           >
-            ⚖
+            <AccountBalance sx={{ fontSize: 22, color: "rgba(255,255,255,0.92)" }} />
           </Box>
           <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography sx={{ fontSize: 11.5, lineHeight: 1.35, opacity: 0.95 }}>
@@ -116,9 +116,13 @@ export default function GovHeader() {
                   bgcolor: active ? "rgba(255,255,255,0.14)" : "transparent",
                   borderRadius: 0,
                   px: 1.75,
+                  py: 1,
                   fontSize: 13,
+                  lineHeight: 1.4,
+                  height: 44,
+                  boxSizing: "border-box",
                   fontWeight: active ? 700 : 500,
-                  borderBottom: active ? `3px solid ${goi.saffron}` : "3px solid transparent",
+                  boxShadow: active ? `inset 0 -3px 0 ${goi.saffron}` : "none",
                   "&:hover": { bgcolor: "rgba(255,255,255,0.08)", color: "#fff" },
                   whiteSpace: "nowrap",
                 }}

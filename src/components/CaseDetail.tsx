@@ -1,33 +1,49 @@
-import { Box, Button, Chip, Divider, Paper, Stack, Typography } from "@mui/material";
-import PageHeader from "./PageHeader";
+import { Box, Button, Chip, Divider, Icon, Paper, Stack, Typography } from "@mui/material";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import Gavel from "@mui/icons-material/Gavel";
 import NotificationsActive from "@mui/icons-material/NotificationsActive";
-import RateReview from "@mui/icons-material/RateReview";
+import AttachFile from "@mui/icons-material/AttachFile";
+import Schedule from "@mui/icons-material/Schedule";
+import AccountBalance from "@mui/icons-material/AccountBalance";
+import Description from "@mui/icons-material/Description";
+import Inbox from "@mui/icons-material/Inbox";
+import PendingActions from "@mui/icons-material/PendingActions";
+import StarRate from "@mui/icons-material/StarRate";
+import InfoOutlined from "@mui/icons-material/InfoOutlined";
+import WarningAmber from "@mui/icons-material/WarningAmber";
+import PageHeader from "./PageHeader";
+import StatusChip from "./StatusChip";
 import { useAppStore } from "../store";
 import { categoryOf, ministryOf } from "../data/catalog";
 import { appealEligible, rateEligible, reminderEligible, slaStatus } from "../domain/sla";
-import StatusChip from "./StatusChip";
-import type { Actor, TimelineEvent } from "../domain/types";
+import { goi } from "../theme";
+import type { Actor, TimelineEvent, TimelineKind } from "../domain/types";
 
 const ACTOR_COLOR: Record<Actor, string> = {
-  citizen: "#0F6B5C",
-  agent: "#6750A4",
-  ministry: "#3B82C4",
-  system: "#7D8C99",
+  citizen: goi.navy,
+  agent: "#5B4AA0",
+  ministry: "#3A6EA5",
+  system: "#6B7684",
 };
 
-const KIND_ICON: Record<string, string> = {
-  filed: "📝",
-  received: "📥",
-  under_process: "⚙️",
-  interim_reply: "🕐",
-  reminder: "🔔",
-  disposal: "🏛️",
-  rating: "⭐",
-  appeal_filed: "⚖️",
-  appeal_disposed: "⚖️",
-  note: "📌",
+const KIND_ICON: Partial<Record<TimelineKind, React.ReactElement<typeof Icon>>> = {
+  filed: <Description sx={{ fontSize: 14 }} />,
+  received: <Inbox sx={{ fontSize: 14 }} />,
+  under_process: <PendingActions sx={{ fontSize: 14 }} />,
+  interim_reply: <Schedule sx={{ fontSize: 14 }} />,
+  reminder: <NotificationsActive sx={{ fontSize: 14 }} />,
+  disposal: <AccountBalance sx={{ fontSize: 14 }} />,
+  rating: <StarRate sx={{ fontSize: 14 }} />,
+  appeal_filed: <Gavel sx={{ fontSize: 14 }} />,
+  appeal_disposed: <Gavel sx={{ fontSize: 14 }} />,
+  note: <InfoOutlined sx={{ fontSize: 14 }} />,
+};
+
+const ACTOR_LABEL: Record<Actor, string> = {
+  citizen: "You",
+  agent: "Your agent",
+  ministry: "Ministry",
+  system: "System",
 };
 
 function fmtDate(iso: string): string {
@@ -51,81 +67,91 @@ export default function CaseDetail() {
   const canAppeal = appealEligible(g, simNow);
 
   return (
-    <Box sx={{ maxWidth: 860, mx: "auto", width: 1, p: { xs: 2, md: 3 }, display: "flex", flexDirection: "column", gap: 2.5 }}>
-      <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
-        <Button size="small" startIcon={<ArrowBack />} onClick={() => { select(null); setView("home"); }} color="inherit" sx={{ color: "text.secondary" }}>
-          My cases
-        </Button>
-      </Stack>
+    <Box sx={{ maxWidth: 900, mx: "auto", width: 1, px: { xs: 1.5, md: 2 }, py: 2.5, display: "flex", flexDirection: "column", gap: 2 }}>
+      <Button
+        size="small" startIcon={<ArrowBack />} color="inherit"
+        onClick={() => { select(null); setView("status"); }}
+        sx={{ alignSelf: "flex-start", color: "text.secondary", px: 0, "&:hover": { bgcolor: "transparent", color: goi.navy } }}
+      >
+        Case register
+      </Button>
 
-      <Paper elevation={1} sx={{ p: 0, overflow: "hidden", borderRadius: 2 }}>
+      {/* Record */}
+      <Paper elevation={0} sx={{ overflow: "hidden", borderRadius: 2 }}>
         <PageHeader
-          title={`Grievance ${g.regId} · शिकायत विवरण`}
-          sub={`${ministryOf(g.ministryId)?.nameEn ?? ""} — status, SLA, movement history and next actions`}
-          right={<StatusChip g={g} sla={sla} />}
+          title={`Grievance ${g.regId ?? ""}`}
+          sub={`${ministryOf(g.ministryId)?.nameEn ?? ""} · filed ${g.filedAt ? fmtDate(g.filedAt) : "—"}`}
+          right={<StatusChip g={g} sla={sla} size="medium" />}
         />
-        <Stack spacing={2.25} sx={{ p: { xs: 2, md: 3 } }}>
-          <Typography variant="h6" sx={{ lineHeight: 1.35 }}>{g.subject}</Typography>
-        <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: "wrap", rowGap: 0.75 }}>
-          <Chip size="small" label={`🏛 ${ministryOf(g.ministryId)?.nameEn}`} variant="outlined" sx={{ height: 26, fontSize: 11.5 }} />
-          <Chip size="small" label={categoryOf(g.categoryId)?.titleEn} variant="outlined" sx={{ height: 26, fontSize: 11.5 }} />
-          {g.filedAt && <Chip size="small" label={`Filed ${fmtDate(g.filedAt)}`} variant="outlined" sx={{ height: 26, fontSize: 11.5 }} />}
-        </Stack>
-
-        {sla.attentionReason && (
-          <Paper variant="outlined" sx={{ p: 1.5, bgcolor: sla.needsAttention ? "warning.main" : "transparent", borderColor: sla.needsAttention ? undefined : "divider" }}>
-            <Typography variant="body2" sx={{ fontWeight: 600, color: sla.needsAttention ? "#fff" : "text.primary", lineHeight: 1.5 }}>
-              {sla.attentionReason}
-            </Typography>
-          </Paper>
-        )}
-
-        <Divider />
-        <Box>
-          <Typography variant="subtitle2" gutterBottom>Grievance</Typography>
-          <Typography variant="body2" sx={{ lineHeight: 1.65, color: "text.primary" }}>{g.description}</Typography>
-        </Box>
-        <Box>
-          <Typography variant="subtitle2" gutterBottom>Relief requested</Typography>
-          <Typography variant="body2" sx={{ lineHeight: 1.6 }}>{g.reliefRequested}</Typography>
-        </Box>
-        {g.evidence.length > 0 && (
+        <Stack spacing={2.5} sx={{ p: { xs: 2, md: 3 } }}>
           <Box>
-            <Typography variant="subtitle2" gutterBottom>Evidence</Typography>
-            <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: "wrap", rowGap: 0.75 }}>
-              {g.evidence.map((e) => (
-                <Chip key={e.name} size="small" variant="outlined" label={`📎 ${e.name}`} sx={{ height: 26, fontSize: 11 }} />
-              ))}
+            <Typography variant="h6" sx={{ lineHeight: 1.4 }}>{g.subject}</Typography>
+            <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: "wrap", rowGap: 0.75, mt: 1 }}>
+              <Chip size="small" variant="outlined" label={categoryOf(g.categoryId)?.titleEn} sx={{ height: 24, fontSize: 11 }} />
+              {g.evidence.length > 0 && (
+                <Chip size="small" variant="outlined" icon={<AttachFile sx={{ fontSize: 13 }} />} label={`${g.evidence.length} evidence item${g.evidence.length > 1 ? "s" : ""}`} sx={{ height: 24, fontSize: 11, "& .MuiChip-icon": { ml: 0.5 } }} />
+              )}
+              {g.reminders.length > 0 && (
+                <Chip size="small" variant="outlined" icon={<NotificationsActive sx={{ fontSize: 13 }} />} label={`${g.reminders.length} reminder${g.reminders.length > 1 ? "s" : ""} sent`} sx={{ height: 24, fontSize: 11, "& .MuiChip-icon": { ml: 0.5 } }} />
+              )}
             </Stack>
           </Box>
-        )}
-        {g.interimReply && (
-          <Paper variant="outlined" sx={{ p: 1.75, bgcolor: "#FFFBF2", borderRadius: 2 }}>
-            <Typography variant="subtitle2" sx={{ color: "warning.dark" }}>🕐 Interim reply · {fmtDate(g.interimReply.at)}</Typography>
-            <Typography variant="body2" sx={{ mt: 0.5, lineHeight: 1.6 }}>{g.interimReply.text}</Typography>
-          </Paper>
-        )}
-        {g.disposal && (
-          <Paper variant="outlined" sx={{ p: 1.75, bgcolor: "#F4FAF6", borderRadius: 2 }}>
-            <Typography variant="subtitle2" sx={{ color: "success.dark" }}>🏛 Disposal · {fmtDate(g.disposal.at)}</Typography>
-            <Typography variant="body2" sx={{ mt: 0.5, lineHeight: 1.6 }}>{g.disposal.summary}</Typography>
-            {g.rating && <Typography variant="caption" sx={{ display: "block", mt: 1, color: "text.secondary" }}>Your feedback: {g.rating}</Typography>}
-          </Paper>
-        )}
-        {g.appeal && (
-          <Paper variant="outlined" sx={{ p: 1.75, bgcolor: "#F6F3FB", borderRadius: 2 }}>
-            <Typography variant="subtitle2" sx={{ color: "#6750A4" }}>⚖ Appeal · {g.appeal.status === "PENDING" ? "pending with Nodal Appellate Authority" : "disposed"}</Typography>
-            <Typography variant="body2" sx={{ mt: 0.5, lineHeight: 1.6 }}>{g.appeal.grounds} — {g.appeal.argument.slice(0, 220)}{g.appeal.argument.length > 220 ? "…" : ""}</Typography>
-          </Paper>
-        )}
+
+          {sla.attentionReason && (
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 1.75, borderRadius: 1.5, display: "flex", gap: 1.25, alignItems: "flex-start",
+                bgcolor: sla.needsAttention ? "#FDF3E7" : "#F4F7FB",
+                borderColor: sla.needsAttention ? "#EBD5BC" : "#D5DFEA",
+              }}
+            >
+              {sla.needsAttention
+                ? <WarningAmber sx={{ fontSize: 19, color: "#B45309", mt: 0.25 }} />
+                : <InfoOutlined sx={{ fontSize: 19, color: "#3A6EA5", mt: 0.25 }} />}
+              <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.55, color: sla.needsAttention ? "#7A4608" : "#33506E" }}>
+                {sla.attentionReason}
+              </Typography>
+            </Paper>
+          )}
+
+          <Divider />
+          <KV label="Grievance" body={g.description} />
+          <KV label="Relief requested" body={g.reliefRequested} />
+          {g.evidence.length > 0 && (
+            <Box>
+              <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: "0.08em", fontSize: 11 }}>Evidence</Typography>
+              <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: "wrap", rowGap: 0.75, mt: 0.75 }}>
+                {g.evidence.map((e) => (
+                  <Chip key={e.name} size="small" variant="outlined" icon={<AttachFile sx={{ fontSize: 13 }} />} label={e.name} sx={{ height: 26, fontSize: 11.5, "& .MuiChip-icon": { ml: 0.5 } }} />
+                ))}
+              </Stack>
+            </Box>
+          )}
+
+          {g.interimReply && <NoticeCard icon={<Schedule />} tone="amber" title={`Interim reply · ${fmtDate(g.interimReply.at)}`} body={g.interimReply.text} />}
+          {g.disposal && (
+            <NoticeCard
+              icon={<AccountBalance />} tone="green" title={`Disposal · ${fmtDate(g.disposal.at)}`} body={g.disposal.summary}
+              footer={g.rating ? `Your feedback: ${g.rating}` : undefined}
+            />
+          )}
+          {g.appeal && (
+            <NoticeCard
+              icon={<Gavel />} tone="violet" title={`Appeal · ${g.appeal.status === "PENDING" ? "pending with Nodal Appellate Authority" : "disposed"}`}
+              body={`${g.appeal.grounds} — ${g.appeal.argument.slice(0, 240)}${g.appeal.argument.length > 240 ? "…" : ""}`}
+            />
+          )}
         </Stack>
       </Paper>
 
       {/* Next actions — same eligibility the WebMCP tools enforce */}
       {(canRemind || canRate || canAppeal) && (
-        <Paper elevation={0} variant="outlined" sx={{ p: 2.25, borderRadius: 3 }}>
-          <Typography variant="subtitle2" gutterBottom>Next actions available to you and your agent</Typography>
-          <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap", rowGap: 1 }}>
+        <Paper elevation={0} variant="outlined" sx={{ p: 2.5, borderRadius: "12px", bgcolor: "#FBFCFE" }}>
+          <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: "0.08em", fontSize: 11 }}>
+            Next actions · अगले कदम
+          </Typography>
+          <Stack direction="row" spacing={1.25} useFlexGap sx={{ flexWrap: "wrap", rowGap: 1, mt: 1.25 }}>
             {canRemind && (
               <Button size="small" variant="contained" color="warning" startIcon={<NotificationsActive />} onClick={() => remind(g.id, false)}>
                 Send reminder
@@ -133,11 +159,15 @@ export default function CaseDetail() {
             )}
             {canRate && (
               <>
-                {(["Satisfactory", "Average", "Poor"] as const).map((r) => (
-                  <Button key={r} size="small" variant={r === "Poor" ? "contained" : "outlined"} color={r === "Poor" ? "error" : r === "Satisfactory" ? "success" : "inherit"} startIcon={r === "Poor" ? undefined : <RateReview />} onClick={() => rate(g.id, r)}>
-                    {r === "Satisfactory" ? "👍 Resolved" : r === "Average" ? "👌 Acceptable" : "👎 Poor — I want to appeal"}
-                  </Button>
-                ))}
+                <Button size="small" variant="outlined" color="success" onClick={() => rate(g.id, "Satisfactory")}>
+                  Resolved
+                </Button>
+                <Button size="small" variant="outlined" onClick={() => rate(g.id, "Average")}>
+                  Acceptable
+                </Button>
+                <Button size="small" variant="contained" color="error" startIcon={<Gavel />} onClick={() => rate(g.id, "Poor")}>
+                  Poor — I want to appeal
+                </Button>
               </>
             )}
             {canAppeal && (
@@ -146,15 +176,15 @@ export default function CaseDetail() {
               </Button>
             )}
           </Stack>
-          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1 }}>
-            Your agent sees these same actions as WebMCP tools — and consequential ones always ask you first.
+          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 1.5 }}>
+            Your agent sees these same actions as WebMCP tools — consequential ones always ask you first.
           </Typography>
         </Paper>
       )}
 
       {/* Timeline */}
-      <Paper elevation={1} sx={{ p: 0, overflow: "hidden", borderRadius: 2 }}>
-        <PageHeader title="Movement timeline · गतिविधि" sub="Every action on this case, attributed to you, your agent, the ministry or the system" />
+      <Paper elevation={0} sx={{ overflow: "hidden", borderRadius: 2 }}>
+        <PageHeader title="Movement timeline" sub="Every action on this case, attributed to you, your agent, the ministry or the system" />
         <Box sx={{ p: { xs: 2, md: 3 } }}>
           <Stack spacing={0}>
             {g.timeline.map((e, i) => (
@@ -167,24 +197,58 @@ export default function CaseDetail() {
   );
 }
 
-function TimelineRow({ e, last }: { e: TimelineEvent; last: boolean }) {
+function KV({ label, body }: { label: string; body: string }) {
   return (
-    <Stack direction="row" sx={{ minHeight: 56 }}>
-      <Stack sx={{ alignItems: "center", width: 34, flexShrink: 0 }}>
-        <Box sx={{ width: 26, height: 26, borderRadius: "50%", display: "grid", placeItems: "center", bgcolor: `${ACTOR_COLOR[e.actor]}14`, border: `1.5px solid ${ACTOR_COLOR[e.actor]}`, fontSize: 12 }}>
-          {KIND_ICON[e.kind] ?? "•"}
+    <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "160px 1fr" }, gap: { xs: 0.5, sm: 2 } }}>
+      <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: "0.08em", fontSize: 11, pt: 0.5 }}>{label}</Typography>
+      <Typography variant="body2" sx={{ lineHeight: 1.75, color: "text.primary" }}>{body}</Typography>
+    </Box>
+  );
+}
+
+const TONES = {
+  amber: { bg: "#FFFCF5", border: "#EBD5BC", color: "#8A5A00" },
+  green: { bg: "#F6FAF7", border: "#CBDFD2", color: "#1A6B38" },
+  violet: { bg: "#F8F7FC", border: "#DCD8EE", color: "#4A3E86" },
+};
+
+function NoticeCard({ icon, tone, title, body, footer }: {
+  icon: React.ReactNode; tone: keyof typeof TONES; title: string; body: string; footer?: string;
+}) {
+  const t = TONES[tone];
+  return (
+    <Paper variant="outlined" sx={{ p: 2, borderRadius: 1.5, bgcolor: t.bg, borderColor: t.border, display: "flex", gap: 1.5, alignItems: "flex-start" }}>
+      <Box sx={{ width: 30, height: 30, borderRadius: 1, display: "grid", placeItems: "center", bgcolor: "#fff", border: `1px solid ${t.border}`, color: t.color, flexShrink: 0 }}>
+        {icon}
+      </Box>
+      <Box sx={{ minWidth: 0 }}>
+        <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: t.color, letterSpacing: "0.02em" }}>{title}</Typography>
+        <Typography variant="body2" sx={{ mt: 0.5, lineHeight: 1.65 }}>{body}</Typography>
+        {footer && <Typography variant="caption" sx={{ display: "block", mt: 0.75, color: "text.secondary" }}>{footer}</Typography>}
+      </Box>
+    </Paper>
+  );
+}
+
+function TimelineRow({ e, last }: { e: TimelineEvent; last: boolean }) {
+  const color = ACTOR_COLOR[e.actor];
+  return (
+    <Stack direction="row" sx={{ minHeight: 52 }}>
+      <Stack sx={{ alignItems: "center", width: 30, flexShrink: 0 }}>
+        <Box sx={{ width: 28, height: 28, borderRadius: "50%", display: "grid", placeItems: "center", bgcolor: "#fff", border: `1.5px solid ${color}`, color }}>
+          {KIND_ICON[e.kind] ?? <InfoOutlined sx={{ fontSize: 14 }} />}
         </Box>
         {!last && <Box sx={{ width: 1.5, flex: 1, bgcolor: "divider", my: 0.25 }} />}
       </Stack>
-      <Box sx={{ pb: last ? 0 : 2.25, pt: 0.25, pl: 0.75 }}>
-        <Stack direction="row" spacing={1} sx={{ alignItems: "baseline", flexWrap: "wrap" }}>
+      <Box sx={{ pb: last ? 0 : 2, pt: 0.25, pl: 1.5, minWidth: 0 }}>
+        <Stack direction="row" spacing={1.25} sx={{ alignItems: "baseline", flexWrap: "wrap", rowGap: 0.25 }}>
           <Typography variant="body2" sx={{ fontWeight: 600 }}>{e.title}</Typography>
-          <Typography variant="caption" sx={{ color: ACTOR_COLOR[e.actor], fontWeight: 600 }}>
-            {e.actor === "citizen" ? "you" : e.actor === "agent" ? "your agent" : e.actor === "ministry" ? "ministry" : "system"} · {fmtDate(e.at)}
+          <Typography variant="caption" sx={{ color, fontWeight: 600 }}>
+            {ACTOR_LABEL[e.actor]} · {fmtDate(e.at)}
           </Typography>
         </Stack>
         {e.text && (
-          <Typography variant="caption" sx={{ display: "block", mt: 0.25, lineHeight: 1.5, color: "text.secondary", maxWidth: 560 }}>
+          <Typography variant="caption" sx={{ display: "block", mt: 0.25, lineHeight: 1.6, color: "text.secondary", maxWidth: 560 }}>
             {e.text}
           </Typography>
         )}
