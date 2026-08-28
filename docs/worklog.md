@@ -4,6 +4,22 @@ Durable project record. Newest entries at the top. Conventional commits referenc
 
 ---
 
+## 2026-08-29 (early hours) — typography · S3+S4 complete · production redeployed
+
+**Owner feedback:** justify text, premium font (reference-grade), compact-but-neat agent section, complete rollout S3→S5 without waiting.
+
+**Typography (`9631947`)** — IBM Plex Sans / Sans Devanagari / Plex Mono system (coherent premium family with real Devanagari); `.longform` justified hyphenation-safe reading text across all long paragraphs; agent section compacted to one hero prompt + pointer; smoothing defaults. Fonts verified loaded; QA 9/10.
+
+**S3 (`4e2c858`)** — adversarial suite: unknown keys/types, J4 recovery, J5 injection inertness (data + KB), gate-bypass (repeated submits never mutate), declined gate, enum guard, surface-leak test. 28→29 tests green.
+
+**S4 (`e3af1bd`-range)** — 20-prompt eval suite RUN against the live tool surface: **20/20** (E02 caught a real budget bug → object-aware clipping + locale-aware category titles + regression test). docs/evals.md, docs/uat.md (10 cases, 0 critical/high), docs/devpost.md (paste-ready), docs/video-script.md (2:45 storyboard).
+
+**Production** — redeployed and verified: IBM Plex live, justified text, compact agent panel, all journeys on the golden dataset. https://webmcp-cpgrams-simulation.vercel.app
+
+**Remaining (owner-assisted / owner-only)** — real-agent walkthrough in ChatGPT browser (record in qa-log.md), record ≤2:45 video (script ready), paste Devpost copy + video URL, submit by Sep 2 21:00 IST. Feature freeze Sep 1 18:00 IST — build is ahead of schedule; hold to bug-fix-only after freeze.
+
+---
+
 ## 2026-08-28 (late night) — de-slop design pass · S2 complete · repo + production live
 
 **Owner feedback:** design was "AI slop" — invest deeply, make it neat/clean/beautiful/professional/premium; don't stop until the goal; repo name authorized ("WebMCP, CP gram simulation"); production deploy authorized via dedicated link.
