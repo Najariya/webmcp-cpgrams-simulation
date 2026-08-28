@@ -3,6 +3,7 @@
  * { ok, speakable, data|error } — speakable is ONE locale, never bilingual concatenation;
  * the locale follows the citizen's current interaction language (default en).
  */
+import { registrar } from "./registrar";
 
 export interface EnvelopeOk<T> {
   ok: true;
@@ -66,8 +67,10 @@ export function err(tool: string, speakable: string, error: ToolError): string {
   return JSON.stringify(env);
 }
 
-/** Wrap any tool body: never throw — surface INTERNAL with a speakable line. */
+/** Wrap any tool body: never throw — surface INTERNAL with a speakable line.
+ *  Also brackets the invocation in the registrar's execution counter (v4 §23). */
 export async function guarded(tool: string, failSpeakable: string, body: () => Promise<string>): Promise<string> {
+  registrar.beginExecution();
   try {
     return await body();
   } catch (e) {
@@ -77,5 +80,7 @@ export async function guarded(tool: string, failSpeakable: string, body: () => P
       hint: "Unexpected page error — tell the user something went wrong and suggest retrying.",
       retry: true,
     });
+  } finally {
+    void registrar.endExecution();
   }
 }

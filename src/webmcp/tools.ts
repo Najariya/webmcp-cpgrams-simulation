@@ -1,9 +1,10 @@
 import { err, guarded, ok } from "./envelope";
 import type { ModelContextTool } from "./types";
+import { checkGate, consumeApproval, hashPayload, useConfirmStore } from "./confirm";
 import { useAppStore } from "../store";
 import { CATEGORIES, categoryOf, ministryOf } from "../data/catalog";
 import { appealEligible, rateEligible, reminderEligible, slaStatus } from "../domain/sla";
-import { REG_ID_RE, type Grievance } from "../domain/types";
+import { REG_ID_RE, draftIsValid, type Grievance, type Satisfaction } from "../domain/types";
 
 /**
  * Tool catalog (v4 §21) — read tools 1–6 + optional speak_aloud.
@@ -50,8 +51,8 @@ function requireString(tool: string, input: Input, field: string, min = 1, max =
   return null;
 }
 
-function findGrievance(tool: string, s: { grievances: Grievance[] }, idKey: string, input: Input): Grievance | string {
-  const rej = rejectUnknownKeys(tool, input, [idKey]) ?? requireString(tool, input, idKey, 6, 40);
+function findGrievance(tool: string, s: { grievances: Grievance[] }, idKey: string, input: Input, extraAllowed: string[] = []): Grievance | string {
+  const rej = rejectUnknownKeys(tool, input, [idKey, ...extraAllowed]) ?? requireString(tool, input, idKey, 6, 40);
   if (rej) return rej;
   const raw = String(input[idKey]).trim();
   const g = s.grievances.find((x) => x.regId === raw || x.id === raw);
@@ -371,6 +372,443 @@ export const speakAloudTool: ModelContextTool = {
     }),
 };
 
+// ---------- write tools 7–13 (v4 §21, §28–§29) ----------
+
+function gateNeeded(tool: string, failSpeak: string, hash: string, rows: { k: string; v: string }[], title: string): string | null {
+  const verdict = checkGate(hash);
+  if (verdict === "approved") return null;
+  if (verdict === "declined") {
+    return err(tool, "The citizen declined this action.", {
+      code: "PRECONDITION_FAILED",
+      message: "The citizen explicitly declined this payload.",
+      hint: "Do not retry the same payload immediately; ask the citizen what they would like to change.",
+    });
+  }
+  useConfirmStore.getState().ask({ action: tool, payloadHash: hash, title, rows });
+  return err(tool, failSpeak, {
+    code: "CONFIRMATION_REQUIRED",
+    message: `The page is showing the exact payload to the citizen for approval (${title}).`,
+    hint: "Ask the citizen to confirm in the page, then call again with IDENTICAL arguments within 60 seconds.",
+  });
+}
+
+function draftRows(d: { subject: string; description: string; reliefRequested: string; categoryId: string }): { k: string; v: string }[] {
+  const cat = categoryOf(d.categoryId);
+  return [
+    { k: "Ministry", v: cat ? ministryOf(cat.ministryId)?.nameEn ?? cat.ministryId : "—" },
+    { k: "Category", v: cat?.titleEn ?? d.categoryId },
+    { k: "Subject", v: d.subject },
+    { k: "Description", v: d.description },
+    { k: "Relief sought", v: d.reliefRequested },
+  ];
+}
+
+export const createGrievanceDraftTool: ModelContextTool = {
+  name: "create_grievance_draft",
+  title: "Create grievance draft",
+  description:
+    "Prepare a structured grievance draft for the citizen to review (no submission happens). Input {categoryId, subject (8-120), description (20-1200), reliefRequested (4-300)}. Get category ids from list_grievance_categories. The draft appears on the portal for the citizen to edit and confirm. Returns JSON {ok, speakable, data:{draft}, nextActions}. Reversible — no confirmation needed.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      categoryId: { type: "string", description: "Category id from list_grievance_categories." },
+      subject: { type: "string", description: "Short headline, 8–120 chars." },
+      description: { type: "string", description: "Facts of the case, 20–1200 chars. No sensitive IDs or passwords." },
+      reliefRequested: { type: "string", description: "The specific outcome wanted, 4–300 chars." },
+    },
+    required: ["categoryId", "subject", "description", "reliefRequested"],
+    additionalProperties: false,
+  },
+  annotations: { untrustedContentHint: true },
+  execute: async (input) =>
+    guarded("create_grievance_draft", "Could not create the draft.", async () => {
+      const i = input as Input;
+      const rej =
+        rejectUnknownKeys("create_grievance_draft", i, ["categoryId", "subject", "description", "reliefRequested"]) ??
+        requireString("create_grievance_draft", i, "categoryId", 3, 60) ??
+        requireString("create_grievance_draft", i, "subject", 8, 120) ??
+        requireString("create_grievance_draft", i, "description", 20, 1200) ??
+        requireString("create_grievance_draft", i, "reliefRequested", 4, 300);
+      if (rej) return rej;
+      const s = useAppStore.getState();
+      if (s.draft) {
+        return err("create_grievance_draft", "A draft is already in progress.", {
+          code: "CONFLICT",
+          message: "Only one grievance draft can be active at a time.",
+          hint: "Use update_grievance_draft to change it, or submit_grievance once the citizen approves it.",
+        });
+      }
+      const cat = categoryOf(String(i.categoryId));
+      if (!cat) {
+        return err("create_grievance_draft", "Unknown grievance category.", {
+          code: "INVALID_ARGUMENT",
+          message: `categoryId "${String(i.categoryId)}" does not exist.`,
+          field: "categoryId",
+          hint: "Call list_grievance_categories for valid ids.",
+        });
+      }
+      const fields = {
+        categoryId: cat.id,
+        ministryId: cat.ministryId,
+        subject: String(i.subject).trim(),
+        description: String(i.description).trim(),
+        reliefRequested: String(i.reliefRequested).trim(),
+        evidence: [],
+      };
+      s.saveDraft(fields);
+      return ok(
+        "create_grievance_draft",
+        "Draft prepared. It is shown on the portal for the citizen to review and edit before anything is submitted.",
+        { draft: { ...fields, valid: draftIsValid({ ...fields, id: "t", updatedAt: "" }) } },
+        ["update_grievance_draft", "submit_grievance"],
+      );
+    }),
+};
+
+export const updateGrievanceDraftTool: ModelContextTool = {
+  name: "update_grievance_draft",
+  title: "Update grievance draft",
+  description:
+    "Edit the active grievance draft. Input: any subset of {categoryId, subject, description, reliefRequested}; omitted fields stay unchanged. The citizen sees changes live on the portal. Returns JSON {ok, speakable, data:{draft}, nextActions}. Reversible — no confirmation needed.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      categoryId: { type: "string" },
+      subject: { type: "string" },
+      description: { type: "string" },
+      reliefRequested: { type: "string" },
+    },
+    additionalProperties: false,
+  },
+  annotations: { untrustedContentHint: true },
+  execute: async (input) =>
+    guarded("update_grievance_draft", "Could not update the draft.", async () => {
+      const i = input as Input;
+      const rej = rejectUnknownKeys("update_grievance_draft", i, ["categoryId", "subject", "description", "reliefRequested"]);
+      if (rej) return rej;
+      const s = useAppStore.getState();
+      if (!s.draft) {
+        return err("update_grievance_draft", "There is no draft to update.", {
+          code: "PRECONDITION_FAILED",
+          message: "No active grievance draft.",
+          hint: "Call create_grievance_draft first.",
+        });
+      }
+      const cat = i.categoryId !== undefined ? categoryOf(String(i.categoryId)) : undefined;
+      if (i.categoryId !== undefined && !cat) {
+        return err("update_grievance_draft", "Unknown grievance category.", {
+          code: "INVALID_ARGUMENT",
+          field: "categoryId",
+          message: `categoryId "${String(i.categoryId)}" does not exist.`,
+          hint: "Call list_grievance_categories for valid ids.",
+        });
+      }
+      const next = {
+        categoryId: cat?.id ?? s.draft.categoryId,
+        ministryId: cat?.ministryId ?? s.draft.ministryId,
+        subject: i.subject !== undefined ? String(i.subject).trim().slice(0, 120) : s.draft.subject,
+        description: i.description !== undefined ? String(i.description).trim().slice(0, 1200) : s.draft.description,
+        reliefRequested: i.reliefRequested !== undefined ? String(i.reliefRequested).trim().slice(0, 300) : s.draft.reliefRequested,
+        evidence: s.draft.evidence,
+      };
+      s.saveDraft(next);
+      return ok(
+        "update_grievance_draft",
+        "Draft updated on the portal.",
+        { draft: { ...next, valid: draftIsValid({ ...next, id: "t", updatedAt: "" }) } },
+        ["submit_grievance"],
+      );
+    }),
+};
+
+export const submitGrievanceTool: ModelContextTool = {
+  name: "submit_grievance",
+  title: "Submit grievance",
+  description:
+    "Submit the active draft as a simulated grievance. CONSEQUENTIAL: the citizen must approve the exact payload in the page first. First call (or after edits) returns CONFIRMATION_REQUIRED and opens the approval dialog; after the citizen confirms, retry with identical (empty) arguments to lodge the grievance and receive the registration ID (PG-26-XXXXX). Replay of a completed submission returns the same ID with alreadyProcessed=true — never files twice. Returns JSON {ok, speakable, data:{regId,...}}.",
+  inputSchema: { type: "object", properties: {}, additionalProperties: false },
+  execute: async () =>
+    guarded("submit_grievance", "Submission could not be completed.", async () => {
+      const s = useAppStore.getState();
+      if (!s.draft) {
+        // idempotent replay: the immediately-preceding successful submission answers an identical retry
+        const last = useConfirmStore.getState().resultFor("submit_grievance", "last");
+        if (last) {
+          const parsed = JSON.parse(last) as { ok: boolean; data?: Record<string, unknown> };
+          if (parsed.ok && parsed.data) {
+            return JSON.stringify({ ...parsed, data: { ...parsed.data, alreadyProcessed: true } });
+          }
+        }
+        return err("submit_grievance", "There is no grievance draft to submit.", {
+          code: "PRECONDITION_FAILED",
+          message: "No active draft.",
+          hint: "Call create_grievance_draft (and have the citizen approve the content) first.",
+        });
+      }
+      if (!draftIsValid(s.draft)) {
+        return err("submit_grievance", "The draft is not complete enough to submit.", {
+          code: "PRECONDITION_FAILED",
+          message: "Draft validation failed.",
+          hint: "Subject ≥ 8 chars, description ≥ 20 chars, relief ≥ 4 chars. Use update_grievance_draft.",
+        });
+      }
+      const payload = {
+        categoryId: s.draft.categoryId,
+        subject: s.draft.subject,
+        description: s.draft.description,
+        reliefRequested: s.draft.reliefRequested,
+      };
+      const hash = hashPayload(payload);
+      const gate = gateNeeded("submit_grievance", "The citizen must approve this grievance before it can be submitted.", hash, draftRows(payload), "Submit grievance");
+      if (gate) return gate;
+      consumeApproval(hash);
+      try {
+        const g = s.submitActiveDraft();
+        const envelope = ok(
+          "submit_grievance",
+          `Grievance lodged. The registration ID is ${g.regId}. The 21-day redressal clock has started.`,
+          { regId: g.regId, ministry: ministryOf(g.ministryId)?.nameEn, filedAt: g.filedAt },
+          ["get_sla_status", "get_grievance_details"],
+        );
+        useConfirmStore.getState().recordResult("submit_grievance", "last", envelope);
+        useConfirmStore.getState().recordResult("submit_grievance", hash, envelope);
+        return envelope;
+      } catch (e) {
+        return err("submit_grievance", "Submission failed.", {
+          code: "INTERNAL",
+          message: e instanceof Error ? e.message : String(e),
+          retry: true,
+        });
+      }
+    }),
+};
+
+function caseRows(g: Grievance, extra: { k: string; v: string }[] = []): { k: string; v: string }[] {
+  return [
+    { k: "Registration ID", v: g.regId ?? "—" },
+    { k: "Subject", v: g.subject },
+    { k: "Status", v: g.status.replace("_", " ") },
+    ...extra,
+  ];
+}
+
+export const sendReminderTool: ModelContextTool = {
+  name: "send_reminder",
+  title: "Send reminder",
+  description:
+    "Send a Reminder on a pending grievance past its 21-day target (C5). CONSEQUENTIAL: the citizen confirms in the page first (first call returns CONFIRMATION_REQUIRED; retry identical arguments after approval). Input {grievanceId}. At most one reminder per 7 days per case. Returns JSON {ok, speakable, data:{regId,reminders}}.",
+  inputSchema: {
+    type: "object",
+    properties: { grievanceId: { type: "string", description: "Registration ID (PG-26-XXXXX)." } },
+    required: ["grievanceId"],
+    additionalProperties: false,
+  },
+  execute: async (input) =>
+    guarded("send_reminder", "Could not send the reminder.", async () => {
+      const s = useAppStore.getState();
+      const found = findGrievance("send_reminder", s, "grievanceId", input as Input);
+      if (typeof found === "string") return found;
+      const g = found;
+      if (!reminderEligible(g, s.simNow)) {
+        return err("send_reminder", "This grievance is not currently eligible for a reminder.", {
+          code: "PRECONDITION_FAILED",
+          message: "Reminders apply to pending grievances past the 21-day target, at most once every 7 days.",
+          hint: "Call get_sla_status to see which case is reminder-eligible today.",
+        });
+      }
+      const payload = { grievanceId: g.regId, kind: "reminder" };
+      const hash = hashPayload(payload);
+      const gate = gateNeeded("send_reminder", "The citizen must approve the reminder before it is sent.", hash, caseRows(g, [{ k: "Action", v: "Send Reminder (C5)" }]), "Send reminder");
+      if (gate) return gate;
+      consumeApproval(hash);
+      const prior = useConfirmStore.getState().resultFor("send_reminder", hash);
+      if (prior) return JSON.stringify({ ...JSON.parse(prior), data: { ...(JSON.parse(prior) as { data: Record<string, unknown> }).data, alreadyProcessed: true } });
+      useAppStore.getState().remind(g.id, true);
+      const envelope = ok(
+        "send_reminder",
+        `Reminder recorded on ${g.regId}. The case timeline now shows it.`,
+        { regId: g.regId, reminders: g.reminders.length + 1 },
+        ["get_sla_status"],
+      );
+      useConfirmStore.getState().recordResult("send_reminder", hash, envelope);
+      return envelope;
+    }),
+};
+
+export const rateDisposalTool: ModelContextTool = {
+  name: "rate_disposal",
+  title: "Rate disposal",
+  description:
+    "Record the citizen's feedback on a disposed grievance (C6). CONSEQUENTIAL: confirm with the citizen first (first call returns CONFIRMATION_REQUIRED; retry identical arguments after approval). Input {grievanceId, rating: Satisfactory|Average|Poor}. A Poor rating opens the 30-day appeal window — after which create_appeal_draft becomes available. Returns JSON {ok, speakable, data:{regId,rating}}.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      grievanceId: { type: "string", description: "Registration ID (PG-26-XXXXX)." },
+      rating: { type: "string", enum: ["Satisfactory", "Average", "Poor"], description: "The citizen's satisfaction with the disposal." },
+    },
+    required: ["grievanceId", "rating"],
+    additionalProperties: false,
+  },
+  execute: async (input) =>
+    guarded("rate_disposal", "Could not record the feedback.", async () => {
+      const s = useAppStore.getState();
+      const i = input as Input;
+      const rej =
+        rejectUnknownKeys("rate_disposal", i, ["grievanceId", "rating"]) ??
+        requireString("rate_disposal", i, "grievanceId", 6, 40);
+      if (rej) return rej;
+      if (!["Satisfactory", "Average", "Poor"].includes(String(i.rating))) {
+        return err("rate_disposal", "Invalid rating value.", {
+          code: "INVALID_ARGUMENT",
+          field: "rating",
+          message: `"${String(i.rating)}" is not a valid rating.`,
+          hint: "Use Satisfactory, Average, or Poor — ask the citizen, never decide for them.",
+        });
+      }
+      const found = findGrievance("rate_disposal", s, "grievanceId", i, ["rating"]);
+      if (typeof found === "string") return found;
+      const g = found;
+      if (!rateEligible(g)) {
+        return err("rate_disposal", "This grievance has no disposal to rate yet.", {
+          code: "PRECONDITION_FAILED",
+          message: "Only disposed grievances can be rated (C6).",
+          hint: "Call get_sla_status to see which case awaits feedback.",
+        });
+      }
+      const rating = String(i.rating) as Satisfaction;
+      const payload = { grievanceId: g.regId, rating };
+      const hash = hashPayload(payload);
+      const gate = gateNeeded("rate_disposal", "The citizen must confirm their feedback before it is recorded.", hash, caseRows(g, [{ k: "Feedback", v: rating }]), "Rate disposal");
+      if (gate) return gate;
+      consumeApproval(hash);
+      useAppStore.getState().rate(g.id, rating);
+      return ok(
+        "rate_disposal",
+        rating === "Poor"
+          ? `Feedback recorded as Poor on ${g.regId}. The appeal option is now open for 30 days — I can prepare an appeal draft if the citizen wants.`
+          : `Feedback recorded as ${rating} on ${g.regId}. The case will close.`,
+        { regId: g.regId, rating },
+        rating === "Poor" ? ["create_appeal_draft"] : ["get_sla_status"],
+      );
+    }),
+};
+
+export const createAppealDraftTool: ModelContextTool = {
+  name: "create_appeal_draft",
+  title: "Create appeal draft",
+  description:
+    "Prepare an appeal against a Poor-rated disposal, grounded in the case record (grounds: what was wrong with the disposal; argument ≥ 30 chars, ideally citing the original relief and evidence). Input {grievanceId, grounds, argument}. Available only inside the 30-day appeal window after a Poor rating. Reversible — no confirmation needed. Returns JSON {ok, speakable, data:{appealDraft}, nextActions}.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      grievanceId: { type: "string", description: "Registration ID (PG-26-XXXXX) of the Poor-rated grievance." },
+      grounds: { type: "string", description: "The objection to the disposal, 4–200 chars." },
+      argument: { type: "string", description: "The appeal argument, 30–1500 chars." },
+    },
+    required: ["grievanceId", "grounds", "argument"],
+    additionalProperties: false,
+  },
+  annotations: { untrustedContentHint: true },
+  execute: async (input) =>
+    guarded("create_appeal_draft", "Could not prepare the appeal.", async () => {
+      const s = useAppStore.getState();
+      const i = input as Input;
+      const rej =
+        rejectUnknownKeys("create_appeal_draft", i, ["grievanceId", "grounds", "argument"]) ??
+        requireString("create_appeal_draft", i, "grievanceId", 6, 40) ??
+        requireString("create_appeal_draft", i, "grounds", 4, 200) ??
+        requireString("create_appeal_draft", i, "argument", 30, 1500);
+      if (rej) return rej;
+      const found = findGrievance("create_appeal_draft", s, "grievanceId", i, ["grounds", "argument"]);
+      if (typeof found === "string") return found;
+      const g = found;
+      if (!appealEligible(g, s.simNow)) {
+        return err("create_appeal_draft", "This grievance is not appeal-eligible.", {
+          code: "PRECONDITION_FAILED",
+          message: "Appeals require a disposed grievance rated Poor, inside the 30-day window (C6, C7).",
+          hint: "Call get_sla_status; if feedback is pending, record it with rate_disposal first.",
+        });
+      }
+      useAppStore.getState().startAppealDraft(g.id, String(i.grounds).trim(), String(i.argument).trim());
+      return ok(
+        "create_appeal_draft",
+        "Appeal draft prepared and shown on the portal. Nothing is filed until the citizen confirms.",
+        {
+          appealDraft: {
+            regId: g.regId,
+            grounds: String(i.grounds).trim(),
+            argumentPreview: `${String(i.argument).trim().slice(0, 120)}…`,
+            addressedTo: ministryOf(g.ministryId)?.appellateAuthority,
+          },
+        },
+        ["send_appeal"],
+      );
+    }),
+};
+
+export const sendAppealTool: ModelContextTool = {
+  name: "send_appeal",
+  title: "Send appeal",
+  description:
+    "File the prepared appeal with the ministry's Nodal Appellate Authority. CONSEQUENTIAL: the citizen must approve the exact appeal in the page first (first call returns CONFIRMATION_REQUIRED; retry with identical empty arguments after approval). Replay after success returns the original result with alreadyProcessed=true. Returns JSON {ok, speakable, data:{regId,appealFiledAt}}.",
+  inputSchema: { type: "object", properties: {}, additionalProperties: false },
+  execute: async () =>
+    guarded("send_appeal", "The appeal could not be filed.", async () => {
+      const s = useAppStore.getState();
+      if (!s.appealDraft) {
+        const last = useConfirmStore.getState().resultFor("send_appeal", "last");
+        if (last) {
+          const parsed = JSON.parse(last) as { ok: boolean; data: Record<string, unknown> };
+          if (parsed.ok) return JSON.stringify({ ...parsed, data: { ...parsed.data, alreadyProcessed: true } });
+        }
+        return err("send_appeal", "There is no appeal draft to send.", {
+          code: "PRECONDITION_FAILED",
+          message: "No active appeal draft.",
+          hint: "Call create_appeal_draft on a Poor-rated case first.",
+        });
+      }
+      const g = s.grievances.find((x) => x.id === s.appealDraft!.grievanceId);
+      if (!g || !appealEligible(g, s.simNow)) {
+        return err("send_appeal", "This case is no longer appeal-eligible.", {
+          code: "PRECONDITION_FAILED",
+          message: "The appeal window may have closed.",
+          hint: "Call get_sla_status to check the case state.",
+        });
+      }
+      const payload = { grievanceId: g.regId, grounds: s.appealDraft.grounds, argument: s.appealDraft.argument };
+      const hash = hashPayload(payload);
+      const rows = [
+        { k: "Registration ID", v: g.regId ?? "—" },
+        { k: "Original relief", v: g.reliefRequested },
+        { k: "Disposal being appealed", v: g.disposal?.summary ?? "—" },
+        { k: "Grounds", v: payload.grounds },
+        { k: "Appeal argument", v: payload.argument },
+        { k: "Addressed to", v: ministryOf(g.ministryId)?.appellateAuthority ?? "Nodal Appellate Authority" },
+      ];
+      const gate = gateNeeded("send_appeal", "The citizen must approve the appeal before it is filed.", hash, rows, "Send appeal");
+      if (gate) return gate;
+      consumeApproval(hash);
+      try {
+        const updated = s.sendAppeal();
+        const envelope = ok(
+          "send_appeal",
+          `Appeal filed on ${updated.regId} with the Nodal Appellate Authority. Disposal target: about 30 days.`,
+          { regId: updated.regId, appealFiledAt: updated.appeal?.filedAt },
+          ["get_grievance_details"],
+        );
+        useConfirmStore.getState().recordResult("send_appeal", "last", envelope);
+        useConfirmStore.getState().recordResult("send_appeal", hash, envelope);
+        return envelope;
+      } catch (e) {
+        return err("send_appeal", "The appeal could not be filed.", {
+          code: "INTERNAL",
+          message: e instanceof Error ? e.message : String(e),
+          retry: true,
+        });
+      }
+    }),
+};
+
 // ---------- dynamic surface (v4 §22) ----------
 
 export const READ_TOOLS: ModelContextTool[] = [
@@ -382,9 +820,26 @@ export const READ_TOOLS: ModelContextTool[] = [
   checkDuplicateTool,
 ];
 
-/** Desired tool set from current state. Write tools join in S2. */
+/** Desired tool set from current state — base reads + state-conditional writes.
+ *  Consequential tools stay registered for a short replay window after success
+ *  (v4 §22 surface × §29 idempotency). */
 export function desiredTools(state: ReturnType<typeof useAppStore.getState>): ModelContextTool[] {
-  void state;
-  void categoryOf;
-  return [...READ_TOOLS];
+  const surf = (() => {
+    try {
+      return state.surface();
+    } catch {
+      return null;
+    }
+  })();
+  const confirm = useConfirmStore.getState();
+  const tools = [...READ_TOOLS];
+  if (!surf) return tools;
+  if (surf.noDraft) tools.push(createGrievanceDraftTool);
+  else tools.push(updateGrievanceDraftTool);
+  if (surf.draftValid || confirm.recentResult("submit_grievance")) tools.push(submitGrievanceTool);
+  if (surf.reminderEligibleIds.length > 0 || confirm.recentResult("send_reminder")) tools.push(sendReminderTool);
+  if (surf.rateEligibleIds.length > 0) tools.push(rateDisposalTool);
+  if (surf.appealEligibleIds.length > 0) tools.push(createAppealDraftTool);
+  if (surf.appealDraftValid || confirm.recentResult("send_appeal")) tools.push(sendAppealTool);
+  return tools;
 }

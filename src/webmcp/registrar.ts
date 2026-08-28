@@ -11,6 +11,9 @@ class ToolRegistrar {
   private specs = new Map<string, ModelContextTool>();
   /** Bump on every change; consumers (panel) re-render via subscription. */
   private listeners = new Set<() => void>();
+  /** v4 §23: defer reconciliation while tool invocations are in flight. */
+  private activeExecutions = 0;
+  private pendingSync: ModelContextTool[] | null = null;
   version = 0;
 
   get available(): boolean {
@@ -21,8 +24,27 @@ class ToolRegistrar {
     return [...this.specs.values()].sort((a, b) => a.name.localeCompare(b.name));
   }
 
+  /** Mark the start of a tool invocation (called by guarded()). */
+  beginExecution(): void {
+    this.activeExecutions += 1;
+  }
+
+  /** Mark the end; flush a deferred sync if this was the last invocation. */
+  async endExecution(): Promise<void> {
+    this.activeExecutions = Math.max(0, this.activeExecutions - 1);
+    if (this.activeExecutions === 0 && this.pendingSync) {
+      const desired = this.pendingSync;
+      this.pendingSync = null;
+      await this.sync(desired);
+    }
+  }
+
   /** Sync registration to the desired tool-name set. */
   async sync(desired: ModelContextTool[]): Promise<void> {
+    if (this.activeExecutions > 0) {
+      this.pendingSync = desired; // complete current execution, then reconcile
+      return;
+    }
     const mc = getModelContext();
     const desiredNames = new Set(desired.map((t) => t.name));
 

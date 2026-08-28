@@ -9,22 +9,29 @@ import StatusView from "./components/StatusView";
 import CaseDetail from "./components/CaseDetail";
 import TransparencyScreen from "./components/TransparencyScreen";
 import FaqScreen from "./components/FaqScreen";
+import ConfirmDialog from "./components/ConfirmDialog";
+import DraftReview from "./components/DraftReview";
+import AppealReview from "./components/AppealReview";
 import { useAppStore } from "./store";
 import { registrar } from "./webmcp/registrar";
 import { desiredTools } from "./webmcp/tools";
 
 /**
  * Portal shell — CPGRAMS-style chrome over the advocate simulation.
- * Citizen-only sections (lodge/status/case/appeal) redirect to the mapped,
- * simulated sign-in when no citizen session exists.
+ * The tool registry re-syncs on every state change (dynamic surface, v4 §22);
+ * consequential agent actions surface through the ConfirmDialog human gate.
  */
 export default function App() {
   const { view, largeType, citizen } = useAppStore();
 
   useEffect(() => {
-    registrar.sync(desiredTools(useAppStore.getState()));
+    // dynamic registration: state → desired tools → diff-sync
+    const syncNow = () => void registrar.sync(desiredTools(useAppStore.getState()));
+    syncNow();
+    const unsub = useAppStore.subscribe(syncNow);
     return () => {
-      registrar.unregisterAll();
+      unsub();
+      void registrar.unregisterAll();
     };
   }, []);
 
@@ -58,13 +65,11 @@ export default function App() {
         {view === "case" && authed(<CaseDetail />)}
         {view === "faq" && <FaqScreen />}
         {view === "transparency" && <TransparencyScreen />}
-        {(view === "draft_review" || view === "appeal_review") && authed(
-          <Box sx={{ p: 4, maxWidth: 640 }}>
-            Review screen — arrives with the agent drafting journey.
-          </Box>,
-        )}
+        {view === "draft_review" && authed(<DraftReview />)}
+        {view === "appeal_review" && authed(<AppealReview />)}
       </Box>
 
+      <ConfirmDialog />
       <GovFooter />
     </Box>
   );
