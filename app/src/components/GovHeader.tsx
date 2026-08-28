@@ -48,7 +48,7 @@ export default function GovHeader() {
             <Typography sx={{ display: { xs: "none", md: "block" }, fontSize: "0.75rem", lineHeight: 1.35 }}>
               भारत सरकार · Government of India <span style={{ opacity: 0.55 }}>|</span> कार्मिक, लोक शिकायत और पेंशन मंत्रालय · Department of Administrative Reforms &amp; Public Grievances
             </Typography>
-            <Typography sx={{ fontSize: { xs: "1.0625rem", md: "1.3125rem" }, fontWeight: 800, lineHeight: 1.2, letterSpacing: "0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            <Typography component="h1" sx={{ fontSize: { xs: "1.0625rem", md: "1.3125rem" }, fontWeight: 800, lineHeight: 1.2, letterSpacing: "0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               CPGRAMS {!compact && <span style={{ fontWeight: 500, fontSize: "0.8438rem", opacity: 0.9 }}>— Centralized Public Grievance Redress and Monitoring System</span>}
             </Typography>
           </Box>

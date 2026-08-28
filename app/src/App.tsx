@@ -75,11 +75,32 @@ export default function App() {
     applyHash();
     window.addEventListener("hashchange", applyHash);
 
+    // per-route document.title
+    const titleFor = (v: View, sel: string | null): string => {
+      const base = "CPGRAMS Simulation";
+      switch (v) {
+        case "lodge": return `Lodge Grievance · ${base}`;
+        case "status": return `My Cases · ${base}`;
+        case "case": return sel ? `${sel} · ${base}` : `My Cases · ${base}`;
+        case "transparency": return `Agent Tools · ${base}`;
+        case "faq": return `FAQs · ${base}`;
+        case "login": return `Sign In · ${base}`;
+        case "draft_review": return `Grievance Review · ${base}`;
+        case "appeal_review": return `Appeal Review · ${base}`;
+        default: return `${base} · The Citizen's Advocate`;
+      }
+    };
+    const setTitle = (v: View, sel: string | null) => {
+      document.title = titleFor(v, sel);
+    };
+    setTitle(useAppStore.getState().view, useAppStore.getState().selectedGrievanceId);
+
     // state → hash (shareable links prefer the registration ID)
     const unsubHash = useAppStore.subscribe((s) => {
       const g = s.grievances.find((x) => x.id === s.selectedGrievanceId || x.regId === s.selectedGrievanceId);
       const want = hashFromState(s.view, g?.regId ?? s.selectedGrievanceId);
       if (want !== location.hash) location.hash = want;
+      setTitle(s.view, g?.regId ?? s.selectedGrievanceId);
     });
 
     // dynamic registration: state → desired tools → diff-sync

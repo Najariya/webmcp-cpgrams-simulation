@@ -162,7 +162,7 @@ export default function TransparencyScreen() {
       <Paper elevation={0} variant="outlined" sx={{ p: { xs: 2, md: 2.5 }, borderRadius: "12px" }}>
         <Stack direction="row" spacing={1.25} sx={{ alignItems: "center" }}>
           <TerminalOutlined sx={{ fontSize: "1.0625rem", color: goi.navy }} />
-          <Typography component="h2" sx={{ fontSize: "0.7812rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.09em", color: goi.navy }}>
+          <Typography component="h3" sx={{ fontSize: "0.7812rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.09em", color: goi.navy }}>
             Try it yourself · स्वयं आज़माएँ
           </Typography>
         </Stack>
@@ -232,7 +232,7 @@ export default function TransparencyScreen() {
       <Paper elevation={0} variant="outlined" sx={{ p: { xs: 2, md: 2.5 }, borderRadius: "12px" }}>
         <Stack direction="row" spacing={1.25} sx={{ alignItems: "center" }}>
           <RecordVoiceOver sx={{ fontSize: "1.0625rem", color: goi.navy }} />
-          <Typography component="h2" sx={{ fontSize: "0.7812rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.09em", color: goi.navy }}>
+          <Typography component="h3" sx={{ fontSize: "0.7812rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.09em", color: goi.navy }}>
             Voice-ready by design · आवाज़ के लिए तैयार
           </Typography>
         </Stack>

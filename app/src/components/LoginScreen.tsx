@@ -39,7 +39,7 @@ export default function LoginScreen() {
     <Box sx={{ maxWidth: 480, mx: "auto", width: 1, p: { xs: 2, md: 3 } }}>
       <Paper elevation={1} sx={{ p: 0, overflow: "hidden" }}>
         <Box sx={{ bgcolor: goi.navy, color: "#fff", px: 3, py: 2, borderBottom: "3px solid", borderColor: goi.saffron }}>
-          <Typography sx={{ fontWeight: 700, fontSize: "1.0625rem" }}>
+          <Typography component="h2" sx={{ fontWeight: 700, fontSize: "1.0625rem" }}>
             {mode === "signin" ? "Citizen Sign In · नागरिक साइन इन" : "Citizen Registration · नागरिक पंजीकरण"}
           </Typography>
           <Typography className="longform" variant="caption" sx={{ opacity: 0.9 }}>

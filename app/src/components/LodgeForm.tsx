@@ -89,7 +89,7 @@ export default function LodgeForm() {
     <Box sx={{ maxWidth: 860, mx: "auto", width: 1, px: { xs: 1.5, md: 2 }, py: 2.5 }}>
       <Paper elevation={1} sx={{ p: 0, overflow: "hidden" }}>
         <Box sx={{ bgcolor: goi.navy, color: "#fff", px: 3, py: 2 }}>
-          <Typography sx={{ fontWeight: 700 }}>Lodge Public Grievance · लोक शिकायत दर्ज करें</Typography>
+          <Typography component="h2" sx={{ fontWeight: 700 }}>Lodge Public Grievance · लोक शिकायत दर्ज करें</Typography>
           <Typography variant="caption" sx={{ opacity: 0.9 }}>
             {d.lodge.bandSub}
           </Typography>
