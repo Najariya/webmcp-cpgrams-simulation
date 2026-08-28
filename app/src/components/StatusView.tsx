@@ -59,7 +59,7 @@ export default function StatusView() {
                 const sla = slaStatus(g, simNow);
                 return (
                   <TableRow key={g.id} hover sx={{ cursor: "pointer" }} onClick={() => { select(g.id); setView("case"); }}>
-                    <TableCell sx={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 12, fontWeight: 600, whiteSpace: "nowrap" }}>{g.regId}</TableCell>
+                    <TableCell sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: 12, fontWeight: 600, whiteSpace: "nowrap" }}>{g.regId}</TableCell>
                     <TableCell sx={{ maxWidth: 280 }}>
                       <Typography variant="body2" noWrap>{g.subject}</Typography>
                     </TableCell>

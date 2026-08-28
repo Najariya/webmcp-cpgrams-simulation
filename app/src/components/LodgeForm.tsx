@@ -71,7 +71,7 @@ export default function LodgeForm() {
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             Your registration ID — quote this for status, reminders and appeals:
           </Typography>
-          <Typography sx={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 26, fontWeight: 700, color: goi.navy, my: 2, letterSpacing: "0.06em" }}>
+          <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: 26, fontWeight: 700, color: goi.navy, my: 2, letterSpacing: "0.06em" }}>
             {submitted}
           </Typography>
           <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2.5, lineHeight: 1.6 }}>

@@ -39,7 +39,7 @@ export default function ConfirmDialog() {
         </Typography>
       </DialogTitle>
       <DialogContent dividers sx={{ pt: 1.5 }}>
-        <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mb: 1.5 }}>
+        <Typography className="longform" variant="caption" sx={{ color: "text.secondary", display: "block", mb: 1.5 }}>
           Your browser agent ({request.action}) wants to perform this action on the simulation portal. Review the exact
           payload — nothing is committed until you confirm.
         </Typography>

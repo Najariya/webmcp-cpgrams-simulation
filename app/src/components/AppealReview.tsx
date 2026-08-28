@@ -50,7 +50,7 @@ export default function AppealReview() {
         <Stack spacing={2.5} sx={{ p: { xs: 2, md: 3 } }}>
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "140px 1fr" }, gap: { xs: 0.5, sm: 2 } }}>
             <Typography variant="overline" sx={{ color: "text.secondary", fontSize: 11, pt: 0.5 }}>Original relief</Typography>
-            <Typography variant="body2" sx={{ lineHeight: 1.7 }}>{g.reliefRequested}</Typography>
+            <Typography className="longform" variant="body2" sx={{ lineHeight: 1.7 }}>{g.reliefRequested}</Typography>
             <Typography variant="overline" sx={{ color: "text.secondary", fontSize: 11, pt: 0.5 }}>Disposal being appealed</Typography>
             <Typography variant="body2" sx={{ lineHeight: 1.7, color: "text.secondary" }}>{g.disposal?.summary ?? "—"}</Typography>
           </Box>

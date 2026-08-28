@@ -75,7 +75,7 @@ export default function TransparencyScreen() {
         {tools.map((t) => (
           <Paper key={t.name} elevation={1} sx={{ p: 2, borderRadius: 2.5 }}>
             <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap", rowGap: 0.5 }}>
-              <Typography variant="subtitle2" sx={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 13.5 }}>{t.name}</Typography>
+              <Typography variant="subtitle2" sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: 13.5 }}>{t.name}</Typography>
               {t.annotations?.readOnlyHint
                 ? <Chip size="small" variant="outlined" label="read · no confirmation" sx={{ height: 22, fontSize: 10.5 }} />
                 : <Chip size="small" color="warning" variant="outlined" label="write · confirmation required" sx={{ height: 22, fontSize: 10.5 }} />}
@@ -102,7 +102,7 @@ export default function TransparencyScreen() {
       </Box>
       {result && (
         <Paper variant="outlined" sx={{ p: 1.75, bgcolor: "#F6F9F7", borderRadius: 2 }}>
-          <Typography variant="caption" sx={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 11, whiteSpace: "pre-wrap", wordBreak: "break-all", lineHeight: 1.5 }}>
+          <Typography variant="caption" sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: 11, whiteSpace: "pre-wrap", wordBreak: "break-all", lineHeight: 1.5 }}>
             {result.slice(0, 1500)}{result.length > 1500 ? "…" : ""}
           </Typography>
         </Paper>

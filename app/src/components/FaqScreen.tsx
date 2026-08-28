@@ -53,7 +53,7 @@ export default function FaqScreen() {
                 {f.q}
               </AccordionSummary>
               <AccordionDetails sx={{ pt: 0 }}>
-                <Typography variant="body2" sx={{ lineHeight: 1.7, color: "text.secondary" }}>{f.a}</Typography>
+                <Typography className="longform" variant="body2" sx={{ lineHeight: 1.7, color: "text.secondary" }}>{f.a}</Typography>
               </AccordionDetails>
             </Accordion>
           ))}

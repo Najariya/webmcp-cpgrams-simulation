@@ -5,19 +5,11 @@ import FactCheck from "@mui/icons-material/FactCheck";
 import LoginIcon from "@mui/icons-material/Login";
 import SmartToy from "@mui/icons-material/SmartToy";
 import Campaign from "@mui/icons-material/Campaign";
-import ArrowForward from "@mui/icons-material/ArrowForward";
 import { useAppStore } from "../store";
 import { goi } from "../theme";
 import { slaStatus } from "../domain/sla";
 
 const HERO_PROMPT = "Which of my grievances needs attention today?";
-
-const PROMPTS = [
-  "Help me file a grievance about this issue.",
-  "Why is this grievance delayed and what can I do?",
-  "I don't agree with this disposal. What options do I have?",
-  "What actions can you currently perform on this website?",
-];
 
 export default function GovHome() {
   const { grievances, simNow, citizen, setView } = useAppStore();
@@ -32,7 +24,7 @@ export default function GovHome() {
         sx={{ px: 2, py: 1.25, display: "flex", gap: 1.5, alignItems: "center", bgcolor: "#FFF9EE", border: "1px solid #EDDCBF", borderRadius: 1.5 }}
       >
         <Campaign sx={{ fontSize: 19, color: goi.alertAmber, flexShrink: 0 }} />
-        <Typography sx={{ fontSize: 12.5, lineHeight: 1.55, color: "#6B4E0E" }}>
+        <Typography className="longform" sx={{ fontSize: 12.5, lineHeight: 1.55, color: "#6B4E0E" }}>
           <strong>Labelled simulation</strong> for the WebMCP Challenge — nothing is submitted to any government system. Inspired by
           the CPGRAMS lifecycle; not affiliated with the Government of India.{" "}
           <Box component="span" sx={{ opacity: 0.7 }}>· यह एक प्रदर्शन सिमुलेशन है।</Box>
@@ -70,9 +62,9 @@ export default function GovHome() {
 
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1.6fr 1fr" }, gap: 2, alignItems: "start" }}>
         {/* About */}
-        <Paper elevation={0} sx={{ p: { xs: 2.5, md: 3.5 }, borderRadius: 2 }}>
+        <Paper elevation={0} sx={{ p: { xs: 2.5, md: 3.5 }, borderRadius: "12px" }}>
           <SectionTitle>About CPGRAMS · सीपीग्राम्स</SectionTitle>
-          <Typography variant="body2" sx={{ lineHeight: 1.8, color: "text.primary", mt: 2, maxWidth: "68ch" }}>
+          <Typography className="longform" variant="body2" sx={{ lineHeight: 1.8, color: "text.primary", mt: 2, maxWidth: "68ch" }}>
             CPGRAMS is the Government of India's centralized portal for public grievances related to service delivery,
             linked to all Central Ministries and Departments. Every grievance receives a unique registration ID; the
             redressal target is <strong>21 days</strong>, with a mandatory <strong>interim reply</strong> when redressal
@@ -85,7 +77,7 @@ export default function GovHome() {
               "Grievances sent by email are not entertained — use the portal or your agent.",
               "No fee is charged for lodging a grievance.",
             ].map((t) => (
-              <Typography component="li" key={t} variant="body2" sx={{ lineHeight: 1.75, color: "text.secondary", mb: 0.5, "&::marker": { color: goi.saffron } }}>
+              <Typography className="longform" component="li" key={t} variant="body2" sx={{ lineHeight: 1.75, color: "text.secondary", mb: 0.5, "&::marker": { color: goi.saffron } }}>
                 {t}
               </Typography>
             ))}
@@ -93,45 +85,34 @@ export default function GovHome() {
         </Paper>
 
         <Stack spacing={2}>
-          {/* Agent assist panel */}
-          <Paper elevation={0} sx={{ p: 2.5, borderRadius: "12px", bgcolor: goi.navy, color: "#fff", backgroundImage: "none" }}>
-            <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 0.75 }}>
-              <SmartToy sx={{ fontSize: 17, opacity: 0.9 }} />
-              <Typography sx={{ fontSize: 12, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.09em", opacity: 0.9 }}>
+          {/* Agent assist — compact: one prompt, one hint */}
+          <Paper elevation={0} sx={{ p: 2, borderRadius: "12px", bgcolor: goi.navy, color: "#fff" }}>
+            <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 1.25 }}>
+              <SmartToy sx={{ fontSize: 15, opacity: 0.9 }} />
+              <Typography sx={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.09em", opacity: 0.9 }}>
                 Ask your agent
               </Typography>
             </Stack>
-            <Typography variant="caption" sx={{ display: "block", opacity: 0.75, mb: 1.5, lineHeight: 1.5 }}>
-              In ChatGPT's browser or Chrome (WebMCP enabled), paste:
-            </Typography>
             <Paper
               elevation={0}
               onClick={() => copy(HERO_PROMPT)}
-              sx={{ p: 1.5, mb: 1.5, bgcolor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 1.5, cursor: "pointer", transition: "background-color .15s", "&:hover": { bgcolor: "rgba(255,255,255,0.16)" } }}
+              sx={{ p: 1.25, bgcolor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.22)", borderRadius: 1.5, cursor: "pointer", transition: "background-color .15s", "&:hover": { bgcolor: "rgba(255,255,255,0.16)" } }}
             >
               <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                <Typography sx={{ fontSize: 13, fontWeight: 600, lineHeight: 1.45, flex: 1 }}>
+                <Typography sx={{ fontSize: 12.5, fontWeight: 600, lineHeight: 1.45, flex: 1 }}>
                   “{HERO_PROMPT}”
                 </Typography>
-                <ContentCopy sx={{ fontSize: 15, opacity: 0.7 }} />
+                <ContentCopy sx={{ fontSize: 14, opacity: 0.7 }} />
               </Stack>
             </Paper>
-            <Stack spacing={0.25}>
-              {PROMPTS.map((p) => (
-                <Stack
-                  key={p} direction="row" spacing={0.75} sx={{ alignItems: "center", py: 0.5, cursor: "pointer", opacity: 0.85, "&:hover": { opacity: 1 } }}
-                  onClick={() => copy(p)}
-                >
-                  <ArrowForward sx={{ fontSize: 12, opacity: 0.6 }} />
-                  <Typography variant="caption" sx={{ lineHeight: 1.5, flex: 1 }}>{p}</Typography>
-                  <ContentCopy sx={{ fontSize: 12, opacity: 0 }} className="copy-hover" />
-                </Stack>
-              ))}
-            </Stack>
+            <Typography variant="caption" sx={{ display: "block", opacity: 0.65, mt: 1.25, lineHeight: 1.5 }}>
+              Paste in ChatGPT's browser or Chrome (WebMCP). More prompts on{" "}
+              <Box component="span" sx={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => setView("transparency")}>Agent Tools</Box>.
+            </Typography>
           </Paper>
 
           {/* What's new */}
-          <Paper elevation={0} sx={{ p: 2.5, borderRadius: 2 }}>
+          <Paper elevation={0} sx={{ p: 2.5, borderRadius: "12px" }}>
             <SectionTitle>What's New · नई जानकारी</SectionTitle>
             <Stack spacing={1.25} sx={{ mt: 2 }}>
               {[
@@ -181,7 +162,7 @@ function ActionCard({
             <Typography component="span" variant="caption" sx={{ color: "text.secondary", fontWeight: 500 }}>{hi}</Typography>
           </Typography>
         </Box>
-        <Typography variant="body2" sx={{ color: "text.secondary", lineHeight: 1.55, fontSize: 12.5 }}>{desc}</Typography>
+        <Typography className="longform" variant="body2" sx={{ color: "text.secondary", lineHeight: 1.55, fontSize: 12.5 }}>{desc}</Typography>
       </CardActionArea>
     </Card>
   );

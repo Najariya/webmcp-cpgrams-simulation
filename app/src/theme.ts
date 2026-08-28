@@ -36,7 +36,7 @@ export const theme = createTheme({
   },
   shape: { borderRadius: 6 },
   typography: {
-    fontFamily: '"Inter", "Noto Sans Devanagari", "SF Pro Text", system-ui, -apple-system, sans-serif',
+    fontFamily: '"IBM Plex Sans", "IBM Plex Sans Devanagari", "SF Pro Text", system-ui, -apple-system, sans-serif',
     allVariants: { letterSpacing: "0" },
     h5: { fontWeight: 700 },
     h6: { fontWeight: 700, fontSize: 17 },

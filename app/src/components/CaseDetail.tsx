@@ -201,7 +201,7 @@ function KV({ label, body }: { label: string; body: string }) {
   return (
     <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "160px 1fr" }, gap: { xs: 0.5, sm: 2 } }}>
       <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: "0.08em", fontSize: 11, pt: 0.5 }}>{label}</Typography>
-      <Typography variant="body2" sx={{ lineHeight: 1.75, color: "text.primary" }}>{body}</Typography>
+      <Typography className="longform" variant="body2" sx={{ lineHeight: 1.75, color: "text.primary" }}>{body}</Typography>
     </Box>
   );
 }
@@ -223,7 +223,7 @@ function NoticeCard({ icon, tone, title, body, footer }: {
       </Box>
       <Box sx={{ minWidth: 0 }}>
         <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: t.color, letterSpacing: "0.02em" }}>{title}</Typography>
-        <Typography variant="body2" sx={{ mt: 0.5, lineHeight: 1.65 }}>{body}</Typography>
+        <Typography className="longform" variant="body2" sx={{ mt: 0.5, lineHeight: 1.65 }}>{body}</Typography>
         {footer && <Typography variant="caption" sx={{ display: "block", mt: 0.75, color: "text.secondary" }}>{footer}</Typography>}
       </Box>
     </Paper>

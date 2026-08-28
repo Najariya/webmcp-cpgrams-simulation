@@ -12,7 +12,7 @@ export default function GovFooter() {
       <Box sx={{ maxWidth: 1180, mx: "auto", px: 2, py: 3 }}>
         <Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ justifyContent: "space-between", gap: 2 }}>
           <Box sx={{ maxWidth: 640 }}>
-            <Typography sx={{ fontSize: 12, lineHeight: 1.75 }}>
+            <Typography className="longform" sx={{ fontSize: 12, lineHeight: 1.75 }}>
               <strong style={{ color: "#fff" }}>Simulation prototype.</strong> Inspired by the CPGRAMS grievance lifecycle
               (DARPG). Not affiliated with, endorsed by, or connected to the Government of India. All cases, ministry
               interactions and officials are fictional. <span style={{ opacity: 0.7 }}>· यह एक प्रदर्शन सिमुलेशन है — सभी मामले काल्पनिक हैं।</span>

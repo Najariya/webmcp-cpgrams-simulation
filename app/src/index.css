@@ -1,3 +1,13 @@
 html, body, #root { height: 100%; margin: 0; }
-body { font-family: "Inter", "Noto Sans Devanagari", "SF Pro Text", system-ui, -apple-system, sans-serif; }
-.leaflet-container { font: inherit; }
+body {
+  font-family: "IBM Plex Sans", "IBM Plex Sans Devanagari", "SF Pro Text", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Long-form reading text: justified, hyphenation-safe */
+.longform { text-align: justify; text-justify: inter-word; hyphens: auto; }
+
+/* Chromium WebMCP flag still gates some builds — keep selection crisp */
+::selection { background: rgba(11, 47, 99, 0.16); }
