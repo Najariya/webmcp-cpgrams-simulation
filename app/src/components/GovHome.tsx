@@ -1,10 +1,13 @@
-import { Box, Card, CardActionArea, Chip, Paper, Stack, Typography } from "@mui/material";
+import { useState } from "react";
+import { Box, Button, Card, CardActionArea, Chip, Paper, Stack, Typography } from "@mui/material";
 import ContentCopy from "@mui/icons-material/ContentCopy";
 import EditNote from "@mui/icons-material/EditNote";
 import FactCheck from "@mui/icons-material/FactCheck";
 import LoginIcon from "@mui/icons-material/Login";
 import SmartToy from "@mui/icons-material/SmartToy";
 import Campaign from "@mui/icons-material/Campaign";
+import Close from "@mui/icons-material/Close";
+import { registrar } from "../webmcp/registrar";
 import { useAppStore } from "../store";
 import { goi } from "../theme";
 import { slaStatus } from "../domain/sla";
@@ -12,9 +15,26 @@ import { dict } from "../i18n";
 
 const HERO_PROMPT = "Which of my grievances needs attention today?";
 
+const NOTICE_KEY = "advocate-notice-v1";
+
 export default function GovHome() {
   const { grievances, simNow, citizen, lang, setView, goOrSignIn } = useAppStore();
   const d = dict(lang);
+  const [noticeOpen, setNoticeOpen] = useState(() => {
+    try {
+      return localStorage.getItem(NOTICE_KEY) !== "dismissed";
+    } catch {
+      return true;
+    }
+  });
+  const dismissNotice = () => {
+    try {
+      localStorage.setItem(NOTICE_KEY, "dismissed");
+    } catch {
+      /* storage unavailable — stays open for this session */
+    }
+    setNoticeOpen(false);
+  };
   const attention = grievances.filter((g) => slaStatus(g, simNow).needsAttention).length;
   const copy = (t: string) => navigator.clipboard?.writeText(t);
   const news = [
@@ -25,17 +45,22 @@ export default function GovHome() {
 
   return (
     <Box sx={{ maxWidth: 1180, mx: "auto", width: 1, px: { xs: 1.5, md: 2 }, py: 2, display: "flex", flexDirection: "column", gap: 2.5 }}>
-      {/* Statutory notice strip */}
-      <Paper
-        elevation={0}
-        sx={{ px: 2, py: 1.25, display: "flex", gap: 1.5, alignItems: "center", bgcolor: "#FFF9EE", border: "1px solid #EDDCBF", borderRadius: 1.5 }}
-      >
-        <Campaign sx={{ fontSize: "1.187rem", color: goi.alertAmber, flexShrink: 0 }} />
-        <Typography className="longform" sx={{ fontSize: "0.7812rem", lineHeight: 1.55, color: "#6B4E0E" }}>
-          <strong>{d.home.noticeStrong}</strong> {d.home.noticeRest}{" "}
-          <Box component="span" sx={{ opacity: 0.7 }}>· यह एक प्रदर्शन सिमुलेशन है।</Box>
-        </Typography>
-      </Paper>
+      {/* Single merged simulation notice (dismissble; header SIMULATION badge always remains) */}
+      {noticeOpen && (
+        <Paper
+          elevation={0}
+          sx={{ px: 2, py: 1.25, display: "flex", gap: 1.5, alignItems: "center", bgcolor: "#FFF9EE", border: "1px solid #EDDCBF", borderRadius: 1.5 }}
+        >
+          <Campaign sx={{ fontSize: "1.1875rem", color: goi.alertAmber, flexShrink: 0 }} />
+          <Typography className="longform" sx={{ fontSize: "0.7812rem", lineHeight: 1.55, color: "#6B4E0E", flex: 1 }}>
+            <strong>{d.home.noticeStrong}</strong> {d.home.noticeRest}{" "}
+            {registrar.available ? d.banner.on : d.banner.off}
+          </Typography>
+          <Button size="small" onClick={dismissNotice} aria-label="Dismiss notice" sx={{ minWidth: 28, p: 0.5, color: "#8A5A00" }}>
+            <Close sx={{ fontSize: "1.125rem" }} />
+          </Button>
+        </Paper>
+      )}
 
       {/* Action cards */}
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "repeat(3, 1fr)" }, gap: 2 }}>

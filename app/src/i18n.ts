@@ -103,6 +103,7 @@ export const DICT = {
       or: "or",
     },
     banner: {
+      on: "WebMCP is active in this browser — your agent's tools on this portal are live.",
       off: "WebMCP is not active in this browser — the portal works normally. Your agent's tools are shown as a labelled simulation on the Agent Tools page.",
     },
     home: {
@@ -262,6 +263,7 @@ export const DICT = {
       or: "या",
     },
     banner: {
+      on: "इस ब्राउज़र में WebMCP सक्रिय है — इस पोर्टल पर आपके एजेंट के टूल्स लाइव हैं।",
       off: "इस ब्राउज़र में WebMCP सक्रिय नहीं है — पोर्टल सामान्य रूप से काम करता है। आपके एजेंट के टूल्स एजेंट टूल्स पृष्ठ पर स्पष्ट रूप से चिह्नित सिमुलेशन के रूप में दिखाए जाते हैं।",
     },
     home: {

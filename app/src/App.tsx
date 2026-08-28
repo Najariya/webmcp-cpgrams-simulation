@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Alert, Box } from "@mui/material";
+import { Box } from "@mui/material";
 import GovHeader from "./components/GovHeader";
 import GovFooter from "./components/GovFooter";
 import GovHome from "./components/GovHome";
@@ -17,7 +17,6 @@ import { registrar } from "./webmcp/registrar";
 import { desiredTools } from "./webmcp/tools";
 import { useAnnounceStore } from "./webmcp/voice";
 import { applyTypeStep } from "./ui/typeScale";
-import { dict } from "./i18n";
 import type { View } from "./store";
 
 /* ---------- hash routing (deep links, back/forward, reload restore) ---------- */
@@ -57,8 +56,7 @@ function hashFromState(view: View, selectedGrievanceId: string | null): string {
  * consequential agent actions surface through the ConfirmDialog human gate.
  */
 export default function App() {
-  const { view, citizen, lang } = useAppStore();
-  const d = dict(lang);
+  const { view, citizen } = useAppStore();
 
   useEffect(() => {
     applyTypeStep(useAppStore.getState().typeStep);
@@ -108,12 +106,6 @@ export default function App() {
       }}
     >
       <GovHeader />
-
-      {!registrar.available && (
-        <Alert severity="info" sx={{ borderRadius: 0, py: 0.4, px: 2, "& .MuiAlert-message": { fontSize: "0.75rem" } }}>
-          {d.banner.off}
-        </Alert>
-      )}
 
       <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
         {view === "home" && <GovHome />}
