@@ -102,8 +102,11 @@ export function computeSurface(s: { grievances: Grievance[]; draft: GrievanceDra
 }
 
 interface AppState extends PersistedShape {
+  clearFiledNotice: () => void;
   view: View;
   selectedGrievanceId: string | null;
+  /** Session-only: the most recent filing, for the case-detail success banner. */
+  lastFiled: { grievanceId: string; regId: string; at: string } | null;
   typeStep: number;
   lang: "en" | "hi";
   /** Simulation clock — frozen at load so relative-day facts stay stable within a session. */
@@ -134,12 +137,14 @@ export const useAppStore = create<AppState>((set, get) => ({
   ...initial,
   view: "home",
   selectedGrievanceId: null,
+  lastFiled: null,
   typeStep: loadTypeStep(),
   lang: loadLang(),
   simNow: new Date().toISOString(),
 
   setView: (view) => set({ view }),
   select: (selectedGrievanceId) => set({ selectedGrievanceId }),
+  clearFiledNotice: () => set({ lastFiled: null }),
   setTypeStep: (step) => {
     applyTypeStep(step);
     saveTypeStep(step);
@@ -189,7 +194,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     const regId = `PG-26-${String(10_000 + Math.floor(Math.random() * 89_999)).slice(0, 5)}`;
     void seq;
     const g = submitDraft(s.draft, s.simNow, regId);
-    set({ grievances: [g, ...s.grievances], draft: null, view: "case", selectedGrievanceId: g.id });
+    set({ grievances: [g, ...s.grievances], draft: null, view: "case", selectedGrievanceId: g.id, lastFiled: { grievanceId: g.id, regId: g.regId ?? "", at: s.simNow } });
     persist({ grievances: [g, ...s.grievances], draft: null, appealDraft: s.appealDraft });
     announce(`Grievance lodged. Your registration ID is ${g.regId}. Quote it for status, reminders and appeals.`, s.lang);
     return g;

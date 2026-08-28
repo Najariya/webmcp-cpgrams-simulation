@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Box, Button, Chip, Divider, Icon, Paper, Stack, Typography } from "@mui/material";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import Gavel from "@mui/icons-material/Gavel";
@@ -10,7 +11,11 @@ import Inbox from "@mui/icons-material/Inbox";
 import PendingActions from "@mui/icons-material/PendingActions";
 import StarRate from "@mui/icons-material/StarRate";
 import InfoOutlined from "@mui/icons-material/InfoOutlined";
+import Close from "@mui/icons-material/Close";
 import WarningAmber from "@mui/icons-material/WarningAmber";
+import TaskAlt from "@mui/icons-material/TaskAlt";
+import ContentCopy from "@mui/icons-material/ContentCopy";
+import Check from "@mui/icons-material/Check";
 import PageHeader from "./PageHeader";
 import StatusChip from "./StatusChip";
 import { useAppStore } from "../store";
@@ -52,7 +57,7 @@ function fmtDate(iso: string): string {
 }
 
 export default function CaseDetail() {
-  const { grievances, selectedGrievanceId, simNow, lang, select, setView, remind, rate } = useAppStore();
+  const { grievances, selectedGrievanceId, simNow, lang, select, setView, remind, rate, lastFiled, clearFiledNotice } = useAppStore();
   const d = dict(lang);
   const g = grievances.find((x) => x.id === selectedGrievanceId || x.regId === selectedGrievanceId);
   if (!g) {
@@ -77,6 +82,17 @@ export default function CaseDetail() {
       >
         {d.case.backToRegister}
       </Button>
+
+      {lastFiled && lastFiled.grievanceId === g.id && (
+        <FiledBanner
+          regId={lastFiled.regId}
+          title={d.case.filedBannerTitle(lastFiled.regId)}
+          target={d.case.filedBannerTarget}
+          copyLabel={d.case.copyId}
+          copiedLabel={d.common.copied}
+          onClose={clearFiledNotice}
+        />
+      )}
 
       {/* Record */}
       <Paper elevation={0} sx={{ overflow: "hidden", borderRadius: 2 }}>
@@ -256,5 +272,34 @@ function TimelineRow({ e, last, lang }: { e: TimelineEvent; last: boolean; lang:
         )}
       </Box>
     </Stack>
+  );
+}
+
+function FiledBanner({ regId, title, target, copyLabel, copiedLabel, onClose }: {
+  regId: string; title: string; target: string; copyLabel: string; copiedLabel: string; onClose: () => void;
+}) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <Paper
+      elevation={0}
+      sx={{ p: 2, borderRadius: "12px", bgcolor: "#F2FAF4", border: "1px solid #BFE2C8", display: "flex", gap: 1.5, alignItems: "center", flexWrap: "wrap" }}
+    >
+      <TaskAlt sx={{ fontSize: 22, color: goi.green }} />
+      <Box sx={{ flex: 1, minWidth: 200 }}>
+        <Typography sx={{ fontSize: "0.875rem", fontWeight: 700, color: "#14532D" }}>{title}</Typography>
+        <Typography sx={{ fontSize: "0.75rem", color: "#3D6B4C", mt: 0.25 }}>{target}</Typography>
+      </Box>
+      <Button
+        size="small" variant="outlined" color="success"
+        startIcon={copied ? <Check /> : <ContentCopy />}
+        onClick={() => { navigator.clipboard?.writeText(regId); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+        sx={{ fontWeight: 700 }}
+      >
+        {copied ? copiedLabel : copyLabel}
+      </Button>
+      <Button size="small" color="inherit" onClick={onClose} aria-label="Dismiss" sx={{ minWidth: 32, p: 0.5, color: "#3D6B4C" }}>
+        <Close sx={{ fontSize: "1.125rem" }} />
+      </Button>
+    </Paper>
   );
 }

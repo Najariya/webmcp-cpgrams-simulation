@@ -186,6 +186,9 @@ export const DICT = {
       alert: "Simulation — credentials are never checked or stored anywhere; one click signs you in as the demo citizen (Sita Sharma). The real CPGRAMS requires registered login for grievance status and appeals.",
     },
     case: {
+      filedBannerTitle: (regId: string) => `Grievance registered · ${regId}`,
+      filedBannerTarget: "Redressal target: 21 days from filing.",
+      copyId: "Copy ID",
       backToRegister: "Case register",
       notFound: "Case not found.",
       backHome: "Back to my cases",
@@ -342,6 +345,9 @@ export const DICT = {
       alert: "सिमुलेशन — प्रमाण-पत्र कहीं जाँचे या रखे नहीं जाते; एक क्लिक से आप डेमो नागरिक (सीता शर्मा) के रूप में साइन इन हो जाते हैं। असली CPGRAMS में शिकायत स्थिति और अपील के लिए पंजीकृत लॉगिन चाहिए।",
     },
     case: {
+      filedBannerTitle: (regId: string) => `शिकायत दर्ज हो गई · ${regId}`,
+      filedBannerTarget: "निवारण का लक्ष्य: दर्ज करने से 21 दिन।",
+      copyId: "आईडी कॉपी करें",
       backToRegister: "मामला रजिस्टर",
       notFound: "मामला नहीं मिला।",
       backHome: "मेरे मामलों पर वापस",
