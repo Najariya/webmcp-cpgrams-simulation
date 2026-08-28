@@ -123,7 +123,12 @@ export function appealWindowDaysLeft(g: Grievance, nowIso: string): number | nul
   return APPEAL_WINDOW_DAYS - daysBetween(g.disposedAt, nowIso);
 }
 
-/** The single entry point the hero journey asks for. */
+/** The single entry point the hero journey asks for.
+ *  Attention = SLA-level signals only (overdue-without-interim, unrated
+ *  disposal, open appeal window). An overdue case WITH an interim reply is
+ *  "explained, not urgent" — reminder stays available as an eligible action,
+ *  but it is not counted as needing attention (keeps get_app_state, the case
+ *  board and the hero speakable line consistent). */
 export function needsAttentionToday(g: Grievance, nowIso: string): boolean {
-  return slaStatus(g, nowIso).needsAttention || reminderEligible(g, nowIso) || rateEligible(g) || appealEligible(g, nowIso);
+  return slaStatus(g, nowIso).needsAttention || rateEligible(g) || appealEligible(g, nowIso);
 }
