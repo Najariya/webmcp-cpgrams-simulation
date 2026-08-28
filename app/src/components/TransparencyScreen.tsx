@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Box, Button, Chip, Paper, Stack, Typography } from "@mui/material";
 import PlayArrow from "@mui/icons-material/PlayArrow";
 import VolumeUp from "@mui/icons-material/VolumeUp";
 import RecordVoiceOver from "@mui/icons-material/RecordVoiceOver";
+import ContentCopy from "@mui/icons-material/ContentCopy";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import Close from "@mui/icons-material/Close";
 import VisibilityOutlined from "@mui/icons-material/VisibilityOutlined";
@@ -71,6 +72,16 @@ export default function TransparencyScreen() {
   const runSelfTest = async () => {
     setResult(await getSlaStatusTool.execute({}, { signal: new AbortController().signal }));
   };
+
+  const parsedResult = useMemo(() => {
+    try {
+      return JSON.parse(result ?? "") as { ok?: boolean; speakable?: string; error?: { message?: string } };
+    } catch {
+      return null;
+    }
+  }, [result]);
+
+  const copyResult = () => navigator.clipboard?.writeText(result ?? "");
 
   const toggle = (name: string) =>
     setExpanded((s) => {
@@ -180,14 +191,38 @@ export default function TransparencyScreen() {
               <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.6875rem", color: "#8FB3E0", flex: 1 }}>
                 get_sla_status → response envelope
               </Typography>
+              <Button size="small" sx={{ minWidth: 28, p: 0.5, color: "#8FB3E0" }} onClick={() => copyResult()} aria-label="Copy JSON">
+                <ContentCopy sx={{ fontSize: "0.9375rem" }} />
+              </Button>
               <Button size="small" sx={{ minWidth: 28, p: 0.5, color: "#8FB3E0" }} onClick={() => setResult(null)} aria-label="Close response">
                 <Close sx={{ fontSize: "0.9375rem" }} />
               </Button>
             </Stack>
-            <Box sx={{ p: 2, maxHeight: 320, overflow: "auto" }}>
-              <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.7188rem", color: "#C7DAF5", whiteSpace: "pre-wrap", wordBreak: "break-word", lineHeight: 1.65 }}>
-                {result}
-              </Typography>
+            {parsedResult && (
+              <Box sx={{ px: 2, pt: 1.5, pb: 1 }}>
+                <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 1 }}>
+                  <Chip
+                    size="small"
+                    label={`ok: ${parsedResult.ok ? "true" : "false"}`}
+                    sx={{ height: 20, fontSize: "0.625rem", fontWeight: 700, letterSpacing: "0.04em", bgcolor: parsedResult.ok ? "rgba(87,180,94,0.18)" : "rgba(229,86,95,0.18)", color: parsedResult.ok ? "#8FE398" : "#F2A0A6", border: `1px solid ${parsedResult.ok ? "rgba(87,180,94,0.5)" : "rgba(229,86,95,0.5)"}`, "& .MuiChip-label": { px: 0.75 } }}
+                  />
+                  <Typography sx={{ fontSize: "0.6875rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#8FB3E0" }}>
+                    What your agent would say
+                  </Typography>
+                </Stack>
+                <Typography className="longform" sx={{ fontSize: "0.8125rem", lineHeight: 1.6, color: "#EAF2FC", fontWeight: 500 }}>
+                  {String(parsedResult.speakable ?? parsedResult.error?.message ?? "")}
+                </Typography>
+              </Box>
+            )}
+            <Box sx={{ px: 2, pb: 2, maxHeight: 320, overflow: "auto", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+              {parsedResult ? (
+                <JsonNode value={parsedResult} depth={0} root />
+              ) : (
+                <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.7812rem", color: "#C7DAF5", whiteSpace: "pre-wrap", wordBreak: "break-word", lineHeight: 1.65 }}>
+                  {result}
+                </Typography>
+              )}
             </Box>
           </Paper>
         )}
@@ -355,5 +390,38 @@ function GuaranteeCard({ icon, title, body }: { icon: React.ReactNode; title: st
         </Typography>
       </Box>
     </Paper>
+  );
+}
+
+/** Compact collapsible JSON tree for the self-test response (dark terminal card). */
+function JsonNode({ label, value, depth = 0, root = false }: {
+  label?: string; value: unknown; depth?: number; root?: boolean;
+}) {
+  const [open, setOpen] = useState(depth < 2);
+  const isObj = value !== null && typeof value === "object";
+  const mono = '"IBM Plex Mono", monospace';
+  if (!isObj) {
+    const color = typeof value === "string" ? "#9CD6A8" : typeof value === "number" ? "#F0B37E" : "#E2A6D8";
+    return (
+      <Box sx={{ pl: root ? 0 : 2, py: 0.25, display: "flex", gap: 1, alignItems: "baseline", flexWrap: "wrap" }}>
+        {label !== undefined && <Typography sx={{ fontFamily: mono, fontSize: "0.75rem", color: "#8FB3E0" }}>{label}:</Typography>}
+        <Typography sx={{ fontFamily: mono, fontSize: "0.75rem", color, wordBreak: "break-word", lineHeight: 1.6 }}>
+          {value === null ? "null" : typeof value === "string" ? `"${value}"` : String(value)}
+        </Typography>
+      </Box>
+    );
+  }
+  const entries: [string, unknown][] = Array.isArray(value) ? value.map((v, i) => [String(i), v]) : Object.entries(value as Record<string, unknown>);
+  return (
+    <Box sx={{ pl: root ? 0 : 2, py: 0.25 }}>
+      <Button
+        size="small" onClick={() => setOpen((o) => !o)}
+        sx={{ minWidth: 0, p: 0, m: 0, textTransform: "none", fontFamily: mono, fontSize: "0.75rem", color: "#8FB3E0", "&:hover": { bgcolor: "transparent", textDecoration: "underline" } }}
+        aria-expanded={open}
+      >
+        {label !== undefined ? `${label}: ` : ""}{Array.isArray(value) ? `Array(${entries.length})` : `{${entries.length}}`} {open ? "▾" : "▸"}
+      </Button>
+      {open && entries.map(([k, v]) => <JsonNode key={k} label={k} value={v} depth={depth + 1} />)}
+    </Box>
   );
 }
