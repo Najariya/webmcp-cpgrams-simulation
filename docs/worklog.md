@@ -4,6 +4,20 @@ Durable project record. Newest entries at the top. Conventional commits referenc
 
 ---
 
+## 2026-08-28 (late night) — de-slop design pass · S2 complete · repo + production live
+
+**Owner feedback:** design was "AI slop" — invest deeply, make it neat/clean/beautiful/professional/premium; don't stop until the goal; repo name authorized ("WebMCP, CP gram simulation"); production deploy authorized via dedicated link.
+
+**Design (c6542d9)** — emoji eliminated in favour of a consistent MUI icon system (StatusChip grammar, timeline kind icons, notice cards); unified icon tiles; normalized radii (12px cards / 6px controls); KV grids; navy agent panel; refined footer. Visual QA via image analysis: 9/10 premium neatness, no blocking defects.
+
+**S2 (eec17ef, 1faa6cc)** — confirm.ts human gate (payload-hash binding, 60s single-use, decline path, replay-window store); write tools 7–13 with full validation + CONFIRMATION_REQUIRED envelopes; registrar activeExecutions race guard; desiredTools state-conditional surface incl. replay windows; ConfirmDialog, DraftReview, AppealReview; window.__advocate dev hook. **In-browser verification: J1 gate→confirm→PG-26-77173→alreadyProcessed replay; J2 reminder + premature-remind PRECONDITION_FAILED + timeline event; J3 Poor→surfaceΔ(+create_appeal_draft −rate_disposal)→appeal filed→replay; J4 NOT_FOUND; J5 injection inert.** Fixes en route: findGrievance rejecting companion keys; needsAttentionToday semantics (interim-explained ≠ attention). Vitest 20/20 (SLA facts C3–C7, engine guards, gate TTL/single-use, envelope budgets).
+
+**Ship (4011b57 + root LICENSE)** — repo restructured to project root with judge-first README; pushed to **github.com/Najariya/webmcp-cpgrams-simulation** (public, MIT at root, topics set). Vercel project `webmcp-cpgrams-simulation` under team naveens-projects-c4a4ab14; **production deployed and verified: https://webmcp-cpgrams-simulation.vercel.app** (HTTP 200, portal renders in-browser).
+
+**Next (S3→S5)** — adversarial/injection test hardening in suite form, ~20 agent evals (docs/evals.md), formal UAT (docs/uat.md), Devpost draft copy, video storyboard → record, freeze Sep 1 18:00 IST, submit by Sep 2 21:00 IST.
+
+---
+
 ## 2026-08-28 (night) — CPGRAMS-replica rework · commit `3026c4e`
 
 **Owner feedback accepted:** visual quality "substandard" vs the real CPGRAMS — make an almost-replica (colors, tone, login mapped out) and keep going to completion.
