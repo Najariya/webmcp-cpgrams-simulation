@@ -105,12 +105,12 @@ export default function CaseDetail() {
           <Box>
             <Typography variant="h6" sx={{ lineHeight: 1.4 }}>{g.subject}</Typography>
             <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: "wrap", rowGap: 0.75, mt: 1 }}>
-              <Chip size="small" variant="outlined" label={lang === "hi" ? categoryOf(g.categoryId)?.titleHi ?? categoryOf(g.categoryId)?.titleEn : categoryOf(g.categoryId)?.titleEn} sx={{ height: 24, fontSize: "0.6875rem" }} />
+              <Chip size="small" variant="outlined" label={lang === "hi" ? categoryOf(g.categoryId)?.titleHi ?? categoryOf(g.categoryId)?.titleEn : categoryOf(g.categoryId)?.titleEn} sx={{ height: 24, fontSize: "0.75rem" }} />
               {g.evidence.length > 0 && (
-                <Chip size="small" variant="outlined" icon={<AttachFile sx={{ fontSize: "0.8125rem" }} />} label={d.case.evidenceItems(g.evidence.length)} sx={{ height: 22, fontSize: "0.6562rem", "& .MuiChip-icon": { ml: 0.5 } }} />
+                <Chip size="small" variant="outlined" icon={<AttachFile sx={{ fontSize: "0.8125rem" }} />} label={d.case.evidenceItems(g.evidence.length)} sx={{ height: 22, fontSize: "0.75rem", "& .MuiChip-icon": { ml: 0.5 } }} />
               )}
               {g.reminders.length > 0 && (
-                <Chip size="small" variant="outlined" icon={<NotificationsActive sx={{ fontSize: "0.8125rem" }} />} label={d.case.remindersSent(g.reminders.length)} sx={{ height: 22, fontSize: "0.6562rem", "& .MuiChip-icon": { ml: 0.5 } }} />
+                <Chip size="small" variant="outlined" icon={<NotificationsActive sx={{ fontSize: "0.8125rem" }} />} label={d.case.remindersSent(g.reminders.length)} sx={{ height: 22, fontSize: "0.75rem", "& .MuiChip-icon": { ml: 0.5 } }} />
               )}
             </Stack>
           </Box>
@@ -138,10 +138,10 @@ export default function CaseDetail() {
           <KV label={d.case.kvRelief} body={g.reliefRequested} />
           {g.evidence.length > 0 && (
             <Box>
-              <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: "0.08em", fontSize: "0.6875rem" }}>Evidence</Typography>
+              <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: "0.08em", fontSize: "0.75rem" }}>Evidence</Typography>
               <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: "wrap", rowGap: 0.75, mt: 0.75 }}>
                 {g.evidence.map((e) => (
-                  <Chip key={e.name} size="small" variant="outlined" icon={<AttachFile sx={{ fontSize: "0.8125rem" }} />} label={e.name} sx={{ height: 24, fontSize: "0.6875rem", "& .MuiChip-icon": { ml: 0.5 } }} />
+                  <Chip key={e.name} size="small" variant="outlined" icon={<AttachFile sx={{ fontSize: "0.8125rem" }} />} label={e.name} sx={{ height: 24, fontSize: "0.75rem", "& .MuiChip-icon": { ml: 0.5 } }} />
                 ))}
               </Stack>
             </Box>
@@ -166,7 +166,7 @@ export default function CaseDetail() {
       {/* Next actions — same eligibility the WebMCP tools enforce */}
       {(canRemind || canRate || canAppeal) && (
         <Paper elevation={0} variant="outlined" sx={{ p: 2.5, borderRadius: "12px", bgcolor: "#FBFCFE" }}>
-          <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: "0.08em", fontSize: "0.6875rem" }}>
+          <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: "0.08em", fontSize: "0.75rem" }}>
             {d.case.nextActions}
           </Typography>
           <Stack direction="row" spacing={1.25} useFlexGap sx={{ flexWrap: "wrap", rowGap: 1, mt: 1.25 }}>
@@ -218,7 +218,7 @@ export default function CaseDetail() {
 function KV({ label, body }: { label: string; body: string }) {
   return (
     <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "160px 1fr" }, gap: { xs: 0.5, sm: 2 } }}>
-      <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: "0.08em", fontSize: "0.6875rem", pt: 0.5 }}>{label}</Typography>
+      <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: "0.08em", fontSize: "0.75rem", pt: 0.5 }}>{label}</Typography>
       <Typography className="longform" variant="body2" sx={{ lineHeight: 1.75, color: "text.primary" }}>{body}</Typography>
     </Box>
   );

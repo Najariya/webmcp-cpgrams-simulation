@@ -82,7 +82,7 @@ export default function StatusView() {
                   <CardActionArea onClick={() => { select(g.id); setView("case"); }} sx={{ p: 1.5, display: "flex", flexDirection: "column", alignItems: "stretch", gap: 0.75, textAlign: "left" }}>
                     <Stack direction="row" sx={{ alignItems: "center", gap: 1 }}>
                       <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.75rem", fontWeight: 600, flex: 1 }}>{g.regId}</Typography>
-                      <Chip size="small" label={d.status.day(sla.daysElapsed, sla.targetDays)} sx={{ height: 20, fontSize: "0.625rem", fontWeight: 700, bgcolor: "#F1F4F8" }} />
+                      <Chip size="small" label={d.status.day(sla.daysElapsed, sla.targetDays)} sx={{ height: 22, fontSize: "0.75rem", fontWeight: 700, bgcolor: "#F1F4F8" }} />
                     </Stack>
                     <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.4 }}>{g.subject}</Typography>
                     <Typography variant="caption" sx={{ color: "text.secondary" }}>
@@ -140,7 +140,7 @@ export default function StatusView() {
                       </TableCell>
                       <TableCell sx={{ maxWidth: 260, py: 1.25 }}><StatusChip g={g} sla={sla} /></TableCell>
                       <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
-                        <Button size="small" variant="outlined" color="inherit" endIcon={<ChevronRight sx={{ fontSize: "1.0625rem" }} />} sx={{ fontSize: "0.7188rem" }} onClick={(e) => { e.stopPropagation(); open(); }}>
+                        <Button size="small" variant="outlined" color="inherit" endIcon={<ChevronRight sx={{ fontSize: "1.0625rem" }} />} sx={{ fontSize: "0.75rem" }} onClick={(e) => { e.stopPropagation(); open(); }}>
                           {d.common.open}
                         </Button>
                       </TableCell>

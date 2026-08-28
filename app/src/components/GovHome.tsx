@@ -139,7 +139,7 @@ export default function GovHome() {
           <Paper elevation={0} sx={{ p: 2.5, borderRadius: "12px", bgcolor: goi.navy, color: "#fff" }}>
             <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 1.25 }}>
               <SmartToy sx={{ fontSize: 16, color: "#FFB37E" }} />
-              <Typography sx={{ fontSize: "0.6875rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.09em" }}>
+              <Typography sx={{ fontSize: "0.75rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.09em" }}>
                 {d.home.askAgent}
               </Typography>
             </Stack>
@@ -167,7 +167,7 @@ export default function GovHome() {
             <Stack spacing={1.25} sx={{ mt: 2 }}>
               {news.map(([date, t]) => (
                 <Stack key={date} direction="row" spacing={1.5} sx={{ alignItems: "baseline" }}>
-                  <Typography variant="caption" sx={{ fontWeight: 700, color: goi.link, minWidth: 74, fontSize: "0.6875rem", fontVariantNumeric: "tabular-nums" }}>{date}</Typography>
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: goi.link, minWidth: 74, fontSize: "0.75rem", fontVariantNumeric: "tabular-nums" }}>{date}</Typography>
                   <Typography variant="caption" sx={{ lineHeight: 1.55, color: "text.primary" }}>{t}</Typography>
                 </Stack>
               ))}
@@ -199,7 +199,7 @@ function ActionCard({
             {icon}
           </Box>
           {badge && (
-            <Chip size="small" label={badge} sx={{ ml: "auto", bgcolor: "#EBF2EE", color: goi.green, fontSize: "0.6562rem", height: 21, fontWeight: 700 }} />
+            <Chip size="small" label={badge} sx={{ ml: "auto", bgcolor: "#EBF2EE", color: goi.green, fontSize: "0.75rem", height: 22, fontWeight: 700 }} />
           )}
         </Stack>
         <Box>

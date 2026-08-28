@@ -45,7 +45,7 @@ export default function GovHeader() {
             <AccountBalance sx={{ fontSize: { xs: "1.125rem", md: "1.375rem" }, color: "rgba(255,255,255,0.92)" }} />
           </Box>
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography sx={{ display: { xs: "none", md: "block" }, fontSize: "0.7188rem", lineHeight: 1.35 }}>
+            <Typography sx={{ display: { xs: "none", md: "block" }, fontSize: "0.75rem", lineHeight: 1.35 }}>
               भारत सरकार · Government of India <span style={{ opacity: 0.55 }}>|</span> कार्मिक, लोक शिकायत और पेंशन मंत्रालय · Department of Administrative Reforms &amp; Public Grievances
             </Typography>
             <Typography sx={{ fontSize: { xs: "1.0625rem", md: "1.3125rem" }, fontWeight: 800, lineHeight: 1.2, letterSpacing: "0.01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
@@ -53,7 +53,7 @@ export default function GovHeader() {
             </Typography>
           </Box>
           <Stack sx={{ alignItems: { xs: "flex-end", md: "flex-end" }, gap: 0.75, flexShrink: 0 }}>
-            <Chip size="small" label="SIMULATION · सिमुलेशन" sx={{ bgcolor: "rgba(255,153,51,0.22)", color: "#FFD9B8", border: "1px solid rgba(255,153,51,0.55)", fontWeight: 700, fontSize: "0.6562rem", height: 20 }} />
+            <Chip size="small" label="SIMULATION · सिमुलेशन" sx={{ bgcolor: "rgba(255,153,51,0.22)", color: "#FFD9B8", border: "1px solid rgba(255,153,51,0.55)", fontWeight: 700, fontSize: "0.75rem", height: 20 }} />
             <Stack direction="row" spacing={{ xs: 0.75, md: 1 }} sx={{ alignItems: "center" }}>
               <Box sx={{ border: "1px solid rgba(255,255,255,0.4)", borderRadius: 1, overflow: "hidden", display: "flex" }}>
                 {(["en", "hi"] as const).map((l) => (
@@ -63,7 +63,7 @@ export default function GovHeader() {
                     disableRipple
                     onClick={() => setLang(l)}
                     sx={{
-                      minWidth: 40, px: 1, py: 0.15, fontSize: "0.7188rem", borderRadius: 0,
+                      minWidth: 40, px: 1, py: 0.15, fontSize: "0.75rem", borderRadius: 0,
                       color: lang === l ? goi.navy : "#fff",
                       bgcolor: lang === l ? "#fff" : "transparent",
                       fontWeight: 700,
@@ -96,7 +96,7 @@ export default function GovHeader() {
                   size="small"
                   startIcon={<LogoutIcon />}
                   onClick={signOut}
-                  sx={{ color: "#fff", borderColor: "rgba(255,255,255,0.5)", border: 1, borderRadius: 1, fontSize: "0.7188rem", py: 0.15 }}
+                  sx={{ color: "#fff", borderColor: "rgba(255,255,255,0.5)", border: 1, borderRadius: 1, fontSize: "0.75rem", py: 0.15 }}
                 >
                   {citizen.name}
                 </Button>
@@ -106,7 +106,7 @@ export default function GovHeader() {
                   variant="contained"
                   startIcon={<LoginIcon />}
                   onClick={() => setView("login")}
-                  sx={{ fontSize: "0.7188rem", py: 0.15, bgcolor: goi.saffron, "&:hover": { bgcolor: goi.saffronDark } }}
+                  sx={{ fontSize: "0.75rem", py: 0.15, bgcolor: goi.saffron, "&:hover": { bgcolor: goi.saffronDark } }}
                 >
                   Sign In
                 </Button>

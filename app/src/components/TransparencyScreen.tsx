@@ -113,7 +113,7 @@ export default function TransparencyScreen() {
                 <>Tools below are read from <code>document.modelContext.getTools()</code> and update live via <code>toolchange</code>.</>
               ) : (
                 <>Open this page in ChatGPT&rsquo;s in-app browser, or enable{" "}
-                  <Box component="code" sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.6562rem", bgcolor: "#F1F4F8", border: "1px solid #D8DFE8", borderRadius: 0.5, px: 0.5, py: 0.25, wordBreak: "break-all" }}>
+                  <Box component="code" sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.75rem", bgcolor: "#F1F4F8", border: "1px solid #D8DFE8", borderRadius: 0.5, px: 0.5, py: 0.25, wordBreak: "break-all" }}>
                     chrome://flags/#enable-webmcp-testing
                   </Box>{" "}
                   in Chrome 149+ and relaunch.</>
@@ -188,7 +188,7 @@ export default function TransparencyScreen() {
                   <Box key={c} sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: c, opacity: 0.85 }} />
                 ))}
               </Stack>
-              <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.6875rem", color: "#8FB3E0", flex: 1 }}>
+              <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.75rem", color: "#8FB3E0", flex: 1 }}>
                 get_sla_status → response envelope
               </Typography>
               <Button size="small" sx={{ minWidth: 28, p: 0.5, color: "#8FB3E0" }} onClick={() => copyResult()} aria-label="Copy JSON">
@@ -204,9 +204,9 @@ export default function TransparencyScreen() {
                   <Chip
                     size="small"
                     label={`ok: ${parsedResult.ok ? "true" : "false"}`}
-                    sx={{ height: 20, fontSize: "0.625rem", fontWeight: 700, letterSpacing: "0.04em", bgcolor: parsedResult.ok ? "rgba(87,180,94,0.18)" : "rgba(229,86,95,0.18)", color: parsedResult.ok ? "#8FE398" : "#F2A0A6", border: `1px solid ${parsedResult.ok ? "rgba(87,180,94,0.5)" : "rgba(229,86,95,0.5)"}`, "& .MuiChip-label": { px: 0.75 } }}
+                    sx={{ height: 22, fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.04em", bgcolor: parsedResult.ok ? "rgba(87,180,94,0.18)" : "rgba(229,86,95,0.18)", color: parsedResult.ok ? "#8FE398" : "#F2A0A6", border: `1px solid ${parsedResult.ok ? "rgba(87,180,94,0.5)" : "rgba(229,86,95,0.5)"}`, "& .MuiChip-label": { px: 0.75 } }}
                   />
-                  <Typography sx={{ fontSize: "0.6875rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#8FB3E0" }}>
+                  <Typography sx={{ fontSize: "0.75rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", color: "#8FB3E0" }}>
                     What your agent would say
                   </Typography>
                 </Stack>
@@ -291,7 +291,7 @@ function ToolGroup({ icon, title, count, blurb, children }: {
         <Box sx={{ display: "grid", placeItems: "center", width: 26, height: 26, borderRadius: 1, bgcolor: "rgba(11,47,99,0.07)", color: goi.navy }}>{icon}</Box>
         <Typography component="h2" sx={{ fontSize: "0.8438rem", fontWeight: 800, color: goi.navy, letterSpacing: "0.01em" }}>
           {title}
-          <Typography component="span" sx={{ fontSize: "0.7188rem", fontWeight: 700, color: "text.disabled", ml: 1, fontVariantNumeric: "tabular-nums" }}>
+          <Typography component="span" sx={{ fontSize: "0.75rem", fontWeight: 700, color: "text.disabled", ml: 1, fontVariantNumeric: "tabular-nums" }}>
             {count}
           </Typography>
         </Typography>
@@ -320,7 +320,7 @@ function ToolCard({ t, index, expanded, onToggle }: {
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "30px 1fr" }, gap: { xs: 0, sm: 1.75 } }}>
         <Typography
           aria-hidden
-          sx={{ display: { xs: "none", sm: "block" }, fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.6875rem", fontWeight: 600, color: "#9AA8B8", pt: "3px", fontVariantNumeric: "tabular-nums" }}
+          sx={{ display: { xs: "none", sm: "block" }, fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.75rem", fontWeight: 600, color: "#9AA8B8", pt: "3px", fontVariantNumeric: "tabular-nums" }}
         >
           {String(index + 1).padStart(2, "0")}
         </Typography>
@@ -332,11 +332,11 @@ function ToolCard({ t, index, expanded, onToggle }: {
             <Chip
               size="small" label={isRead ? "read" : "write"}
               sx={isRead
-                ? { height: 20, fontSize: "0.625rem", fontWeight: 700, letterSpacing: "0.04em", bgcolor: "#EEF4FB", color: "#2B5B8C", border: "1px solid #C9DBF0", "& .MuiChip-label": { px: 0.75 } }
-                : { height: 20, fontSize: "0.625rem", fontWeight: 700, letterSpacing: "0.04em", bgcolor: "#FDF3E7", color: "#8A5A00", border: "1px solid #EBD5BC", "& .MuiChip-label": { px: 0.75 } }}
+                ? { height: 22, fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.04em", bgcolor: "#EEF4FB", color: "#2B5B8C", border: "1px solid #C9DBF0", "& .MuiChip-label": { px: 0.75 } }
+                : { height: 22, fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.04em", bgcolor: "#FDF3E7", color: "#8A5A00", border: "1px solid #EBD5BC", "& .MuiChip-label": { px: 0.75 } }}
             />
             {t.annotations?.untrustedContentHint && (
-              <Chip size="small" label="untrusted content" sx={{ height: 20, fontSize: "0.625rem", fontWeight: 600, letterSpacing: "0.04em", bgcolor: "transparent", color: "#8A97A6", border: "1px dashed #C6D0DC", "& .MuiChip-label": { px: 0.75 } }} />
+              <Chip size="small" label="untrusted content" sx={{ height: 22, fontSize: "0.75rem", fontWeight: 600, letterSpacing: "0.04em", bgcolor: "transparent", color: "#8A97A6", border: "1px dashed #C6D0DC", "& .MuiChip-label": { px: 0.75 } }} />
             )}
           </Stack>
           <Typography sx={{ fontSize: "0.8125rem", fontWeight: 600, color: "text.primary", lineHeight: 1.45, mt: 0.75 }}>
@@ -347,7 +347,7 @@ function ToolCard({ t, index, expanded, onToggle }: {
           </Typography>
           <Button
             size="small" color="inherit" onClick={onToggle}
-            sx={{ mt: 0.25, ml: -1, px: 1, fontSize: "0.6875rem", fontWeight: 700, color: goi.link, textTransform: "none", "&:hover": { bgcolor: "transparent", textDecoration: "underline" } }}
+            sx={{ mt: 0.25, ml: -1, px: 1, fontSize: "0.75rem", fontWeight: 700, color: goi.link, textTransform: "none", "&:hover": { bgcolor: "transparent", textDecoration: "underline" } }}
             endIcon={<ExpandMore sx={{ fontSize: "0.9375rem", transform: expanded ? "rotate(180deg)" : "none", transition: "transform .15s", ml: -0.5 }} />}
           >
             {expanded ? "Hide" : "Show"} full contract{paramNames.length > 0 ? ` · ${paramNames.length} parameter${paramNames.length > 1 ? "s" : ""}` : ""}
@@ -359,11 +359,11 @@ function ToolCard({ t, index, expanded, onToggle }: {
                 return (
                   <Box key={p} sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "180px 1fr" }, gap: { xs: 0.25, sm: 2 }, px: 1.5, py: 1, bgcolor: i % 2 === 0 ? "#FBFCFE" : "#fff", borderTop: i === 0 ? "none" : "1px solid #EDF1F6" }}>
                     <Stack direction="row" spacing={0.5} sx={{ alignItems: "baseline" }}>
-                      <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.6875rem", fontWeight: 600, color: goi.navyDark, wordBreak: "break-all" }}>{p}</Typography>
-                      {required.has(p) && <Typography component="span" sx={{ fontSize: "0.625rem", fontWeight: 800, color: "#B42318" }}>*</Typography>}
+                      <Typography sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.75rem", fontWeight: 600, color: goi.navyDark, wordBreak: "break-all" }}>{p}</Typography>
+                      {required.has(p) && <Typography component="span" sx={{ fontSize: "0.75rem", fontWeight: 800, color: "#B42318" }}>*</Typography>}
                     </Stack>
-                    <Typography sx={{ fontSize: "0.6875rem", lineHeight: 1.55, color: "text.secondary" }}>
-                      <Box component="span" sx={{ color: "#5B6774", fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.6562rem" }}>{spec.type}{spec.enum ? ` · ${spec.enum.join(" | ")}` : ""}</Box>
+                    <Typography sx={{ fontSize: "0.75rem", lineHeight: 1.55, color: "text.secondary" }}>
+                      <Box component="span" sx={{ color: "#5B6774", fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.75rem" }}>{spec.type}{spec.enum ? ` · ${spec.enum.join(" | ")}` : ""}</Box>
                       {spec.description && <Box component="span"> — {spec.description}</Box>}
                     </Typography>
                   </Box>

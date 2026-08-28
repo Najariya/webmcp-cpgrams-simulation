@@ -23,12 +23,12 @@ export default function GovFooter() {
             </Typography>
           </Box>
           <Stack spacing={0.5} sx={{ alignItems: { xs: "flex-start", md: "flex-end" }, flexShrink: 0 }}>
-            <Typography sx={{ fontSize: "0.7188rem", opacity: 0.9 }}>{d.footer.line1}</Typography>
-            <Typography sx={{ fontSize: "0.7188rem", opacity: 0.75 }}>{d.footer.line2}</Typography>
+            <Typography sx={{ fontSize: "0.7812rem", opacity: 0.9 }}>{d.footer.line1}</Typography>
+            <Typography sx={{ fontSize: "0.7812rem", opacity: 0.75 }}>{d.footer.line2}</Typography>
           </Stack>
         </Stack>
         <Divider sx={{ my: 2, borderColor: "rgba(255,255,255,0.12)" }} />
-        <Typography variant="caption" sx={{ opacity: 0.7, fontSize: "0.6875rem" }}>
+        <Typography variant="caption" sx={{ opacity: 0.7, fontSize: "0.7812rem" }}>
           {d.footer.version} · {new Date().getFullYear()}
         </Typography>
       </Box>
