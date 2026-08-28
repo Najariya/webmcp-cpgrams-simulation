@@ -117,27 +117,46 @@ export const listGrievanceCategoriesTool: ModelContextTool = {
   name: "list_grievance_categories",
   title: "List grievance categories",
   description:
-    "Categories this simulation accepts, routed to Central Ministries/Departments (Railways, EPFO, Health, Education, Power, Consumer Affairs) with a 21-day redressal target. Use before filing so category and ministry ids are valid. Returns JSON {ok, speakable, data:{categories:[{id,titleEn,titleHi,ministry,requiresEvidence}]}, nextActions}. Read-only.",
-  inputSchema: { type: "object", properties: {}, additionalProperties: false },
+    "Categories this simulation accepts, routed to Central Ministries/Departments (Railways, EPFO, Health, Education, Power, Consumer Affairs) with a 21-day redressal target. Titles return in ONE locale (default en; pass lang:'hi' for Hindi). Use before filing so category ids are valid. Returns JSON {ok, speakable, data:{categories:[{id,title,ministry,needsEvidence}],redressalTargetDays}, nextActions}. Read-only.",
+  inputSchema: {
+    type: "object",
+    properties: { lang: { type: "string", enum: ["en", "hi"], description: "Locale for category titles; default en." } },
+    additionalProperties: false,
+  },
   annotations: { readOnlyHint: true },
-  execute: async () =>
-    guarded("list_grievance_categories", "Could not list categories. Please retry.", async () =>
-      ok(
+  execute: async (input) =>
+    guarded("list_grievance_categories", "Could not list categories. Please retry.", async () => {
+      const i = input as Input;
+      const rej = rejectUnknownKeys("list_grievance_categories", i, ["lang"]);
+      if (rej) return rej;
+      const lang = i.lang === "hi" ? "hi" : "en";
+      return ok(
         "list_grievance_categories",
-        `${CATEGORIES.length} grievance categories are accepted, routed to six Central ministries.`,
+        lang === "hi"
+          ? `${CATEGORIES.length} श्रेणियाँ उपलब्ध हैं — छह केंद्रीय मंत्रालयों को अग्रेषित।`
+          : `${CATEGORIES.length} grievance categories are accepted, routed to six Central ministries.`,
         {
           categories: CATEGORIES.map((c) => ({
             id: c.id,
-            titleEn: c.titleEn,
-            titleHi: c.titleHi,
-            ministry: ministryOf(c.ministryId)?.nameEn ?? c.ministryId,
-            requiresEvidence: c.requiresEvidence,
+            title: lang === "hi" ? c.titleHi : c.titleEn,
+            ministry: MINISTRY_SHORT[c.ministryId] ?? c.ministryId,
+            needsEvidence: c.requiresEvidence,
           })),
           redressalTargetDays: 21,
         },
         ["create_grievance_draft"],
-      ),
-    ),
+      );
+    }),
+};
+
+/** Compact ministry labels keep the category survey inside the char budget. */
+const MINISTRY_SHORT: Record<string, string> = {
+  rail: "Railways",
+  epfo: "EPFO (Labour)",
+  health: "Health & FW",
+  edu: "Education",
+  power: "Power",
+  ca: "Consumer Affairs",
 };
 
 export const getGrievanceDetailsTool: ModelContextTool = {

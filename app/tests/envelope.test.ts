@@ -26,3 +26,17 @@ describe("result envelope budgets (v4 §24, §26)", () => {
     expect(errEnv.error.hint).toBe("h");
   });
 });
+
+describe("object-aware budget trimming (eval E02 regression)", () => {
+  it("trims the array field inside an object, keeps scalars", () => {
+    const env = ok("list_grievance_categories", "s", {
+      categories: Array.from({ length: 30 }, (_, i) => ({ id: `cat-${i}`, title: "t".repeat(60) })),
+      redressalTargetDays: 21,
+    });
+    const parsed = JSON.parse(env) as { data: { categories?: unknown[]; redressalTargetDays?: number; truncated?: boolean; total?: number } };
+    expect(parsed.data.categories!.length).toBeLessThan(30);
+    expect(parsed.data.redressalTargetDays).toBe(21);
+    expect(parsed.data.truncated).toBe(true);
+    expect(parsed.data.total).toBe(30);
+  });
+});
