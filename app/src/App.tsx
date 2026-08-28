@@ -51,9 +51,8 @@ export default function App() {
 
       {!registrar.available && (
         <Alert severity="info" sx={{ borderRadius: 0, py: 0.4, px: 2, "& .MuiAlert-message": { fontSize: 12 } }}>
-          WebMCP is not active in this browser — the portal works normally; your agent's tools are shown as a simulation
-          on the Agent Tools page. Open in <strong>ChatGPT's in-app browser</strong> or enable{" "}
-          <strong>chrome://flags/#enable-webmcp-testing</strong> in Chrome 149+ and relaunch.
+          WebMCP is not active in this browser — the portal works normally. Your agent&rsquo;s tools are shown as a
+          labelled simulation on the <strong>Agent Tools</strong> page.
         </Alert>
       )}
 

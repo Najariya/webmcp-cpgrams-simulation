@@ -48,7 +48,7 @@ export default function GovHeader() {
           </Box>
           <Stack sx={{ alignItems: "flex-end", gap: 0.75, flexShrink: 0 }}>
             <Chip size="small" label="SIMULATION · सिमुलेशन" sx={{ bgcolor: "rgba(255,153,51,0.22)", color: "#FFD9B8", border: "1px solid rgba(255,153,51,0.55)", fontWeight: 700, fontSize: 10.5 }} />
-            <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+            <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
               <Box sx={{ border: "1px solid rgba(255,255,255,0.4)", borderRadius: 1, overflow: "hidden", display: "flex" }}>
                 {(["en", "hi"] as const).map((l) => (
                   <Button
@@ -67,8 +67,8 @@ export default function GovHeader() {
                   </Button>
                 ))}
               </Box>
-              <IconButton size="small" onClick={toggleLargeType} sx={{ color: largeType ? "#FFB37E" : "#fff", border: "1px solid rgba(255,255,255,0.4)" }} aria-label="Large type">
-                <TextIncrease sx={{ fontSize: 16 }} />
+              <IconButton size="small" onClick={toggleLargeType} sx={{ color: largeType ? "#FFB37E" : "#fff", border: "1px solid rgba(255,255,255,0.4)", width: 28, height: 28, borderRadius: 1 }} aria-label="Large type">
+                <TextIncrease sx={{ fontSize: 15 }} />
               </IconButton>
               {citizen ? (
                 <Button

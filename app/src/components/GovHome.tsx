@@ -162,7 +162,7 @@ function ActionCard({
             <Typography component="span" variant="caption" sx={{ color: "text.secondary", fontWeight: 500 }}>{hi}</Typography>
           </Typography>
         </Box>
-        <Typography className="longform" variant="body2" sx={{ color: "text.secondary", lineHeight: 1.55, fontSize: 12.5 }}>{desc}</Typography>
+        <Typography className="longform" variant="body2" sx={{ color: "text.secondary", lineHeight: 1.6, fontSize: 12.5 }}>{desc}</Typography>
       </CardActionArea>
     </Card>
   );

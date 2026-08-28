@@ -89,10 +89,10 @@ export default function CaseDetail() {
             <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: "wrap", rowGap: 0.75, mt: 1 }}>
               <Chip size="small" variant="outlined" label={categoryOf(g.categoryId)?.titleEn} sx={{ height: 24, fontSize: 11 }} />
               {g.evidence.length > 0 && (
-                <Chip size="small" variant="outlined" icon={<AttachFile sx={{ fontSize: 13 }} />} label={`${g.evidence.length} evidence item${g.evidence.length > 1 ? "s" : ""}`} sx={{ height: 24, fontSize: 11, "& .MuiChip-icon": { ml: 0.5 } }} />
+                <Chip size="small" variant="outlined" icon={<AttachFile sx={{ fontSize: 13 }} />} label={`${g.evidence.length} evidence item${g.evidence.length > 1 ? "s" : ""}`} sx={{ height: 22, fontSize: 10.5, "& .MuiChip-icon": { ml: 0.5 } }} />
               )}
               {g.reminders.length > 0 && (
-                <Chip size="small" variant="outlined" icon={<NotificationsActive sx={{ fontSize: 13 }} />} label={`${g.reminders.length} reminder${g.reminders.length > 1 ? "s" : ""} sent`} sx={{ height: 24, fontSize: 11, "& .MuiChip-icon": { ml: 0.5 } }} />
+                <Chip size="small" variant="outlined" icon={<NotificationsActive sx={{ fontSize: 13 }} />} label={`${g.reminders.length} reminder${g.reminders.length > 1 ? "s" : ""} sent`} sx={{ height: 22, fontSize: 10.5, "& .MuiChip-icon": { ml: 0.5 } }} />
               )}
             </Stack>
           </Box>
@@ -123,7 +123,7 @@ export default function CaseDetail() {
               <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: "0.08em", fontSize: 11 }}>Evidence</Typography>
               <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: "wrap", rowGap: 0.75, mt: 0.75 }}>
                 {g.evidence.map((e) => (
-                  <Chip key={e.name} size="small" variant="outlined" icon={<AttachFile sx={{ fontSize: 13 }} />} label={e.name} sx={{ height: 26, fontSize: 11.5, "& .MuiChip-icon": { ml: 0.5 } }} />
+                  <Chip key={e.name} size="small" variant="outlined" icon={<AttachFile sx={{ fontSize: 13 }} />} label={e.name} sx={{ height: 24, fontSize: 11, "& .MuiChip-icon": { ml: 0.5 } }} />
                 ))}
               </Stack>
             </Box>

@@ -20,10 +20,10 @@ export default function StatusView() {
   return (
     <Box sx={{ maxWidth: 1180, mx: "auto", width: 1, px: { xs: 1.5, md: 2 }, py: 2.5 }}>
       <Paper elevation={1} sx={{ p: 0, overflow: "hidden" }}>
-        <Box sx={{ bgcolor: goi.navy, color: "#fff", px: 3, py: 2, display: "flex", flexWrap: "wrap", gap: 1.5, alignItems: "center" }}>
-          <Box sx={{ flex: 1, minWidth: 220 }}>
-            <Typography sx={{ fontWeight: 700 }}>View Grievance Status · शिकायत की स्थिति</Typography>
-            <Typography variant="caption" sx={{ opacity: 0.85 }}>
+        <Box sx={{ bgcolor: goi.navy, color: "#fff", px: { xs: 2, md: 3 }, py: 2.25, display: "flex", flexWrap: "wrap", gap: 1.5, alignItems: "center", borderBottom: "3px solid", borderColor: goi.saffron }}>
+          <Box sx={{ flex: 1, minWidth: 220, py: 0.5 }}>
+            <Typography sx={{ fontSize: 16.5, fontWeight: 700, letterSpacing: "0.01em", lineHeight: 1.35 }}>View Grievance Status · शिकायत की स्थिति</Typography>
+            <Typography sx={{ fontSize: 12, opacity: 0.85, lineHeight: 1.55, mt: 0.25 }}>
               Your case register — SLA clocks, interim replies, reminders, feedback and appeals.
             </Typography>
           </Box>
@@ -42,7 +42,7 @@ export default function StatusView() {
         </Box>
 
         <TableContainer>
-          <Table size="small" sx={{ minWidth: 760 }} aria-label="Grievance register">
+          <Table size="small" sx={{ minWidth: 760, "& .MuiTableCell-body": { py: 1.25, "&:first-of-type": { pt: 1 } }, "& .MuiTableCell-head": { pb: 1.25 } }} aria-label="Grievance register">
             <TableHead>
               <TableRow>
                 <TableCell>Registration ID</TableCell>
