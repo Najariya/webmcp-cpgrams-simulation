@@ -104,10 +104,11 @@ export default function App() {
       setTitle(s.view, g?.regId ?? s.selectedGrievanceId);
     });
 
-    // dynamic registration: state → desired tools → diff-sync
-    const syncNow = () => void registrar.sync(desiredTools(useAppStore.getState()));
-    syncNow();
-    const unsub = useAppStore.subscribe(syncNow);
+    // dynamic registration: state → desired tools → diff-sync (the provider
+    // pattern keeps deferred flushes fresh — see registrar.requestSync)
+    registrar.setProvider(() => desiredTools(useAppStore.getState()));
+    registrar.requestSync();
+    const unsub = useAppStore.subscribe(() => registrar.requestSync());
     return () => {
       unsubHash();
       window.removeEventListener("hashchange", applyHash);

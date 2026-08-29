@@ -13,8 +13,16 @@ class ToolRegistrar {
   private listeners = new Set<() => void>();
   /** v4 §23: defer reconciliation while tool invocations are in flight. */
   private activeExecutions = 0;
-  private pendingSync: ModelContextTool[] | null = null;
+  private pending = false;
+  /** Computes the CURRENT desired tool set on demand — a deferred flush must
+   *  see state as of flush time (e.g. the post-success replay window that
+   *  only opens after the tool records its result), not a stale snapshot. */
+  private provider: (() => ModelContextTool[]) | null = null;
   version = 0;
+
+  setProvider(fn: () => ModelContextTool[]): void {
+    this.provider = fn;
+  }
 
   get available(): boolean {
     return getModelContext() !== undefined;
@@ -29,20 +37,30 @@ class ToolRegistrar {
     this.activeExecutions += 1;
   }
 
-  /** Mark the end; flush a deferred sync if this was the last invocation. */
+  /** Mark the end; flush a deferred sync if this was the last invocation.
+   *  The flush recomputes the desired set through the provider so replay
+   *  windows opened during execution (recordResult) are honoured. */
   async endExecution(): Promise<void> {
     this.activeExecutions = Math.max(0, this.activeExecutions - 1);
-    if (this.activeExecutions === 0 && this.pendingSync) {
-      const desired = this.pendingSync;
-      this.pendingSync = null;
-      await this.sync(desired);
+    if (this.activeExecutions === 0 && this.pending) {
+      this.pending = false;
+      await this.sync(this.provider ? this.provider() : []);
     }
+  }
+
+  /** Request reconciliation now, or as soon as in-flight executions finish. */
+  requestSync(): void {
+    if (this.activeExecutions > 0) {
+      this.pending = true;
+      return;
+    }
+    void this.sync(this.provider ? this.provider() : []);
   }
 
   /** Sync registration to the desired tool-name set. */
   async sync(desired: ModelContextTool[]): Promise<void> {
     if (this.activeExecutions > 0) {
-      this.pendingSync = desired; // complete current execution, then reconcile
+      this.pending = true; // complete current execution, then reconcile (fresh)
       return;
     }
     const mc = getModelContext();

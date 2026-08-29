@@ -281,3 +281,14 @@ ChatGPT UAT (docs verdict above): safety claim HELD (no bypass anywhere); 4 defe
    (Hindi-only titles; English secondary only in EN mode); footer English tail removed in hi.
    Fixed a self-introduced duplicate ("…क्या है? · …क्या है?") in the explainer title.
 41/41 tests green; deployed and verified.
+
+## 2026-08-29 — UAT round 4: appeal replay window fixed (registrar freshness)
+
+The one FAIL: after a successful send_appeal the tool vanished from the registry, making the
+contracted 60s replay (alreadyProcessed:true) unreachable. Root cause: registrar's deferred
+sync stored a SNAPSHOT of the desired list taken at state-change time — before the tool's
+recordResult opened the replay window — and the post-execution flush replayed that stale list,
+unregistering the tool. Fix: provider pattern (registrar.setProvider/requestSync); deferred
+flushes recompute desiredTools fresh at flush time. Regression test added (42 tests). E2E
+verified live: gate → confirm → filed → tool still exposed → replay returns alreadyProcessed
+with the same regId. Safety verdict from this UAT: no bypass found (again).
