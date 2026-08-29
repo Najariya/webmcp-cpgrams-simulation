@@ -292,3 +292,13 @@ unregistering the tool. Fix: provider pattern (registrar.setProvider/requestSync
 flushes recompute desiredTools fresh at flush time. Regression test added (42 tests). E2E
 verified live: gate → confirm → filed → tool still exposed → replay returns alreadyProcessed
 with the same regId. Safety verdict from this UAT: no bypass found (again).
+
+## 2026-08-29 — UAT round 5 (release-ready) + Agent Tools Hindi chrome
+
+Final cache-busted UAT: every suite PASS; no bypass of the confirmation gate across all rounds.
+Residual note (English tool contracts in हिं mode) closed as designed: tool names/titles/
+descriptions/schemas are the agent-facing contracts and stay English (per the fix-prompt's
+no-contract-changes constraint). All NON-contract chrome on the Agent Tools page is now Hindi
+in हिं mode — status strip, flag hint, group titles/blurbs, try-it blurb, voice-section rows,
+Human-control/Privacy cards — plus a visible italic exemption line stating that tool contracts
+are intentionally English and identical across languages.

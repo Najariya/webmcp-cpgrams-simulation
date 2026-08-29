@@ -114,17 +114,16 @@ export default function TransparencyScreen() {
           <Box sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: available ? goi.green : "#B45309", mt: "7px", flexShrink: 0 }} />
           <Box sx={{ minWidth: 0 }}>
             <Typography sx={{ fontSize: "0.8125rem", fontWeight: 700, color: available ? "#1A5C33" : "#7A4608", lineHeight: 1.4 }}>
-              {available ? "WebMCP active in this browser. This is the live registry" : "WebMCP not active. This is a simulation view of the intended registry"}
+              {available ? dd.agentTools.statusOn : dd.agentTools.statusOff}
             </Typography>
             <Typography className="longform" sx={{ fontSize: "0.75rem", lineHeight: 1.65, color: "text.secondary", mt: 0.25 }}>
               {available ? (
                 <>Tools below are read from <code>document.modelContext.getTools()</code> and update live via <code>toolchange</code>.</>
               ) : (
-                <>Open this page in ChatGPT&rsquo;s in-app browser, or enable{" "}
+                <>{dd.agentTools.flagHint1}{" "}
                   <Box component="code" sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.75rem", bgcolor: "#F1F4F8", border: "1px solid #D8DFE8", borderRadius: 0.5, px: 0.5, py: 0.25, wordBreak: "break-all" }}>
                     chrome://flags/#enable-webmcp-testing
-                  </Box>{" "}
-                  in Chrome 149+ and relaunch.</>
+                  </Box>{" "}{dd.agentTools.flagHint2}</>
               )}
             </Typography>
             <Typography className="longform" sx={{ fontSize: "0.75rem", lineHeight: 1.65, color: "text.secondary", mt: 0.75 }}>
@@ -137,9 +136,10 @@ export default function TransparencyScreen() {
       {reads.length > 0 && (
         <ToolGroup
           icon={<VisibilityOutlined sx={{ fontSize: "1rem" }} />}
-          title={`Read tools · पढ़ने के टूल`}
+          title={lang === "hi" ? "पढ़ने के टूल · Read tools" : "Read tools · पढ़ने के टूल"}
           count={reads.length}
-          blurb="Free for your agent to call at any time. They only read your record, so no confirmation is needed."
+          blurb={dd.agentTools.readBlurb}
+          exemption={lang === "hi" ? dd.agentTools.exemption : undefined}
         >
           {reads.map((t, i) => (
             <ToolCard key={t.name} t={t} index={i} expanded={expanded.has(t.name)} onToggle={() => toggle(t.name)} />
@@ -152,7 +152,7 @@ export default function TransparencyScreen() {
           icon={<PanToolOutlined sx={{ fontSize: "1rem" }} />}
           title={`Action tools · कार्रवाई के टूल`}
           count={writes.length}
-          blurb="These change something: your record or your preferences. Record-changing actions pause for your explicit in-page confirmation, bound to the exact payload, before anything is committed. Preference changes are reversible and need none."
+          blurb={dd.agentTools.actionBlurb}
         >
           {writes.map((t, i) => (
             <ToolCard key={t.name} t={t} index={reads.length + i} expanded={expanded.has(t.name)} onToggle={() => toggle(t.name)} />
@@ -175,7 +175,7 @@ export default function TransparencyScreen() {
           </Typography>
         </Stack>
         <Typography className="longform" sx={{ fontSize: "0.7812rem", lineHeight: 1.65, color: "text.secondary", mt: 1 }}>
-          Run the exact tool your agent would call with the same validation and envelope, no agent required. The response below is precisely what your agent receives.
+          {dd.agentTools.tryBlurb}
         </Typography>
         <Stack direction="row" spacing={1.5} useFlexGap sx={{ flexWrap: "wrap", rowGap: 1, mt: 1.75 }}>
           <Button variant="outlined" size="small" startIcon={<PlayArrow />} onClick={runSelfTest}>
@@ -246,9 +246,9 @@ export default function TransparencyScreen() {
         </Stack>
         <Stack spacing={1} sx={{ mt: 1.5 }}>
           {[
-            ["Speakable envelopes", "Every tool returns a one-locale speakable line sized for speech: compact, plain-language and never bilingual concatenation. Voice agents read it directly."],
-            ["Live announcements", "Page state changes (filings, reminders, ratings, appeals and approval prompts) are announced through an aria-live region, so voice agents and screen readers hear what changed."],
-            ["Voice Mode", "A narration preference (toggle in the header or the set_voice_mode tool) makes the page speak key citizen moments aloud in English or Hindi."],
+            [dd.agentTools.voice1Title, dd.agentTools.voice1Body],
+            [dd.agentTools.voice2Title, dd.agentTools.voice2Body],
+            [dd.agentTools.voice3Title, dd.agentTools.voice3Body],
           ].map(([t, d]) => (
             <Box key={t} sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "180px 1fr" }, gap: { xs: 0.25, sm: 2 } }}>
               <Typography sx={{ fontSize: "0.7812rem", fontWeight: 700, color: goi.navyDark }}>{t}</Typography>
@@ -277,21 +277,21 @@ export default function TransparencyScreen() {
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
         <GuaranteeCard
           icon={<VerifiedUserOutlined sx={{ fontSize: "1.1875rem" }} />}
-          title="Human control"
-          body="Reads are free. Drafting is reversible. Consequential actions (submitting a grievance or sending an appeal) require your explicit confirmation in the page, bound to the exact payload. The agent can never silently commit them."
+          title={dd.agentTools.humanTitle}
+          body={dd.agentTools.humanBody}
         />
         <GuaranteeCard
           icon={<PrivacyTipOutlined sx={{ fontSize: "1.1875rem" }} />}
-          title="Privacy"
-          body="The prototype has no application backend and performs no server-side persistence. Demo grievance state is stored locally in your browser. You can export it as a file or erase it at any time from the case register. Information required for an agent action is shared with your browser agent through explicit WebMCP tool contracts. All cases are fictional; no government connectivity."
+          title={dd.agentTools.privacyTitle}
+          body={dd.agentTools.privacyBody}
         />
       </Box>
     </Box>
   );
 }
 
-function ToolGroup({ icon, title, count, blurb, children }: {
-  icon: React.ReactNode; title: string; count: number; blurb: string; children: React.ReactNode;
+function ToolGroup({ icon, title, count, blurb, exemption, children }: {
+  icon: React.ReactNode; title: string; count: number; blurb: string; exemption?: string; children: React.ReactNode;
 }) {
   return (
     <Box>
@@ -306,6 +306,11 @@ function ToolGroup({ icon, title, count, blurb, children }: {
         <Box sx={{ flex: 1, height: 2, bgcolor: "#E8EDF3", borderRadius: 1, maxWidth: 140 }} />
       </Stack>
       <Typography className="longform" sx={{ fontSize: "0.75rem", lineHeight: 1.6, color: "text.secondary", mb: 1.5, pl: { sm: 5.25 } }}>{blurb}</Typography>
+      {exemption && (
+        <Typography sx={{ fontSize: "0.75rem", lineHeight: 1.55, color: "text.disabled", mb: 1.5, pl: { sm: 5.25 }, fontStyle: "italic" }}>
+          {exemption}
+        </Typography>
+      )}
       <Stack spacing={1.25}>{children}</Stack>
     </Box>
   );
