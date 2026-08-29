@@ -136,7 +136,7 @@ export default function TransparencyScreen() {
       {reads.length > 0 && (
         <ToolGroup
           icon={<VisibilityOutlined sx={{ fontSize: "1rem" }} />}
-          title={lang === "hi" ? "पढ़ने के टूल · Read tools" : "Read tools · पढ़ने के टूल"}
+          title={lang === "hi" ? "पढ़ने के टूल्स · Read tools" : "Read tools · पढ़ने के टूल्स"}
           count={reads.length}
           blurb={dd.agentTools.readBlurb}
           exemption={lang === "hi" ? dd.agentTools.exemption : undefined}
@@ -150,7 +150,7 @@ export default function TransparencyScreen() {
       {writes.length > 0 && (
         <ToolGroup
           icon={<PanToolOutlined sx={{ fontSize: "1rem" }} />}
-          title={`Action tools · कार्रवाई के टूल`}
+          title={lang === "hi" ? "कार्रवाई के टूल्स · Action tools" : "Action tools · कार्रवाई के टूल्स"}
           count={writes.length}
           blurb={dd.agentTools.actionBlurb}
         >
