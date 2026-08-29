@@ -80,7 +80,7 @@ The prototype has no application backend and performs no server-side persistence
 
 ## Testing
 
-- **Unit (vitest, 41 tests)** — SLA facts, attention ranking, lifecycle guards, human-gate TTL/single-use, envelope budgets, authorization parity, voice layer, adversarial inputs: `npm test`.
+- **Unit (vitest, 42 tests)** — SLA facts, attention ranking, lifecycle guards, human-gate TTL/single-use, envelope budgets, authorization parity, voice layer, adversarial inputs: `npm test`.
 - **In-browser golden journeys** — J1 file (gate → confirm → ID → idempotent replay), J2 hero reminder (incl. premature-reminder refusal), J3 Poor → surface change → appeal → replay, J4 invalid-ID `NOT_FOUND`, J5 injection inertness. Verified through the same tool surface agents use.
 - Worklog & QA history: [`docs/worklog.md`](docs/worklog.md).
 

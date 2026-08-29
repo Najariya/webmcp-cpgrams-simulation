@@ -8,7 +8,7 @@ Government grievance platforms have dramatically improved access. India's CPGRAM
 
 ## What it does
 
-A CPGRAMS-style grievance sandbox (clearly labelled simulation) where the citizen's **own browser agent** is their advocate through the whole lifecycle — File → Track → Understand → Remind → Rate → Appeal. Ask *"Which of my grievances needs attention today?"* and the agent answers with one ranked recommendation first — the case on day 23 of a 21-day target with no interim response — explains it plainly, and offers to send a reminder — which **you** must approve in the page. The agent honours the same sign-in gate the portal shows you, and your data never leaves your browser (one-click export or erase). The portal is voice-ready: every tool returns a speakable line, state changes are announced live, and a Voice Mode (or the set_voice_mode tool) narrates key moments aloud in English or Hindi — built for voice-first citizens and voice-enabled agents alike.
+A CPGRAMS-style grievance sandbox (clearly labelled simulation) where the citizen's **own browser agent** is their advocate through the whole lifecycle — File → Track → Understand → Remind → Rate → Appeal. Ask *"Which of my grievances needs attention today?"* and the agent answers with one ranked recommendation first — the case on day 23 of a 21-day target with no interim response — explains it plainly, and offers to send a reminder — which **you** must approve in the page. The agent honours the same sign-in gate the portal shows you, and your data never leaves your browser (one-click export or erase). The portal is voice-ready: every tool returns a speakable line, state changes are announced live, and a Voice Mode (or the set_voice_mode tool) narrates key moments aloud in English or Hindi. The full interface is bilingual EN/HI, deep-linkable, and works from phone-width to desktop.
 
 ## How we built it
 
@@ -20,7 +20,7 @@ Designing tool contracts that survive real models (descriptions ARE the contract
 
 ## Accomplishments we're proud of
 
-The full lifecycle works through the agent, end to end, safely: gated filing with memorable IDs, the hero SLA journey with a single ranked "most urgent today" recommendation, Poor-rating → live tool-registry change → evidence-grounded appeal. We also let an independent skeptical browser agent attack the live build: every bypass of the confirmation gate failed (full log in the repo). 41 unit tests + a 24-prompt eval suite + adversarial tests, all green. A premium government-grade UI that still reads honestly as a simulation.
+The full lifecycle works through the agent, end to end, safely: gated filing with memorable IDs, the hero SLA journey with a single ranked "most urgent today" recommendation, Poor-rating → live tool-registry change → evidence-grounded appeal. We also let an independent skeptical browser agent attack the live build: every bypass of the confirmation gate failed (full log in the repo). 42 unit tests + a 24-prompt eval suite + adversarial tests, all green, plus five full adversarial UAT rounds by an independent browser agent with zero gate bypasses. A premium government-grade UI that still reads honestly as a simulation.
 
 ## What we learned
 
