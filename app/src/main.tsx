@@ -39,6 +39,26 @@ class Boundary extends Component<{ children: ReactNode }, { err: Error | null }>
   }
 }
 
+/**
+ * Self-heal for stale cached bundles: agent browsers (e.g. ChatGPT's in-app
+ * browser) can serve a previous deployment's JS on first navigation. If that
+ * old bundle crashes on the modelContext EventTarget mismatch this build
+ * guards against, reload ONCE per session — the reload fetches the current
+ * bundle, which handles it. The flag prevents a crash loop.
+ */
+const SELF_HEAL_KEY = "advocate-selfheal-v1";
+window.addEventListener("error", (ev) => {
+  const msg = String(ev.message || "");
+  if (!/addEventListener is not a function/i.test(msg)) return;
+  try {
+    if (sessionStorage.getItem(SELF_HEAL_KEY) === "1") return;
+    sessionStorage.setItem(SELF_HEAL_KEY, "1");
+  } catch {
+    return; // no session storage — never risk a reload loop
+  }
+  location.reload();
+});
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider theme={theme}>

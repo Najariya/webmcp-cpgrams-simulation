@@ -19,7 +19,7 @@ export default function GovFooter() {
             <Typography className="longform" sx={{ fontSize: "0.75rem", lineHeight: 1.75 }}>
               {lang === "hi" ? (
                 <>
-                  <strong style={{ color: "#fff" }}>सिमुलेशन प्रोटोटाइप।</strong> CPGRAMS शिकायत जीवन-चक्र (DARPG) से प्रेरित। भारत सरकार से संबद्ध, समर्थित या जुड़ा नहीं है। सभी मामले, मंत्रालयी क्रियाएँ और अधिकारी काल्पनिक हैं। <span style={{ opacity: 0.8 }}>· A labelled simulation; all cases are fictional.</span>
+                  <strong style={{ color: "#fff" }}>सिमुलेशन प्रोटोटाइप।</strong> CPGRAMS शिकायत जीवन-चक्र (DARPG) से प्रेरित। भारत सरकार से संबद्ध, समर्थित या जुड़ा नहीं है। सभी मामले, मंत्रालयी क्रियाएँ और अधिकारी काल्पनिक हैं।
                 </>
               ) : (
                 <>

@@ -265,3 +265,19 @@ ChatGPT UAT (docs verdict above): safety claim HELD (no bypass anywhere); 4 defe
    Date.now() at reset — any elapsed time shaved the day count. resetDemo now re-anchors
    simNow with the seeds. Verified: reset 3s after load → Day 23 / 21.
 41/41 tests green; deployed and verified on production.
+
+## 2026-08-29 — UAT verdict round 3 fixes (3 remaining blockers)
+
+1. **Agent Tools cold-nav crash (stale bundle)**: the crash signature the tester hit on first
+   navigation matches the PRE-fix bundle served from the agent browser's cache (reload fetched
+   the fixed one — exactly "reload recovers"). Current bundle audited: the only modelContext
+   listener call is typeof-guarded. Added a one-time self-heal in main.tsx: a window error
+   matching "addEventListener is not a function" reloads once per session (flag-guarded,
+   storage-safe), so even a stale cached bundle recovers automatically. Verified live.
+2. **Export demonstrability**: "Export my data" now downloads the file AND copies the JSON to
+   the clipboard, shows a bilingual success snackbar (count + KB), and announces via aria-live —
+   visible proof even where embedded browsers swallow the download UI. Verified live.
+3. **Residual English in हिं mode**: home card English secondary labels removed in hi mode
+   (Hindi-only titles; English secondary only in EN mode); footer English tail removed in hi.
+   Fixed a self-introduced duplicate ("…क्या है? · …क्या है?") in the explainer title.
+41/41 tests green; deployed and verified.

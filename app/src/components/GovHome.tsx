@@ -73,7 +73,7 @@ export default function GovHome() {
       <Accordion elevation={0} disableGutters sx={{ bgcolor: "transparent", "&:before": { display: "none" }, "&.Mui-expanded": { margin: 0 }, borderBottom: "1px dashed #D8DFE8", borderRadius: 0 }}>
         <AccordionSummary expandIcon={<ExpandMore />} sx={{ minHeight: 44, "& .MuiAccordionSummary-content": { my: 0.5 } }}>
           <HelpOutline sx={{ fontSize: "1.0625rem", color: goi.navy, mr: 1.25 }} />
-          <Typography sx={{ fontSize: "0.8125rem", fontWeight: 700, color: goi.navy }}>{d.home.explainerTitle} · ब्राउज़र एजेंट क्या है?</Typography>
+          <Typography sx={{ fontSize: "0.8125rem", fontWeight: 700, color: goi.navy }}>{d.home.explainerTitle}</Typography>
         </AccordionSummary>
         <AccordionDetails sx={{ pt: 0 }}>
           <Typography className="longform" variant="body2" sx={{ lineHeight: 1.7, color: "text.secondary" }}>
@@ -89,25 +89,25 @@ export default function GovHome() {
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "repeat(3, 1fr)" }, gap: 2 }}>
         {citizen ? (
           <ActionCard
-            icon={<FactCheck />} title={d.home.cardTitleStatus} hi={lang === "hi" ? "View Status" : "स्थिति देखें"}
+            icon={<FactCheck />} title={d.home.cardTitleStatus} secondary={lang === "hi" ? undefined : "स्थिति देखें"}
             desc={d.home.cardStatusDesc}
             badge={attention ? d.home.cardStatusBadge(attention) : d.home.cases(grievances.length)}
             onClick={() => goOrSignIn("status")}
           />
         ) : (
           <ActionCard
-            icon={<LoginIcon />} title={d.home.cardTitleLogin} hi={lang === "hi" ? "Register / Login" : "पंजीकरण / लॉगिन"}
+            icon={<LoginIcon />} title={d.home.cardTitleLogin} secondary={lang === "hi" ? undefined : "पंजीकरण / लॉगिन"}
             desc={d.home.cardStatusDesc}
             onClick={() => setView("login")}
           />
         )}
         <ActionCard
-          icon={<EditNote />} title={d.home.cardTitleLodge} hi={lang === "hi" ? "Lodge Grievance" : "शिकायत दर्ज करें"}
+          icon={<EditNote />} title={d.home.cardTitleLodge} secondary={lang === "hi" ? undefined : "शिकायत दर्ज करें"}
           desc={d.home.cardLodgeDesc}
           onClick={() => goOrSignIn("lodge")}
         />
         <ActionCard
-          icon={<SmartToy />} title={d.home.cardTitleAgent} hi={lang === "hi" ? "Your Browser Agent" : "आपका एजेंट"}
+          icon={<SmartToy />} title={d.home.cardTitleAgent} secondary={lang === "hi" ? undefined : "आपका एजेंट"}
           desc={d.home.cardAgentDesc}
           onClick={() => setView("transparency")}
           accent
@@ -186,8 +186,8 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 }
 
 function ActionCard({
-  icon, title, hi, desc, badge, onClick, accent,
-}: { icon: React.ReactNode; title: string; hi: string; desc: string; badge?: string; onClick: () => void; accent?: boolean }) {
+  icon, title, secondary, desc, badge, onClick, accent,
+}: { icon: React.ReactNode; title: string; secondary?: string; desc: string; badge?: string; onClick: () => void; accent?: boolean }) {
   return (
     <Card elevation={0} sx={{ borderRadius: "12px", ...(accent ? { border: "1px solid #C9D8EC", bgcolor: "#F5F8FC" } : {}) }}>
       <CardActionArea onClick={onClick} sx={{ p: 2.5, display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 1, minHeight: 148, height: "100%" }}>
@@ -202,7 +202,7 @@ function ActionCard({
         <Box>
           <Typography sx={{ fontWeight: 700, fontSize: "0.9375rem", lineHeight: 1.25, display: "flex", alignItems: "baseline", gap: 1 }}>
             {title}
-            <Typography component="span" variant="caption" sx={{ color: "text.secondary", fontWeight: 500 }}>{hi}</Typography>
+            {secondary && <Typography component="span" variant="caption" sx={{ color: "text.secondary", fontWeight: 500 }}>{secondary}</Typography>}
           </Typography>
         </Box>
         <Typography className="longform" variant="body2" sx={{ color: "text.secondary", lineHeight: 1.6, fontSize: "0.7812rem" }}>{desc}</Typography>

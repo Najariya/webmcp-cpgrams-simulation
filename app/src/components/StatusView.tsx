@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Box, Button, Card, CardActionArea, Chip, InputAdornment, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Alert, Box, Button, Card, CardActionArea, Chip, InputAdornment, Paper, Snackbar, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
 import Search from "@mui/icons-material/Search";
 import RestartAlt from "@mui/icons-material/RestartAlt";
 import Download from "@mui/icons-material/Download";
@@ -10,6 +10,7 @@ import { rankAttention, slaStatus } from "../domain/sla";
 import StatusChip from "./StatusChip";
 import { goi } from "../theme";
 import { dict } from "../i18n";
+import { announce } from "../webmcp/voice";
 
 /**
  * View Status (CPGRAMS-style): search by registration ID, or the citizen's
@@ -29,22 +30,35 @@ export default function StatusView() {
     .slice()
     .sort((a, b) => (rank.get(a.id) ?? Number.MAX_SAFE_INTEGER) - (rank.get(b.id) ?? Number.MAX_SAFE_INTEGER));
 
+  const [exported, setExported] = useState<string | null>(null);
+
   const exportData = () => {
     const s = useAppStore.getState();
-    const payload = {
+    const json = JSON.stringify({
       exportedAt: new Date().toISOString(),
       note: "Browser-local simulation data. Nothing here was ever sent to a server; this file is your copy.",
       citizen: s.citizen,
       grievances: s.grievances,
       draft: s.draft,
       appealDraft: s.appealDraft,
-    };
-    const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }));
+    }, null, 2);
+    // file download AND clipboard copy: embedded browsers sometimes swallow
+    // the download UI, so the copy gives always-visible proof of the export.
+    void navigator.clipboard?.writeText(json).catch(() => undefined);
+    const url = URL.createObjectURL(new Blob([json], { type: "application/json" }));
     const a = document.createElement("a");
     a.href = url;
     a.download = "cpgrams-simulation-my-data.json";
     a.click();
     URL.revokeObjectURL(url);
+    const kb = (json.length / 1024).toFixed(1);
+    const count = s.grievances.length;
+    setExported(`${count}|${kb}`);
+    announce(
+      `Data export ready: ${count} grievances, ${kb} kilobytes. The file was downloaded and the JSON copied to your clipboard.`,
+      lang,
+    );
+    setTimeout(() => setExported(null), 6000);
   };
 
   return (
@@ -173,6 +187,19 @@ export default function StatusView() {
           </Button>
         </Stack>
       </Stack>
+
+      <Snackbar
+        open={exported !== null}
+        onClose={() => setExported(null)}
+        autoHideDuration={6000}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity="success" variant="filled" onClose={() => setExported(null)} sx={{ "& .MuiAlert-message": { fontSize: "0.8125rem" } }}>
+          {lang === "hi"
+            ? `निर्यात तैयार: ${exported ? exported.split("|")[0] : ""} शिकायतें, ${exported ? exported.split("|")[1] : ""} KB। फ़ाइल डाउनलोड हुई और JSON क्लिपबोर्ड पर कॉपी हुआ।`
+            : `Export ready: ${exported ? exported.split("|")[0] : ""} grievances, ${exported ? exported.split("|")[1] : ""} KB. File downloaded and JSON copied to your clipboard.`}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
