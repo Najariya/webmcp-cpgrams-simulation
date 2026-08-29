@@ -247,3 +247,21 @@ Vision-model sweep of every page found and fixed:
 Re-verified: My Cases (chips fully readable, detail lines clean), Home (distinct explainer,
 correct badge), Case Detail PASS, Lodge PASS, Agent Tools PASS, FAQs (DOM: 1×H1, 7 accordions).
 41/41 tests green. Deployed and verified on production.
+
+## 2026-08-29 — UAT verdict round 2 fixes (4 defects)
+
+ChatGPT UAT (docs verdict above): safety claim HELD (no bypass anywhere); 4 defects fixed:
+
+1. **CRITICAL Agent Tools crash** (`n?.addEventListener is not a function`): ChatGPT's in-app
+   browser exposes modelContext WITHOUT EventTarget methods. toolchange subscription and
+   getTools enumeration are now capability-guarded (typeof checks) with graceful fallback to
+   the intended registry. Reproduced with an injected ChatGPT-like modelContext — page renders.
+2. **Hindi completeness**: Hindi-first swaps everywhere — action-card titles, About/What's New
+   section titles, agent prompt chips (Hindi prompts added), footer legal line, Lodge/Login/
+   Agent Tools band titles. English stays as the small secondary label in hi mode.
+3. **"Export my data" absent**: false negative — the control is present but localized
+   ("मेरा डेटा निर्यात करें") when हिं is active after G4. Verified present in BOTH languages.
+4. **Reset fixture drift (day 22 vs 23)**: simNow froze at load while resetDemo reseeded with
+   Date.now() at reset — any elapsed time shaved the day count. resetDemo now re-anchors
+   simNow with the seeds. Verified: reset 3s after load → Day 23 / 21.
+41/41 tests green; deployed and verified on production.

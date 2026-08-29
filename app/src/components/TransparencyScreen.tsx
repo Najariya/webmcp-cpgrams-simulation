@@ -42,20 +42,28 @@ export default function TransparencyScreen() {
   useEffect(() => {
     const unsub = registrar.subscribe(() => force((n) => n + 1));
     const mc = getModelContext();
+    // ChatGPT's in-app browser exposes modelContext WITHOUT EventTarget
+    // methods — subscribe to toolchange only when they actually exist.
+    const hasEvents =
+      !!mc && typeof mc.addEventListener === "function" && typeof mc.removeEventListener === "function";
     const onChange = () => force((n) => n + 1);
-    mc?.addEventListener("toolchange", onChange);
+    if (hasEvents) mc.addEventListener("toolchange", onChange);
     return () => {
       unsub();
-      mc?.removeEventListener("toolchange", onChange);
+      if (hasEvents) mc.removeEventListener("toolchange", onChange);
     };
   }, []);
 
   useEffect(() => {
     let cancelled = false;
-    getModelContext()
-      ?.getTools()
-      .then((tools) => !cancelled && setLive(tools))
-      .catch(() => setLive(null));
+    const mc = getModelContext();
+    if (mc && typeof mc.getTools === "function") {
+      mc.getTools()
+        .then((tools) => !cancelled && setLive(tools))
+        .catch(() => setLive(null));
+    } else {
+      setLive(null); // no live enumeration — fall back to the intended registry
+    }
     return () => {
       cancelled = true;
     };
@@ -95,7 +103,7 @@ export default function TransparencyScreen() {
     <Box sx={{ maxWidth: 980, mx: "auto", width: 1, px: { xs: 1.5, md: 2 }, py: 2.5, display: "flex", flexDirection: "column", gap: 3 }}>
       <Paper elevation={1} sx={{ p: 0, overflow: "hidden", borderRadius: 2 }}>
         <PageHeader
-          title="Agent Tools · आपके एजेंट के टूल्स"
+          title={lang === "hi" ? "एजेंट टूल्स · Agent Tools" : "Agent Tools · आपके एजेंट के टूल्स"}
           sub="Exactly which capabilities this site exposes to your browser agent right now, the same registry your agent sees through WebMCP"
         />
         <Stack

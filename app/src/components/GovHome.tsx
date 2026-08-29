@@ -15,7 +15,7 @@ import { registrar } from "../webmcp/registrar";
 import { useAppStore } from "../store";
 import { goi } from "../theme";
 import { slaStatus } from "../domain/sla";
-import { dict } from "../i18n";
+import { AGENT_PROMPTS_HI, dict } from "../i18n";
 
 const AGENT_PROMPTS = [
   "Which of my grievances needs attention today?",
@@ -89,25 +89,25 @@ export default function GovHome() {
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "repeat(3, 1fr)" }, gap: 2 }}>
         {citizen ? (
           <ActionCard
-            icon={<FactCheck />} title="View Status" hi="स्थिति देखें"
+            icon={<FactCheck />} title={d.home.cardTitleStatus} hi={lang === "hi" ? "View Status" : "स्थिति देखें"}
             desc={d.home.cardStatusDesc}
             badge={attention ? d.home.cardStatusBadge(attention) : d.home.cases(grievances.length)}
             onClick={() => goOrSignIn("status")}
           />
         ) : (
           <ActionCard
-            icon={<LoginIcon />} title="Register / Login" hi="पंजीकरण / लॉगिन"
+            icon={<LoginIcon />} title={d.home.cardTitleLogin} hi={lang === "hi" ? "Register / Login" : "पंजीकरण / लॉगिन"}
             desc={d.home.cardStatusDesc}
             onClick={() => setView("login")}
           />
         )}
         <ActionCard
-          icon={<EditNote />} title="Lodge Grievance" hi="शिकायत दर्ज करें"
+          icon={<EditNote />} title={d.home.cardTitleLodge} hi={lang === "hi" ? "Lodge Grievance" : "शिकायत दर्ज करें"}
           desc={d.home.cardLodgeDesc}
           onClick={() => goOrSignIn("lodge")}
         />
         <ActionCard
-          icon={<SmartToy />} title="Your Browser Agent" hi="आपका एजेंट"
+          icon={<SmartToy />} title={d.home.cardTitleAgent} hi={lang === "hi" ? "Your Browser Agent" : "आपका एजेंट"}
           desc={d.home.cardAgentDesc}
           onClick={() => setView("transparency")}
           accent
@@ -117,7 +117,7 @@ export default function GovHome() {
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1.6fr 1fr" }, gap: 2, alignItems: "start" }}>
         {/* About */}
         <Paper elevation={0} sx={{ p: { xs: 2.5, md: 3.5 }, borderRadius: "12px" }}>
-          <SectionTitle>About CPGRAMS · सीपीग्राम्स</SectionTitle>
+          <SectionTitle>{d.home.aboutTitle}</SectionTitle>
           <Typography className="longform" variant="body2" sx={{ lineHeight: 1.8, color: "text.primary", mt: 2, maxWidth: "68ch" }}>
             {d.home.aboutPara1}
             <strong>{d.home.aboutPara2}</strong>
@@ -148,7 +148,7 @@ export default function GovHome() {
               </Typography>
             </Stack>
             <Stack spacing={0.75}>
-              {AGENT_PROMPTS.map((p) => (
+              {(lang === "hi" ? AGENT_PROMPTS_HI : AGENT_PROMPTS).map((p) => (
                 <PromptChip key={p} text={p} copiedLabel={d.common.copied} copyLabel={d.common.copy} />
               ))}
             </Stack>
@@ -160,7 +160,7 @@ export default function GovHome() {
 
           {/* What's new */}
           <Paper elevation={0} sx={{ p: 2.5, borderRadius: "12px" }}>
-            <SectionTitle>What's New · नई जानकारी</SectionTitle>
+            <SectionTitle>{d.home.whatsNewTitle}</SectionTitle>
             <Stack spacing={1.25} sx={{ mt: 2 }}>
               {news.map(([date, t]) => (
                 <Stack key={date} direction="row" spacing={1.5} sx={{ alignItems: "baseline" }}>

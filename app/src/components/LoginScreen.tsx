@@ -40,7 +40,7 @@ export default function LoginScreen() {
       <Paper elevation={1} sx={{ p: 0, overflow: "hidden" }}>
         <Box sx={{ bgcolor: goi.navy, color: "#fff", px: 3, py: 2, borderBottom: "3px solid", borderColor: goi.saffron }}>
           <Typography component="h2" sx={{ fontWeight: 700, fontSize: "1.0625rem" }}>
-            {mode === "signin" ? "Citizen Sign In · नागरिक साइन इन" : "Citizen Registration · नागरिक पंजीकरण"}
+            {mode === "signin" ? (lang === "hi" ? "नागरिक साइन इन · Citizen Sign In" : "Citizen Sign In · नागरिक साइन इन") : (lang === "hi" ? "नागरिक पंजीकरण · Citizen Registration" : "Citizen Registration · नागरिक पंजीकरण")}
           </Typography>
           <Typography className="longform" variant="caption" sx={{ opacity: 0.9 }}>
             {mode === "signin"

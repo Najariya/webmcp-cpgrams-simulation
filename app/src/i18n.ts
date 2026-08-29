@@ -86,6 +86,12 @@ export const FAQS: Record<Lang, { q: string; a: string }[]> = {
   ],
 };
 
+export const AGENT_PROMPTS_HI = [
+  "आज मेरी कौन सी शिकायत को ध्यान चाहिए?",
+  "मेरी समस्या के बारे में शिकायत दर्ज करने में मेरी मदद करें।",
+  "मेरे मामले की स्थिति सादे शब्दों में समझाइए।",
+];
+
 export const DICT = {
   en: {
     common: {
@@ -127,6 +133,12 @@ export const DICT = {
       bullet2: "Grievances sent by email are not entertained; use the portal or your agent.",
       bullet3: "No fee is charged for lodging a grievance.",
       askAgent: "Ask your agent",
+      aboutTitle: "About CPGRAMS · सीपीग्राम्स",
+      whatsNewTitle: "What's New · नई जानकारी",
+      cardTitleStatus: "View Status",
+      cardTitleLodge: "Lodge Grievance",
+      cardTitleAgent: "Your Browser Agent",
+      cardTitleLogin: "Register / Login",
       explainerTitle: "What is a browser agent?",
       explainerBody1: "A browser agent is an AI helper that can use a website for you. You say what you need in plain words; it reads the page, fills forms and clicks buttons while you watch. Before anything important happens, it asks you first.",
       explainerBody2: "Examples: ChatGPT's in-app browser, or Chrome with WebMCP turned on. On this portal the agent gets safe, structured tools instead of guessing at buttons. Every big action needs your approval in the page.",
@@ -293,6 +305,12 @@ export const DICT = {
       bullet2: "ईमेल से भेजी गई शिकायतें स्वीकार नहीं होतीं — पोर्टल या अपना एजेंट उपयोग करें।",
       bullet3: "शिकायत दर्ज करने के लिए कोई शुल्क नहीं है।",
       askAgent: "अपने एजेंट से पूछें",
+      aboutTitle: "सीपीग्राम्स के बारे में",
+      whatsNewTitle: "नई जानकारी",
+      cardTitleStatus: "स्थिति देखें",
+      cardTitleLodge: "शिकायत दर्ज करें",
+      cardTitleAgent: "आपका ब्राउज़र एजेंट",
+      cardTitleLogin: "पंजीकरण / लॉगिन",
       explainerTitle: "ब्राउज़र एजेंट क्या है?",
       explainerBody1: "ब्राउज़र एजेंट एक AI सहायक है जो वेबसाइट को आपके लिए इस्तेमाल कर सकता है। आप अपनी ज़रूरत सादे शब्दों में बताते हैं; वह पेज पढ़ता है, फ़ॉर्म भरता है और बटन दबाता है — और कोई बड़ा काम करने से पहले आपसे पूछता है।",
       explainerBody2: "उदाहरण: ChatGPT का इन-ऐप ब्राउज़र, या WebMCP चालू करने वाला Chrome। इस पोर्टल पर एजेंट को अनुमान लगाने के बजाय सुरक्षित टूल मिलते हैं, और हर बड़े काम के लिए पेज में आपकी मंज़ूरी चाहिए।",

@@ -17,9 +17,17 @@ export default function GovFooter() {
         <Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ justifyContent: "space-between", gap: 2 }}>
           <Box sx={{ maxWidth: 640 }}>
             <Typography className="longform" sx={{ fontSize: "0.75rem", lineHeight: 1.75 }}>
-              <strong style={{ color: "#fff" }}>Simulation prototype.</strong> Inspired by the CPGRAMS grievance lifecycle
-              (DARPG). Not affiliated with, endorsed by, or connected to the Government of India. All cases, ministry
-              interactions and officials are fictional. <span style={{ opacity: 0.8 }}>· यह एक प्रदर्शन सिमुलेशन है — सभी मामले काल्पनिक हैं।</span>
+              {lang === "hi" ? (
+                <>
+                  <strong style={{ color: "#fff" }}>सिमुलेशन प्रोटोटाइप।</strong> CPGRAMS शिकायत जीवन-चक्र (DARPG) से प्रेरित। भारत सरकार से संबद्ध, समर्थित या जुड़ा नहीं है। सभी मामले, मंत्रालयी क्रियाएँ और अधिकारी काल्पनिक हैं। <span style={{ opacity: 0.8 }}>· A labelled simulation; all cases are fictional.</span>
+                </>
+              ) : (
+                <>
+                  <strong style={{ color: "#fff" }}>Simulation prototype.</strong> Inspired by the CPGRAMS grievance lifecycle
+                  (DARPG). Not affiliated with, endorsed by, or connected to the Government of India. All cases, ministry
+                  interactions and officials are fictional. <span style={{ opacity: 0.8 }}>· यह एक प्रदर्शन सिमुलेशन है — सभी मामले काल्पनिक हैं।</span>
+                </>
+              )}
             </Typography>
           </Box>
           <Stack spacing={0.5} sx={{ alignItems: { xs: "flex-start", md: "flex-end" }, flexShrink: 0 }}>

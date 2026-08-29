@@ -258,8 +258,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   resetDemo: () => {
-    const fresh = { grievances: seedGoldenCases(), draft: null, appealDraft: null };
-    set({ ...fresh, view: "home", selectedGrievanceId: null });
+    // re-anchor the simulation clock with the seeds so "day 23" stays exactly
+    // day 23 no matter how long the page was open before the reset (UAT D4)
+    const nowMs = Date.now();
+    const fresh = { grievances: seedGoldenCases(nowMs), draft: null, appealDraft: null };
+    set({ ...fresh, view: "home", selectedGrievanceId: null, simNow: new Date(nowMs).toISOString() });
     persist(fresh);
   },
 
