@@ -232,3 +232,18 @@ Agent Tools try-it (speakable line + JSON tree). 41/41 tests green throughout.
 Deviations: 375/768 viewport screenshots not possible in this embedded browser (verified at
 native width + breakpoint audit); Lighthouse/axe not runnable here (manual a11y checks:
 1×H1, aria-live, keyboard rows, aria-pressed, focus-visible rings).
+
+## 2026-08-29 — Pre-hot-testing visual QA sweep (owner: "elements breaking, esp. My Cases")
+
+Vision-model sweep of every page found and fixed:
+- **My Cases status chips clipped mid-word** ("…no interim resp") — StatusChip redesigned: short
+  single-line state pill (On track / Delayed / Overdue / Feedback pending / Appeal open /
+  Appeal pending / Closed, EN+HI) + optional secondary detail line only for nuance ("no interim
+  response", "N days left"). Day counts no longer duplicated between SLA and Status columns;
+  table cells top-aligned; subject column narrowed.
+- **Copy bug**: badge "1 need attention" → "1 needs attention".
+- **Polish**: the "What is a browser agent?" explainer row restyled (borderless, dashed
+  underline) so it no longer reads as a second banner stacked under the notice strip.
+Re-verified: My Cases (chips fully readable, detail lines clean), Home (distinct explainer,
+correct badge), Case Detail PASS, Lodge PASS, Agent Tools PASS, FAQs (DOM: 1×H1, 7 accordions).
+41/41 tests green. Deployed and verified on production.

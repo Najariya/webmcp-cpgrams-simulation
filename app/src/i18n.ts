@@ -109,7 +109,7 @@ export const DICT = {
     home: {
       noticeStrong: "Labelled simulation for the WebMCP Challenge",
       noticeRest: "Nothing is submitted to any government system. Inspired by the CPGRAMS lifecycle; not affiliated with the Government of India.",
-      cardStatusBadge: (n: number) => (n ? `${n} need attention` : "all on track"),
+      cardStatusBadge: (n: number) => (n ? (n === 1 ? "1 needs attention" : `${n} need attention`) : "all on track"),
       cardStatusDesc: "Track grievances, SLA clocks, reminders, feedback and appeals.",
       cardLodgeDesc: "File a service-delivery grievance to a Central Ministry. 21-day redressal target.",
       cardAgentDesc: "This portal also speaks WebMCP: your agent tracks, explains and acts with your confirmation.",

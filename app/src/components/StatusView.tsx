@@ -101,7 +101,7 @@ export default function StatusView() {
           </Stack>
         ) : (
           <TableContainer>
-            <Table size="small" sx={{ minWidth: 760, "& .MuiTableCell-body": { py: 1.25, "&:first-of-type": { pt: 1 } }, "& .MuiTableCell-head": { pb: 1.25 } }} aria-label="Grievance register">
+            <Table size="small" sx={{ minWidth: 760, "& .MuiTableCell-body": { py: 1.25, verticalAlign: "top", "&:first-of-type": { pt: 1 } }, "& .MuiTableCell-head": { pb: 1.25 } }} aria-label="Grievance register">
               <TableHead>
                 <TableRow>
                   <TableCell>{d.status.hReg}</TableCell>
@@ -126,7 +126,7 @@ export default function StatusView() {
                       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } }}
                     >
                       <TableCell sx={{ fontFamily: '"IBM Plex Mono", monospace', fontSize: "0.75rem", fontWeight: 600, whiteSpace: "nowrap" }}>{g.regId}</TableCell>
-                      <TableCell sx={{ maxWidth: 280 }}>
+                      <TableCell sx={{ maxWidth: 220 }}>
                         <Tooltip title={g.subject} enterDelay={400}>
                           <Typography variant="body2" noWrap component="span" sx={{ display: "inline-block", maxWidth: "100%" }}>{g.subject}</Typography>
                         </Tooltip>

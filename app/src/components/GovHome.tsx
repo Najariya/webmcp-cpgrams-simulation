@@ -70,7 +70,7 @@ export default function GovHome() {
       )}
 
       {/* Plain-language explainer */}
-      <Accordion elevation={0} disableGutters sx={{ border: "1px solid #D8DFE8", borderRadius: "8px !important", "&:before": { display: "none" } }}>
+      <Accordion elevation={0} disableGutters sx={{ bgcolor: "transparent", "&:before": { display: "none" }, "&.Mui-expanded": { margin: 0 }, borderBottom: "1px dashed #D8DFE8", borderRadius: 0 }}>
         <AccordionSummary expandIcon={<ExpandMore />} sx={{ minHeight: 44, "& .MuiAccordionSummary-content": { my: 0.5 } }}>
           <HelpOutline sx={{ fontSize: "1.0625rem", color: goi.navy, mr: 1.25 }} />
           <Typography sx={{ fontSize: "0.8125rem", fontWeight: 700, color: goi.navy }}>{d.home.explainerTitle} · ब्राउज़र एजेंट क्या है?</Typography>
