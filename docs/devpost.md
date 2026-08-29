@@ -12,7 +12,7 @@ A CPGRAMS-style grievance sandbox (clearly labelled simulation) where the citize
 
 ## How we built it
 
-WebMCP-first: 13 structured tools (reads, reversible drafts, consequential actions) registered through `document.modelContext`, with **dynamic registration** — the tool surface changes with your situation (appeal drafting appears only inside an open appeal window). Consequential tools return `CONFIRMATION_REQUIRED` and open a payload-hash-bound, 60-second single-use human gate; replays are idempotent (`alreadyProcessed`). Results are compact, one-locale `speakable` envelopes within Chrome's guidance; grievance text is treated as untrusted (injection tests included). No backend — client-side simulation with relative-date golden cases. React + MUI, IBM Plex typography, CPGRAMS-inspired government chrome.
+WebMCP-first: 14 structured tools (reads, reversible drafts, consequential actions, a voice preference) registered through `document.modelContext`, with **dynamic registration** — the tool surface changes with your situation (appeal drafting appears only inside an open appeal window). Consequential tools return `CONFIRMATION_REQUIRED` and open a payload-hash-bound, 60-second single-use human gate; replays are idempotent (`alreadyProcessed`). Results are compact, one-locale `speakable` envelopes within Chrome's guidance; grievance text is treated as untrusted (injection tests included). No backend — client-side simulation with relative-date golden cases. React + MUI, IBM Plex typography, CPGRAMS-inspired government chrome.
 
 ## Challenges we ran into
 
